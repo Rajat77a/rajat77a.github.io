@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rajat Krishnan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0B0C0E;
+    --text: #F5F5F4;
+    --surface: #14161A;
+    --accent: #2DD4BF;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+  }
+  .bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: var(--accent);
+  }
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    letter-spacing: -0.02em;
+  }
+  p.tag {
+    margin-top: 12px;
+    color: #8A8F98;
+    font-size: 1.05rem;
+  }
+  .status {
+    margin-top: 32px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--surface);
+    border: 1px solid #22252B;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    color: #8A8F98;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+</style>
+</head>
+<body>
+<div class="bar"></div>
+<div>
+  <h1>Rajat Krishnan</h1>
+  <p class="tag">Portfolio building in progress.</p>
+  <div class="status"><span class="dot"></span> Live, more soon</div>
+</div>
+</body>
+</html>
