@@ -199,7 +199,7 @@ h2.section-title {
     top: 100%;
     left: 0;
     right: 0;
-    background: rgba(11,12,14,0.98);
+    background: #0B0C0E;
     flex-direction: column;
     padding: 16px;
     border-bottom: 1px solid var(--border);
