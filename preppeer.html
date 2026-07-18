@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrepPeer &mdash; Rajat Krishnan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="accent-bar"></div>
+<div class="topbar">
+  <div class="brand">Rajat Krishnan</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="preppeer.html" class="active">PrepPeer</a>
+    <a href="about.html">About</a>
+  </nav>
+</div>
+
+<section class="hero" style="padding-top:60px;">
+  <h1 style="font-size:2.2rem;">PrepPeer</h1>
+  <p>AI mock interview platform. Live at <a href="https://prep-peer.vercel.app" style="color:var(--accent);" target="_blank">prep-peer.vercel.app</a></p>
+</section>
+
+<section class="section">
+  <div class="card">
+    <h2>The problem</h2>
+    <p>I found a real problem in a country like India, where teenagers just out of college and actively job hunting have no way to know how they rank against other people preparing for the same job role, or how good they actually are in their field before the real interview.</p>
+    <img src="assets/pp-hero.jpg" alt="PrepPeer hero section">
+  </div>
+
+  <div class="card">
+    <h2>What I did, and decided</h2>
+    <p>I built PrepPeer with my co-founder Adarsh Vijay: role-specific AI interview questions, 4-dimension scoring (Communication, Problem Solving, Specificity, Confidence), and a live peer leaderboard. It's a live production app, built entirely on free tools, zero budget.</p>
+    <img src="assets/pp-howitworks.jpg" alt="How it works, four steps">
+    <p>The leaderboard needed real peers to mean anything, but a brand-new product has no users. I seeded it with friends, family, and test accounts rather than waiting for organic traffic, because people won't compete against an empty leaderboard. Trust has to come before scale, not after.</p>
+    <img src="assets/pp-interview-demo.jpg" alt="Scoring demo">
+    <p>For the AI layer, I had two free API options, Gemini and Groq (Llama 3.3-70b). Gemini was slower with about the same accuracy, so I went with Groq. Getting the 4-dimension scoring to behave consistently took several days of testing and prompt adjustments. It's still not perfect, there are bugs, and I know exactly why: I'm running on free-tier APIs.</p>
+    <img src="assets/pp-leaderboard.jpg" alt="Leaderboard">
+  </div>
+
+  <div class="card">
+    <h2>What came of it</h2>
+    <p>Real testers, beyond friends and family, used it specifically to prep before switching jobs, to get a feel for what questions would come and roughly where they'd score. I submitted PrepPeer to Hub71's accelerator; no response yet.</p>
+    <p>What I actually walked away with: I learned how to host a real website, set up a working database, and secure it properly (rate limiting, no password leaks), despite not coming from a strong coding background. Prompting well and using the right AI tools was the actual skill that got this built.</p>
+  </div>
+
+  <div class="card" style="background:transparent; border:1px dashed var(--border);">
+    <h2 style="font-size:1.1rem;">Known, disclosed issues</h2>
+    <p style="color:var(--muted); font-size:0.95rem;">Leaderboard is seeded (friends, family, test accounts), not organic traffic yet. Groq's free tier caps at 1,000 requests/day for Llama 3.3 70B, which is the source of most current scoring inconsistencies. No response yet from Hub71 or PrimetradeAI applications.</p>
+  </div>
+</section>
+
+<div class="footer">
+  <a href="https://github.com/Rajat77a/PrepPeer">View the repo</a> &middot; <a href="index.html">Back home</a>
+</div>
+</body>
+</html>
