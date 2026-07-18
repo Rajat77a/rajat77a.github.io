@@ -10,18 +10,21 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<a href="#main" class="skip-link">Skip to main content</a>
 <div class="accent-bar"></div>
 <div class="topbar">
   <div class="brand">Rajat Krishnan</div>
+  <button class="menu-toggle" aria-label="Toggle menu" onclick="document.querySelector('nav').classList.toggle('active')">&#9776;</button>
   <nav>
     <a href="index.html">Home</a>
     <a href="preppeer.html">PrepPeer</a>
     <a href="about.html" class="active">About</a>
   </nav>
 </div>
+<main id="main">
 
 <section class="section">
-  <img class="bio-photo" src="assets/bio-photo.jpg" alt="Rajat Krishnan">
+  <img class="bio-photo" src="assets/bio-photo.jpg" alt="Rajat Krishnan" width="140" height="170" loading="lazy">
   <h2 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; margin-bottom:12px;">Rajat Krishnan</h2>
   <p style="color:var(--muted); margin-bottom:24px;">2nd-year CS undergrad. AI Fluency intern at FlyRank AI. Building PrepPeer with Adarsh Vijay.</p>
 
@@ -47,7 +50,7 @@
     <a class="link-chip" href="mailto:rajatkrishnan321@gmail.com">Email</a>
   </div>
 </section>
-
+</main>
 <div class="footer">
   <a href="https://github.com/Rajat77a">github.com/Rajat77a</a> &middot; rajatkrishnan321@gmail.com
 </div>
