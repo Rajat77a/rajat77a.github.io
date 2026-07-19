@@ -1,7 +1,7 @@
 :root {
   --bg: #0B0C0E;
   --text: #F5F5F4;
-  --muted: #8A8F98;
+  --muted: #B8B8B8;
   --surface: #14161A;
   --border: #22252B;
   --accent: #2DD4BF;
@@ -82,7 +82,7 @@ a:focus-visible, button:focus-visible {
 .hero h1 {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(1.6rem, 6vw, 2.8rem);
   letter-spacing: -0.02em;
   margin-bottom: 18px;
 }
@@ -174,7 +174,10 @@ h2.section-title {
   justify-content: center;
 }
 .link-chip {
-  padding: 10px 20px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 12px 20px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -195,24 +198,30 @@ h2.section-title {
   }
   .topbar nav {
     display: none;
-    position: absolute;
-    top: 100%;
+    position: fixed;
+    top: 0;
     left: 0;
     right: 0;
-    background: #0B0C0E;
+    bottom: 0;
+    background: var(--bg);
     flex-direction: column;
-    padding: 16px;
+    padding: 80px 16px 16px;
     border-bottom: 1px solid var(--border);
+    z-index: 9;
   }
   .topbar nav.active {
     display: flex;
   }
-  .topbar nav a {
+.topbar nav a {
     margin: 0;
     padding: 12px 0;
     width: 100%;
     text-align: center;
     border-bottom: 1px solid var(--border);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .topbar nav a:last-child {
     border-bottom: none;
@@ -231,6 +240,10 @@ h2.section-title {
   }
   .card {
     padding: 24px;
+  }
+  .card img {
+    height: 200px;
+    object-fit: cover;
   }
   .case-preview {
     flex-direction: column;
@@ -282,7 +295,8 @@ h2.section-title {
     line-height: 1.5;
   }
   .link-chip {
-    padding: 8px 16px;
+    min-height: 44px;
+    padding: 12px 20px;
     font-size: 0.9rem;
   }
   .bio-photo {
