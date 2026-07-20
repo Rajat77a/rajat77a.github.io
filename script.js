@@ -198,6 +198,9 @@ const conciseList = (items, count = 4) => items.slice(0, count).join(", ");
 
 const projectLine = (project) => `${project.name}: ${project.summary}`;
 
+const fullProfileSummary = () =>
+  "Rajat Krishnan is an AI-focused CSE student at VIT-AP and AI Fluency Intern at FlyRank AI. He builds AI products and full-stack web apps like PrepPeer, NextStep.AI, GridWatch, UniEvents, and data/creative tools; he is open to internships in AI product engineering, full-stack web, prompt engineering, automation, and data tools.";
+
 const answerRajat = (question) => {
   if (!knowledge) {
     return {
@@ -266,6 +269,13 @@ const answerRajat = (question) => {
       text:
         "Rajat is an AI-focused CSE student at VIT-AP and AI Fluency Intern at FlyRank AI, building practical AI products across web, data, and automation.",
       source: "Resume + GitHub"
+    };
+  }
+
+  if (includesAny(q, ["everything about rajat", "everything about me", "all about rajat", "all about me", "about rajat", "about me", "tell me about rajat", "tell me about me", "who is rajat"])) {
+    return {
+      text: fullProfileSummary(),
+      source: "Resume + GitHub + submitted links"
     };
   }
 
@@ -409,8 +419,12 @@ const answerRajat = (question) => {
   if (includesAny(q, ["resume", "cv", "download resume", "see resume"])) {
     return {
       text:
-        "Rajat's resume is available on this portfolio through the Resume link in Contact. It includes his education, experience, projects, skills, and certifications.",
-      source: "Resume"
+        "Here is Rajat's resume as a downloadable PDF. It includes his education, experience, projects, skills, and certifications.",
+      source: "Resume",
+      link: {
+        href: "assets/docs/Rajat_Krishnan_Resume.pdf",
+        label: "Download Rajat's Resume"
+      }
     };
   }
 
@@ -435,7 +449,7 @@ const answerRajat = (question) => {
   return { text: knowledge.boundaries.unknown, source: "Verified-data guard" };
 };
 
-const appendMessage = (container, text, type = "bot", source = "") => {
+const appendMessage = (container, text, type = "bot", source = "", link = null) => {
   if (!container) {
     return;
   }
@@ -443,6 +457,16 @@ const appendMessage = (container, text, type = "bot", source = "") => {
   const message = document.createElement("div");
   message.className = `message ${type}`;
   message.textContent = text;
+  if (link && type === "bot") {
+    const anchor = document.createElement("a");
+    anchor.className = "message-link";
+    anchor.href = link.href;
+    anchor.target = "_blank";
+    anchor.rel = "noreferrer";
+    anchor.textContent = link.label;
+    anchor.setAttribute("download", "");
+    message.appendChild(anchor);
+  }
   if (source && type === "bot") {
     const small = document.createElement("small");
     small.textContent = `Source: ${source}`;
@@ -463,7 +487,7 @@ const handleChat = (form, input, messages) => {
     appendMessage(messages, question, "user");
     input.value = "";
     const answer = answerRajat(question);
-    window.setTimeout(() => appendMessage(messages, answer.text, "bot", answer.source), 180);
+    window.setTimeout(() => appendMessage(messages, answer.text, "bot", answer.source, answer.link), 180);
   });
 };
 
@@ -484,7 +508,7 @@ document.querySelectorAll("[data-ask]").forEach((button) => {
   button.addEventListener("click", () => {
     const answer = answerRajat(button.dataset.ask);
     appendMessage(pageMessages, button.dataset.ask, "user");
-    window.setTimeout(() => appendMessage(pageMessages, answer.text, "bot", answer.source), 180);
+    window.setTimeout(() => appendMessage(pageMessages, answer.text, "bot", answer.source, answer.link), 180);
   });
 });
 

@@ -967,6 +967,27 @@ p {
   text-transform: uppercase;
 }
 
+.message-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(200, 255, 77, 0.42);
+  border-radius: 8px;
+  color: var(--lime);
+  font-weight: 900;
+}
+
+.message-link::after {
+  content: "download";
+  color: rgba(245, 242, 236, 0.62);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .chat-form {
   display: grid;
   grid-template-columns: 1fr 92px;
