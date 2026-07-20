@@ -215,6 +215,41 @@ const answerRajat = (question) => {
     };
   }
 
+  if (["hi", "hello", "hey", "yo", "hii", "helo", "helloo"].includes(q)) {
+    return {
+      text: "Hey, I'm Rajat Intelligence. Ask me about Rajat's projects, current work, skills, certifications, or internship availability.",
+      source: "Conversation"
+    };
+  }
+
+  if (includesAny(q, ["how are you", "how r u", "how you doing", "what's up", "whats up"])) {
+    return {
+      text: "I'm sharp and ready. Want the quick version of Rajat's current work, best projects, or tech stack?",
+      source: "Conversation"
+    };
+  }
+
+  if (includesAny(q, ["who are you", "what are you", "your name", "introduce yourself"])) {
+    return {
+      text: "I'm Rajat Intelligence, a custom portfolio assistant built to answer verified questions about Rajat. What do you want to know first?",
+      source: "Conversation"
+    };
+  }
+
+  if (includesAny(q, ["what can you do", "help", "what should i ask", "questions can i ask"])) {
+    return {
+      text: "Ask me about Rajat's current role, internship availability, projects, tech stack, education, certifications, experience, or contact.",
+      source: "Conversation"
+    };
+  }
+
+  if (includesAny(q, ["thanks", "thank you", "ty", "nice", "cool", "great"])) {
+    return {
+      text: "Anytime. Want a quick recruiter-style summary of Rajat or a project breakdown?",
+      source: "Conversation"
+    };
+  }
+
   const rajatTerms = ["rajat", "portfolio", "internship", "project", "skill", "study", "college", "github", "linkedin", "resume", "certification", "experience", "work", "contact", "email", "available", "tech", "stack", "flyrank", "vit", "preppeer", "nextstep", "gridwatch", "zedworks"];
   const knownTopic = includesAny(q, rajatTerms);
 
