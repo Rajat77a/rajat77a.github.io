@@ -36,6 +36,7 @@
         <a href="#home" class="active">Home</a>
         <a href="#work">Projects</a>
         <a href="#about">About</a>
+        <a href="#ask-ai">AI</a>
         <a href="#contact" class="nav-contact">Contact</a>
       </nav>
     </header>
@@ -233,6 +234,52 @@
         </div>
       </section>
 
+      <section id="ask-ai" class="section intelligence-section">
+        <div class="section-heading">
+          <p class="eyebrow">RAJAT INTELLIGENCE</p>
+          <h2>Ask the portfolio. Get verified answers.</h2>
+        </div>
+        <div class="intelligence-shell">
+          <div class="intel-copy">
+            <p>
+              A custom local portfolio intelligence engine built from Rajat's
+              resume, GitHub projects, public LinkedIn signals, and approved
+              profile facts. No external AI API. No invented claims.
+            </p>
+            <div class="intel-prompts" aria-label="Suggested questions">
+              <button type="button" data-ask="What is Rajat doing right now?">Current role</button>
+              <button type="button" data-ask="Is Rajat available for internships?">Availability</button>
+              <button type="button" data-ask="What projects has Rajat built?">Projects</button>
+              <button type="button" data-ask="What is Rajat's strongest tech stack?">Stack</button>
+            </div>
+          </div>
+          <div class="chat-panel" aria-label="Rajat Intelligence chat">
+            <div class="chat-header">
+              <span></span>
+              <div>
+                <strong>Rajat Intelligence</strong>
+                <p>Verified local assistant</p>
+              </div>
+            </div>
+            <div class="chat-messages" data-chat-messages>
+              <div class="message bot">
+                Ask about Rajat's work, projects, skills, education, experience, certifications, or contact.
+              </div>
+            </div>
+            <form class="chat-form" data-chat-form>
+              <input
+                data-chat-input
+                type="text"
+                autocomplete="off"
+                placeholder="Ask about Rajat..."
+                aria-label="Ask Rajat Intelligence"
+              />
+              <button type="submit" data-cursor="ASK">Ask</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
       <section id="contact" class="section contact-section">
         <div>
           <p class="eyebrow">CONTACT</p>
@@ -259,10 +306,40 @@
       </section>
     </main>
 
+    <button class="ai-launcher" type="button" data-ai-launcher data-cursor="ASK AI">
+      Ask Rajat AI
+    </button>
+
+    <aside class="ai-drawer" data-ai-drawer aria-label="Ask Rajat AI drawer" aria-hidden="true">
+      <div class="drawer-head">
+        <div>
+          <strong>Rajat Intelligence</strong>
+          <p>Short verified answers only</p>
+        </div>
+        <button type="button" data-ai-close aria-label="Close Rajat Intelligence">Close</button>
+      </div>
+      <div class="chat-messages drawer-messages" data-drawer-messages>
+        <div class="message bot">
+          Ask me about Rajat's current role, projects, stack, certifications, education, availability, or contact.
+        </div>
+      </div>
+      <form class="chat-form" data-drawer-form>
+        <input
+          data-drawer-input
+          type="text"
+          autocomplete="off"
+          placeholder="Ask about Rajat..."
+          aria-label="Ask Rajat AI"
+        />
+        <button type="submit" data-cursor="ASK">Ask</button>
+      </form>
+    </aside>
+
     <footer>
       <p>&copy; 2026 Rajat Krishnan. Built with attention, motion, and product proof.</p>
     </footer>
 
+    <script src="knowledge.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

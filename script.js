@@ -187,3 +187,203 @@ window.addEventListener("resize", () => {
   setActiveNav();
   setScrollDepth();
 });
+
+const knowledge = window.RAJAT_KNOWLEDGE;
+const normalizeQuestion = (value) =>
+  value.toLowerCase().replace(/[^a-z0-9+#.\s-]/g, " ").replace(/\s+/g, " ").trim();
+
+const includesAny = (text, words) => words.some((word) => text.includes(word));
+
+const conciseList = (items, count = 4) => items.slice(0, count).join(", ");
+
+const projectLine = (project) => `${project.name}: ${project.summary}`;
+
+const answerRajat = (question) => {
+  if (!knowledge) {
+    return {
+      text: "The local knowledge base is not loaded yet. Refresh the page and ask again.",
+      source: "System"
+    };
+  }
+
+  const q = normalizeQuestion(question);
+
+  if (!q) {
+    return {
+      text: "Ask about Rajat's current role, projects, skills, education, certifications, availability, or contact.",
+      source: "Guide"
+    };
+  }
+
+  const rajatTerms = ["rajat", "portfolio", "internship", "project", "skill", "study", "college", "github", "linkedin", "resume", "certification", "experience", "work", "contact", "email", "available", "tech", "stack", "flyrank", "vit", "preppeer", "nextstep", "gridwatch", "zedworks"];
+  const knownTopic = includesAny(q, rajatTerms);
+
+  if (includesAny(q, ["capital", "weather", "recipe", "movie", "sports", "news", "bitcoin price", "write code for me", "homework"]) && !knownTopic) {
+    return { text: knowledge.boundaries.refusal, source: "Scope guard" };
+  }
+
+  if (includesAny(q, ["doing", "current", "now", "right now", "today", "role", "flyrank"])) {
+    return { text: knowledge.current.summary, source: "Resume" };
+  }
+
+  if (includesAny(q, ["available", "internship", "hire", "hiring", "open to", "job", "roles"])) {
+    return { text: knowledge.availability, source: "Resume + portfolio" };
+  }
+
+  if (includesAny(q, ["study", "college", "university", "vit", "education", "degree", "mtech", "school"])) {
+    return {
+      text: knowledge.education.join(" "),
+      source: "Resume"
+    };
+  }
+
+  if (includesAny(q, ["experience", "worked", "work experience", "freelance", "zedworks", "ignite", "client"])) {
+    return {
+      text:
+        "Rajat is an AI Fluency Intern at FlyRank AI and a freelance AI content developer/designer through ZedWorks / IgniteWithoutCaffeine.",
+      source: "Resume"
+    };
+  }
+
+  if (includesAny(q, ["certification", "certificate", "certified", "anthropic", "google cloud", "ibm", "nasscom", "jpmorgan", "hp life", "canva"])) {
+    return {
+      text: `Verified certifications include ${conciseList(knowledge.certifications, 5)}. He also has Canva Design School credentials.`,
+      source: "Resume"
+    };
+  }
+
+  if (includesAny(q, ["project", "built", "builds", "portfolio", "apps", "products"])) {
+    return {
+      text:
+        "Rajat has built PrepPeer, NextStep.AI, GridWatch, UniEvents, Bitcoin Sentiment Analysis, and ZedWorks Portfolio.",
+      source: "Resume + GitHub"
+    };
+  }
+
+  const project = knowledge.projects.find((item) => q.includes(item.name.toLowerCase().replace(".ai", "")));
+  if (project) {
+    return {
+      text: projectLine(project),
+      source: "GitHub + resume"
+    };
+  }
+
+  if (includesAny(q, ["skill", "stack", "tech", "technology", "language", "tools", "react", "next", "python", "typescript", "javascript", "node", "mongodb", "ai tools"])) {
+    return {
+      text:
+        `Rajat works across ${conciseList(knowledge.skills.languages, 5)}, plus ${conciseList(knowledge.skills.web, 6)} and AI tools like ${conciseList(knowledge.skills.aiTools, 5)}.`,
+      source: "Resume + GitHub"
+    };
+  }
+
+  if (includesAny(q, ["prompt", "llm", "ai", "model", "codex", "claude", "chatgpt", "gemini"])) {
+    return {
+      text:
+        "Rajat focuses on prompt engineering, LLM workflows, output evaluation, model behavior testing, and AI-assisted product builds.",
+      source: "Resume"
+    };
+  }
+
+  if (includesAny(q, ["contact", "email", "linkedin", "github", "reach", "message"])) {
+    return {
+      text:
+        `Reach Rajat at ${knowledge.identity.email}. GitHub: ${knowledge.identity.github}. LinkedIn: ${knowledge.identity.linkedin}.`,
+      source: "Resume + GitHub"
+    };
+  }
+
+  if (includesAny(q, ["language", "speak"])) {
+    return {
+      text: `Rajat speaks ${knowledge.skills.humanLanguages.join(", ")}.`,
+      source: "Resume"
+    };
+  }
+
+  if (includesAny(q, ["interest", "hobby", "outside"])) {
+    return {
+      text: `Rajat's interests include ${knowledge.interests.join(", ")}.`,
+      source: "Resume"
+    };
+  }
+
+  if (!knownTopic) {
+    return { text: knowledge.boundaries.refusal, source: "Scope guard" };
+  }
+
+  return { text: knowledge.boundaries.unknown, source: "Verified-data guard" };
+};
+
+const appendMessage = (container, text, type = "bot", source = "") => {
+  if (!container) {
+    return;
+  }
+
+  const message = document.createElement("div");
+  message.className = `message ${type}`;
+  message.textContent = text;
+  if (source && type === "bot") {
+    const small = document.createElement("small");
+    small.textContent = `Source: ${source}`;
+    message.appendChild(small);
+  }
+  container.appendChild(message);
+  container.scrollTop = container.scrollHeight;
+};
+
+const handleChat = (form, input, messages) => {
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const question = input.value.trim();
+    if (!question) {
+      return;
+    }
+
+    appendMessage(messages, question, "user");
+    input.value = "";
+    const answer = answerRajat(question);
+    window.setTimeout(() => appendMessage(messages, answer.text, "bot", answer.source), 180);
+  });
+};
+
+const pageMessages = document.querySelector("[data-chat-messages]");
+const drawerMessages = document.querySelector("[data-drawer-messages]");
+handleChat(
+  document.querySelector("[data-chat-form]"),
+  document.querySelector("[data-chat-input]"),
+  pageMessages
+);
+handleChat(
+  document.querySelector("[data-drawer-form]"),
+  document.querySelector("[data-drawer-input]"),
+  drawerMessages
+);
+
+document.querySelectorAll("[data-ask]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const answer = answerRajat(button.dataset.ask);
+    appendMessage(pageMessages, button.dataset.ask, "user");
+    window.setTimeout(() => appendMessage(pageMessages, answer.text, "bot", answer.source), 180);
+  });
+});
+
+const drawer = document.querySelector("[data-ai-drawer]");
+const launcher = document.querySelector("[data-ai-launcher]");
+const drawerInput = document.querySelector("[data-drawer-input]");
+
+launcher?.addEventListener("click", () => {
+  drawer?.classList.add("open");
+  drawer?.setAttribute("aria-hidden", "false");
+  window.setTimeout(() => drawerInput?.focus(), 120);
+});
+
+document.querySelector("[data-ai-close]")?.addEventListener("click", () => {
+  drawer?.classList.remove("open");
+  drawer?.setAttribute("aria-hidden", "true");
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    drawer?.classList.remove("open");
+    drawer?.setAttribute("aria-hidden", "true");
+  }
+});
