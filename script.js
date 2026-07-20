@@ -201,6 +201,9 @@ const projectLine = (project) => `${project.name}: ${project.summary}`;
 const fullProfileSummary = () =>
   "Rajat Krishnan is an AI-focused CSE student at VIT-AP and AI Fluency Intern at FlyRank AI. He builds AI products and full-stack web apps like PrepPeer, NextStep.AI, GridWatch, UniEvents, and data/creative tools; he is open to internships in AI product engineering, full-stack web, prompt engineering, automation, and data tools.";
 
+const closestProfileAnswer = () =>
+  "Verified snapshot: Rajat is a CSE student at VIT-AP, AI Fluency Intern at FlyRank AI, and a build-first developer focused on AI products, full-stack web, prompt workflows, automation, and data tools.";
+
 const answerRajat = (question) => {
   if (!knowledge) {
     return {
@@ -260,7 +263,7 @@ const answerRajat = (question) => {
     };
   }
 
-  const rajatTerms = ["rajat", "portfolio", "internship", "project", "skill", "study", "college", "github", "linkedin", "resume", "certification", "experience", "work", "contact", "email", "available", "tech", "stack", "flyrank", "vit", "preppeer", "nextstep", "gridwatch", "zedworks", "frontend", "backend", "full-stack", "fullstack", "python", "react", "next.js", "why", "summary", "recruiter", "fit"];
+  const rajatTerms = ["rajat", "him", "his", "profile", "portfolio", "internship", "project", "skill", "study", "college", "github", "linkedin", "resume", "certification", "experience", "work", "contact", "email", "available", "tech", "stack", "flyrank", "vit", "preppeer", "nextstep", "gridwatch", "zedworks", "frontend", "backend", "full-stack", "fullstack", "python", "react", "next.js", "why", "summary", "recruiter", "fit", "developer", "person", "good", "strong", "background"];
   const knownTopic = includesAny(q, rajatTerms);
 
   if (includesAny(q, ["capital", "weather", "recipe", "movie", "sports", "news", "bitcoin price", "write code for me", "homework"]) && !knownTopic) {
@@ -291,6 +294,22 @@ const answerRajat = (question) => {
       text:
         "Rajat combines build-first execution with AI fluency: he ships working products, understands prompt workflows, and can move from idea to polished interface fast.",
       source: "Resume + GitHub"
+    };
+  }
+
+  if (includesAny(q, ["good developer", "good candidate", "good fit", "how good", "as a developer", "as a person", "kind of person", "personality", "mindset", "strength", "strengths"])) {
+    return {
+      text:
+        "Rajat's verified strengths are build-first execution, AI fluency, prompt engineering, full-stack product work, and clear communication across five languages.",
+      source: "Resume + GitHub"
+    };
+  }
+
+  if (includesAny(q, ["age", "birthday", "date of birth", "dob", "gpa", "cgpa", "salary", "expected salary", "private", "address"])) {
+    return {
+      text:
+        "I do not have that verified public detail for Rajat. I can answer accurately about his work, projects, skills, education, experience, certifications, availability, and contact.",
+      source: "Privacy + verified-data guard"
     };
   }
 
@@ -453,7 +472,11 @@ const answerRajat = (question) => {
     return { text: knowledge.boundaries.refusal, source: "Scope guard" };
   }
 
-  return { text: knowledge.boundaries.unknown, source: "Verified-data guard" };
+  return {
+    text:
+      `${closestProfileAnswer()} Ask for current role, projects, skills, education, certifications, resume, or contact for a sharper answer.`,
+    source: "Closest verified profile match"
+  };
 };
 
 const appendMessage = (container, text, type = "bot", source = "", link = null) => {
