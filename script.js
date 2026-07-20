@@ -1,5 +1,5 @@
 const revealTargets = document.querySelectorAll(
-  ".section-heading, .project-showcase, .about-section, .capabilities, .contact-section"
+  ".section-heading, .proof-card, .cert-wall, .project-showcase, .about-section, .capabilities, .contact-section"
 );
 
 revealTargets.forEach((target) => target.classList.add("reveal"));
@@ -150,6 +150,25 @@ document.querySelectorAll(".project-visual").forEach((card) => {
   card.addEventListener("pointerleave", () => {
     card.style.setProperty("--mx", 0);
     card.style.setProperty("--my", 0);
+  });
+});
+
+document.querySelectorAll(".proof-card").forEach((card) => {
+  card.addEventListener("pointermove", (event) => {
+    if (!canHover) {
+      return;
+    }
+
+    const bounds = card.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+    card.style.setProperty("--proof-x", x.toFixed(3));
+    card.style.setProperty("--proof-y", y.toFixed(3));
+  });
+
+  card.addEventListener("pointerleave", () => {
+    card.style.setProperty("--proof-x", 0);
+    card.style.setProperty("--proof-y", 0);
   });
 });
 
