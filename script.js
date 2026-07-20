@@ -232,6 +232,13 @@ const answerRajat = (question) => {
     };
   }
 
+  if (includesAny(q, ["how is rajat", "hows rajat", "how's rajat", "how is he", "how is rajat doing", "how rajat"])) {
+    return {
+      text: "Rajat is in build mode: studying CSE at VIT-AP, interning with FlyRank AI, and shipping AI/web products. Want his current role or project list?",
+      source: "Resume + GitHub"
+    };
+  }
+
   if (includesAny(q, ["who are you", "what are you", "your name", "introduce yourself"])) {
     return {
       text: "I'm Rajat Intelligence, a custom portfolio assistant built to answer verified questions about Rajat. What do you want to know first?",
