@@ -250,7 +250,7 @@ const answerRajat = (question) => {
     };
   }
 
-  const rajatTerms = ["rajat", "portfolio", "internship", "project", "skill", "study", "college", "github", "linkedin", "resume", "certification", "experience", "work", "contact", "email", "available", "tech", "stack", "flyrank", "vit", "preppeer", "nextstep", "gridwatch", "zedworks"];
+  const rajatTerms = ["rajat", "portfolio", "internship", "project", "skill", "study", "college", "github", "linkedin", "resume", "certification", "experience", "work", "contact", "email", "available", "tech", "stack", "flyrank", "vit", "preppeer", "nextstep", "gridwatch", "zedworks", "frontend", "backend", "full-stack", "fullstack", "python", "react", "next.js", "why", "summary", "recruiter", "fit"];
   const knownTopic = includesAny(q, rajatTerms);
 
   if (includesAny(q, ["capital", "weather", "recipe", "movie", "sports", "news", "bitcoin price", "write code for me", "homework"]) && !knownTopic) {
@@ -259,6 +259,22 @@ const answerRajat = (question) => {
 
   if (includesAny(q, ["doing", "current", "now", "right now", "today", "role", "flyrank"])) {
     return { text: knowledge.current.summary, source: "Resume" };
+  }
+
+  if (includesAny(q, ["recruiter summary", "quick summary", "short summary", "summarize rajat", "pitch", "elevator pitch"])) {
+    return {
+      text:
+        "Rajat is an AI-focused CSE student at VIT-AP and AI Fluency Intern at FlyRank AI, building practical AI products across web, data, and automation.",
+      source: "Resume + GitHub"
+    };
+  }
+
+  if (includesAny(q, ["why rajat", "why should", "why hire", "why consider", "what makes rajat"])) {
+    return {
+      text:
+        "Rajat combines build-first execution with AI fluency: he ships working products, understands prompt workflows, and can move from idea to polished interface fast.",
+      source: "Resume + GitHub"
+    };
   }
 
   if (includesAny(q, ["available", "internship", "hire", "hiring", "open to", "job", "roles"])) {
@@ -280,6 +296,30 @@ const answerRajat = (question) => {
     };
   }
 
+  if (includesAny(q, ["frontend role", "front end role", "frontend fit", "good for frontend", "ui role"])) {
+    return {
+      text:
+        "Yes. Rajat fits frontend/product UI roles through React, Next.js, Tailwind, Framer Motion, and shipped interfaces for PrepPeer and NextStep.AI.",
+      source: "Resume + GitHub"
+    };
+  }
+
+  if (includesAny(q, ["ai role", "ai fit", "prompt role", "good for ai", "ai engineer", "ai product"])) {
+    return {
+      text:
+        "Yes. Rajat fits AI product roles through prompt engineering, LLM workflow testing, model-output evaluation, and AI-assisted product builds.",
+      source: "Resume"
+    };
+  }
+
+  if (includesAny(q, ["backend role", "backend fit", "full stack role", "full-stack role", "fullstack role"])) {
+    return {
+      text:
+        "Rajat has full-stack proof through Node.js, Express, MongoDB, SQLite, REST APIs, JWT auth, and projects like UniEvents and PrepPeer.",
+      source: "Resume + GitHub"
+    };
+  }
+
   if (includesAny(q, ["certification", "certificate", "certified", "anthropic", "google cloud", "ibm", "nasscom", "jpmorgan", "hp life", "canva"])) {
     return {
       text: `Verified certifications include ${conciseList(knowledge.certifications, 5)}. He also has Canva Design School credentials.`,
@@ -287,11 +327,19 @@ const answerRajat = (question) => {
     };
   }
 
-  if (includesAny(q, ["project", "built", "builds", "portfolio", "apps", "products"])) {
+  if (includesAny(q, ["best project", "strongest project", "top project", "main project"])) {
     return {
       text:
-        "Rajat has built PrepPeer, NextStep.AI, GridWatch, UniEvents, Bitcoin Sentiment Analysis, and ZedWorks Portfolio.",
+        "PrepPeer is the strongest AI product proof: role-specific interviews, AI scoring, peer ranking, percentile leaderboards, and shareable score cards.",
       source: "Resume + GitHub"
+    };
+  }
+
+  if (includesAny(q, ["compare preppeer and nextstep", "preppeer vs nextstep", "nextstep vs preppeer", "difference between preppeer and nextstep"])) {
+    return {
+      text:
+        "PrepPeer helps job seekers train with AI interviews and ranking. NextStep.AI helps parents turn report cards into clear action plans.",
+      source: "GitHub"
     };
   }
 
@@ -303,7 +351,38 @@ const answerRajat = (question) => {
     };
   }
 
+  if (includesAny(q, ["project", "built", "builds", "portfolio", "apps", "products"])) {
+    return {
+      text:
+        "Rajat has built PrepPeer, NextStep.AI, GridWatch, UniEvents, Bitcoin Sentiment Analysis, and ZedWorks Portfolio.",
+      source: "Resume + GitHub"
+    };
+  }
+
   if (includesAny(q, ["skill", "stack", "tech", "technology", "language", "tools", "react", "next", "python", "typescript", "javascript", "node", "mongodb", "ai tools"])) {
+    if (includesAny(q, ["where", "used", "proof"])) {
+      if (includesAny(q, ["next", "next.js", "react", "typescript", "tailwind", "framer"])) {
+        return {
+          text: "Rajat used React/Next.js/TypeScript/Tailwind across PrepPeer, NextStep.AI, UniEvents, and this portfolio.",
+          source: "Resume + GitHub"
+        };
+      }
+
+      if (includesAny(q, ["python", "scikit", "pandas", "streamlit", "plotly", "sqlite"])) {
+        return {
+          text: "Rajat used Python in GridWatch and Bitcoin Sentiment Analysis, covering ML anomaly detection, dashboards, notebooks, and data analysis.",
+          source: "Resume + GitHub"
+        };
+      }
+
+      if (includesAny(q, ["node", "express", "mongodb", "jwt", "api"])) {
+        return {
+          text: "Rajat used Node.js, Express, MongoDB, JWT, and REST APIs in the University Event Management System and backend-oriented web work.",
+          source: "Resume + GitHub"
+        };
+      }
+    }
+
     return {
       text:
         `Rajat works across ${conciseList(knowledge.skills.languages, 5)}, plus ${conciseList(knowledge.skills.web, 6)} and AI tools like ${conciseList(knowledge.skills.aiTools, 5)}.`,
@@ -324,6 +403,14 @@ const answerRajat = (question) => {
       text:
         `Reach Rajat at ${knowledge.identity.email}. GitHub: ${knowledge.identity.github}. LinkedIn: ${knowledge.identity.linkedin}.`,
       source: "Resume + GitHub"
+    };
+  }
+
+  if (includesAny(q, ["resume", "cv", "download resume", "see resume"])) {
+    return {
+      text:
+        "Rajat's resume is available on this portfolio through the Resume link in Contact. It includes his education, experience, projects, skills, and certifications.",
+      source: "Resume"
     };
   }
 

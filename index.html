@@ -30,14 +30,14 @@
       <nav class="nav-pill" aria-label="Primary navigation">
         <span class="nav-progress" aria-hidden="true"></span>
         <span class="nav-glow" aria-hidden="true"></span>
-        <a class="avatar-link" href="#home" aria-label="Rajat Krishnan home">
+        <a class="avatar-link" href="#home" aria-label="Rajat Krishnan home" data-cursor="HOME">
           <img src="assets/images/profile.png" alt="Rajat Krishnan" />
         </a>
-        <a href="#home" class="active">Home</a>
-        <a href="#work">Projects</a>
-        <a href="#about">About</a>
-        <a href="#ask-ai">AI</a>
-        <a href="#contact" class="nav-contact">Contact</a>
+        <a href="#home" class="active" data-cursor="HOME">Home</a>
+        <a href="#work" data-cursor="WORK">Projects</a>
+        <a href="#about" data-cursor="ABOUT">About</a>
+        <a href="#ask-ai" data-cursor="ASK">AI</a>
+        <a href="#contact" class="nav-contact" data-cursor="CONTACT">Contact</a>
       </nav>
     </header>
 
@@ -158,7 +158,7 @@
               <span>PRODUCT / AI INTERVIEWS</span>
               <span>SURFACE / LANDING + LOGIN</span>
             </div>
-            <a class="text-link" href="https://prep-peer.vercel.app" target="_blank" rel="noreferrer" data-cursor="OPEN">
+            <a class="text-link" href="https://prep-peer.vercel.app" target="_blank" rel="noreferrer" data-cursor="VISIT">
               Visit project
             </a>
           </div>
@@ -183,7 +183,7 @@
               <span>PRODUCT / REPORT ANALYSIS</span>
               <span>SURFACE / LANDING + PORTAL AUTH</span>
             </div>
-            <a class="text-link" href="https://nextstep-ai-web.vercel.app" target="_blank" rel="noreferrer" data-cursor="OPEN">
+            <a class="text-link" href="https://nextstep-ai-web.vercel.app" target="_blank" rel="noreferrer" data-cursor="VISIT">
               Visit project
             </a>
           </div>
@@ -247,10 +247,10 @@
               profile facts. No external AI API. No invented claims.
             </p>
             <div class="intel-prompts" aria-label="Suggested questions">
-              <button type="button" data-ask="What is Rajat doing right now?">Current role</button>
-              <button type="button" data-ask="Is Rajat available for internships?">Availability</button>
-              <button type="button" data-ask="What projects has Rajat built?">Projects</button>
-              <button type="button" data-ask="What is Rajat's strongest tech stack?">Stack</button>
+              <button type="button" data-ask="What is Rajat doing right now?" data-cursor="ROLE">Current role</button>
+              <button type="button" data-ask="Is Rajat available for internships?" data-cursor="AVAIL">Availability</button>
+              <button type="button" data-ask="What projects has Rajat built?" data-cursor="PROJECTS">Projects</button>
+              <button type="button" data-ask="What is Rajat's strongest tech stack?" data-cursor="STACK">Stack</button>
             </div>
           </div>
           <div class="chat-panel" aria-label="Rajat Intelligence chat">
@@ -316,7 +316,7 @@
           <strong>Rajat Intelligence</strong>
           <p>Short verified answers only</p>
         </div>
-        <button type="button" data-ai-close aria-label="Close Rajat Intelligence">Close</button>
+        <button type="button" data-ai-close aria-label="Close Rajat Intelligence" data-cursor="CLOSE">Close</button>
       </div>
       <div class="chat-messages drawer-messages" data-drawer-messages>
         <div class="message bot">
