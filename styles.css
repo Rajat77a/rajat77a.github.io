@@ -449,7 +449,7 @@ p {
   max-width: 920px;
   font-family: "Anton", Impact, sans-serif;
   font-size: clamp(3.3rem, 8vw, 8rem);
-  line-height: 0.92;
+  line-height: 1;
   font-weight: 400;
 }
 
@@ -497,8 +497,8 @@ p {
 .proof-card h3 {
   margin: 40px 0 12px;
   font-family: "Anton", Impact, sans-serif;
-  font-size: clamp(2.6rem, 4.6vw, 5rem);
-  line-height: 0.93;
+  font-size: clamp(2.25rem, 3.8vw, 4rem);
+  line-height: 1.06;
   font-weight: 400;
 }
 
@@ -583,7 +583,7 @@ p {
   margin: 0 0 18px;
   font-family: "Anton", Impact, sans-serif;
   font-size: clamp(4rem, 8vw, 8.5rem);
-  line-height: 0.9;
+  line-height: 0.98;
   font-weight: 400;
 }
 
@@ -638,7 +638,7 @@ p {
 
 .project-visual {
   position: relative;
-  min-height: 520px;
+  min-height: 560px;
   perspective: 1200px;
   transform-style: preserve-3d;
   transform: translateY(calc(var(--scroll-shift, 0) * -32px)) rotateX(calc(var(--my, 0) * 7deg)) rotateY(calc(var(--mx, 0) * -9deg));
@@ -647,7 +647,7 @@ p {
 
 .project-visual img {
   position: absolute;
-  width: 78%;
+  width: 82%;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 6px;
   object-fit: cover;
@@ -665,8 +665,17 @@ p {
 .project-visual img:last-child {
   left: 0;
   bottom: 0;
-  width: 58%;
+  width: 64%;
   transform: rotateX(3deg) rotateY(11deg) rotateZ(-2deg);
+}
+
+.project-visual.warm img:first-of-type {
+  width: 84%;
+}
+
+.project-visual.warm img:last-of-type {
+  width: 62%;
+  bottom: 6px;
 }
 
 .project-visual:hover img:first-child {
