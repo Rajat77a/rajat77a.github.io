@@ -10,7 +10,7 @@ window.RAJAT_KNOWLEDGE = {
     headline: "AI-focused Computer Science student and product builder"
   },
   ai: {
-    endpoint: ""
+    endpoint: "https://rajat77a-github-io.vercel.app/api/chat"
   },
   current: {
     role: "AI Fluency Intern",
