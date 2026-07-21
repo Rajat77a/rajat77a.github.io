@@ -31,7 +31,10 @@
         <span class="nav-progress" aria-hidden="true"></span>
         <span class="nav-glow" aria-hidden="true"></span>
         <a class="avatar-link" href="#home" aria-label="Rajat Krishnan home" data-cursor="HOME">
-          <img src="assets/images/profile.png" alt="Rajat Krishnan" />
+          <picture>
+            <source srcset="assets/images/profile.webp" type="image/webp" />
+            <img src="assets/images/profile.png" alt="Rajat Krishnan" width="800" height="800" decoding="async" />
+          </picture>
         </a>
         <a href="#home" class="active" data-cursor="HOME">Home</a>
         <a href="#work" data-cursor="WORK">Projects</a>
@@ -66,7 +69,10 @@
         </div>
 
         <div class="hero-orbit" aria-hidden="true">
-          <img src="assets/images/profile.png" alt="" />
+          <picture>
+            <source srcset="assets/images/profile.webp" type="image/webp" />
+            <img src="assets/images/profile.png" alt="" width="800" height="800" decoding="async" fetchpriority="high" />
+          </picture>
         </div>
 
         <div class="hero-footer">
@@ -170,8 +176,14 @@
           <div class="project-visual stack-tilt" data-cursor="PREPPEER">
             <span class="floating-label label-one">AI UX</span>
             <span class="floating-label label-two">AUTH FLOW</span>
-            <img src="assets/captures/preppeer-hero.png" alt="PrepPeer landing page hero" />
-            <img src="assets/captures/preppeer-login.png" alt="PrepPeer login screen" />
+            <picture>
+              <source srcset="assets/captures/preppeer-hero.webp" type="image/webp" />
+              <img src="assets/captures/preppeer-hero.png" alt="PrepPeer landing page hero" width="1800" height="1125" loading="lazy" decoding="async" />
+            </picture>
+            <picture>
+              <source srcset="assets/captures/preppeer-login.webp" type="image/webp" />
+              <img src="assets/captures/preppeer-login.png" alt="PrepPeer login screen" width="1800" height="1125" loading="lazy" decoding="async" />
+            </picture>
           </div>
         </article>
 
@@ -195,15 +207,24 @@
           <div class="project-visual stack-tilt warm" data-cursor="NEXTSTEP">
             <span class="floating-label label-one">PARENT UX</span>
             <span class="floating-label label-two">PORTAL</span>
-            <img src="assets/captures/nextstep-hero.png" alt="NextStep.AI landing page hero" />
-            <img src="assets/captures/nextstep-login.png" alt="NextStep.AI login screen" />
+            <picture>
+              <source srcset="assets/captures/nextstep-hero.webp" type="image/webp" />
+              <img src="assets/captures/nextstep-hero.png" alt="NextStep.AI landing page hero" width="1800" height="1125" loading="lazy" decoding="async" />
+            </picture>
+            <picture>
+              <source srcset="assets/captures/nextstep-login.webp" type="image/webp" />
+              <img src="assets/captures/nextstep-login.png" alt="NextStep.AI login screen" width="1800" height="1125" loading="lazy" decoding="async" />
+            </picture>
           </div>
         </article>
       </section>
 
       <section id="about" class="section about-section">
         <div class="portrait-panel">
-          <img src="assets/images/profile.png" alt="Portrait of Rajat Krishnan" />
+          <picture>
+            <source srcset="assets/images/profile.webp" type="image/webp" />
+            <img src="assets/images/profile.png" alt="Portrait of Rajat Krishnan" width="800" height="800" loading="lazy" decoding="async" />
+          </picture>
         </div>
         <div class="about-copy">
           <p class="eyebrow">ABOUT ME</p>
