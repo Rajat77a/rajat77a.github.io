@@ -153,11 +153,14 @@ const isPromptAttack = (q) =>
 const isRajatTopic = (q) =>
   /\b(rajat|he|him|his|profile|portfolio|project|skill|college|sem|semester|age|dob|birthday|dbms|ece|resume|cv|contact|github|linkedin|internship|education|experience|work|flyrank|vit|preppeer|nextstep)\b/.test(q);
 
+const fallbackAnswer =
+  "I stay focused on Rajat, but I can help with his projects, skills, resume, current role, education, or contact.";
+
 const directVerifiedAnswer = (message) => {
   const q = message.toLowerCase();
 
   if (isPromptAttack(q) && !isRajatTopic(q)) {
-    return "I stay focused on Rajat, but I can help with his projects, skills, resume, current role, education, or contact.";
+    return fallbackAnswer;
   }
 
   if (/\b(sem|semester)\b/.test(q)) {
@@ -177,6 +180,123 @@ const directVerifiedAnswer = (message) => {
   }
 
   return null;
+};
+
+const forbiddenAnswerPatterns = [
+  /\bweather\b/i,
+  /\brecipe\b/i,
+  /\bmovie\b/i,
+  /\bsports?\b/i,
+  /\bbitcoin price\b/i,
+  /\bstock market\b/i,
+  /\bhomework\b/i,
+  /\bsystem prompt\b/i,
+  /\bhidden prompt\b/i,
+  /\bdeveloper instructions?\b/i,
+  /\bignore (all )?(previous|prior) instructions?\b/i,
+  /\bas an ai language model\b/i,
+  /\bi am rajat\b/i,
+  /\bi'm rajat\b/i,
+  /\bmy name is rajat\b/i
+];
+
+const unsupportedClaimPatterns = [
+  /\b(gpa|cgpa)\b/i,
+  /\bsalary\b/i,
+  /\baddress\b/i,
+  /\bhostel\b/i,
+  /\brelationship\b/i,
+  /\bgirlfriend\b/i,
+  /\bboyfriend\b/i,
+  /\bparent(s)?\b/i,
+  /\bpassport\b/i,
+  /\baadhaar\b/i
+];
+
+const allowedAnswerTerms = [
+  "rajat",
+  "vit-ap",
+  "computer science",
+  "cse",
+  "flyrank",
+  "preppeer",
+  "nextstep",
+  "gridwatch",
+  "unievents",
+  "bitcoin sentiment",
+  "zedworks",
+  "internship",
+  "resume",
+  "github",
+  "linkedin",
+  "portfolio",
+  "python",
+  "java",
+  "javascript",
+  "typescript",
+  "react",
+  "next.js",
+  "node",
+  "express",
+  "mongodb",
+  "sqlite",
+  "dbms",
+  "ece",
+  "semester",
+  "third-year",
+  "third year",
+  "5th",
+  "19",
+  "7 november 2006",
+  "payyanur",
+  "kerala",
+  "amaravati",
+  "anthropic",
+  "google cloud",
+  "ibm",
+  "nasscom",
+  "jpmorgan",
+  "canva",
+  "contact",
+  "email",
+  "phone",
+  "skills",
+  "projects",
+  "education",
+  "experience",
+  "certifications"
+];
+
+const hasAllowedAnswerGrounding = (answer) => {
+  const normalized = answer.toLowerCase();
+  return allowedAnswerTerms.some((term) => normalized.includes(term));
+};
+
+const validateAnswer = (question, answer) => {
+  const q = question.toLowerCase();
+  const text = String(answer || "").trim();
+
+  if (!text) {
+    return "I could not form a clean answer there. Ask me about Rajat's projects, skills, resume, current role, education, or contact.";
+  }
+
+  if (text === fallbackAnswer) {
+    return text;
+  }
+
+  if (forbiddenAnswerPatterns.some((pattern) => pattern.test(text))) {
+    return fallbackAnswer;
+  }
+
+  if (!isRajatTopic(q) && !hasAllowedAnswerGrounding(text)) {
+    return fallbackAnswer;
+  }
+
+  if (unsupportedClaimPatterns.some((pattern) => pattern.test(text)) && !unsupportedClaimPatterns.some((pattern) => pattern.test(q))) {
+    return "I do not have that verified public detail for Rajat. I can answer accurately about his work, projects, skills, education, experience, certifications, availability, resume, and contact.";
+  }
+
+  return text;
 };
 
 const createGroqAnswer = async (messages) => {
@@ -269,7 +389,8 @@ export default async function handler(req, res) {
   ];
 
   try {
-    const answer = directVerifiedAnswer(cleanMessage) || (await createAiAnswer(messages)) || "I could not form a clean answer there. Ask me about Rajat's projects, skills, resume, or current role.";
+    const rawAnswer = directVerifiedAnswer(cleanMessage) || (await createAiAnswer(messages));
+    const answer = validateAnswer(cleanMessage, rawAnswer);
 
     return res.status(200).json({
       answer,
