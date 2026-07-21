@@ -11,6 +11,16 @@ const RAJAT_PROFILE = {
   },
   current:
     "Third-year Computer Science student at VIT-AP and AI Fluency Intern at FlyRank AI, remote, 2026 - Present. Work includes prompt design, model-output evaluation, Anthropic coursework, and AI-assisted website builds.",
+  academicNotes: {
+    semester:
+      "Rajat is currently in third year; based on his 2024 - 2029 VIT-AP academic timeline, that corresponds to 5th semester right now.",
+    dbms:
+      "Yes, Rajat has practical database experience through MongoDB, SQLite, REST APIs, JWT auth, UniEvents, GridWatch, and full-stack web projects. The verified profile does not separately list a DBMS course name.",
+    ece:
+      "Rajat's verified academic background is Computer Science, not ECE. Claim AI, web, data, and database work for him; do not claim ECE-specific expertise unless Rajat confirms it.",
+    age:
+      "Rajat's verified date of birth or age is not available, so do not guess it."
+  },
   availability:
     "Open to internships in AI product engineering, full-stack web, prompt engineering, automation, and data tools.",
   education: [
@@ -83,6 +93,10 @@ Rules:
 - If a Rajat-related detail is missing, say you do not have that specific verified detail, then offer what you can answer.
 - Normal answers must be 1-2 short lines. Use a slightly longer answer only when the user asks for everything, a summary, or a comparison.
 - If asked Rajat's college year, current education status, or "which year", say he is currently a third-year Computer Science student at VIT-AP.
+- If asked Rajat's semester or "which sem", answer: "Rajat is currently in third year; based on his 2024 - 2029 VIT-AP timeline, that corresponds to 5th semester right now."
+- If asked whether Rajat studied DBMS, say he has practical database experience through MongoDB, SQLite, REST APIs, JWT auth, UniEvents, and GridWatch; do not claim a named DBMS course unless asked, and say the course name is not separately verified.
+- If asked whether Rajat knows ECE, say his verified background is CSE, not ECE; he has AI/web/data/database proof, but ECE-specific expertise is not verified.
+- If asked age, DOB, or birthday, do not guess. Say his verified age/date of birth is not available.
 - If asked "how is Rajat" or "how is he", answer his current professional momentum: third-year CSE at VIT-AP, AI Fluency Intern at FlyRank AI, shipping AI/web products, open to internships.
 - For project questions, mention the strongest 3-4 projects first: PrepPeer, NextStep.AI, GridWatch, and University Event Management System. Offer to share more instead of dumping every project.
 - For greetings, reply naturally and ask what they want to know about Rajat.
@@ -109,6 +123,28 @@ const getOpenAiText = (payload) => {
 const getGroqText = (payload) => payload.choices?.[0]?.message?.content?.trim() || "";
 
 const wantsResume = (message) => /\b(resume|cv|curriculum vitae|download)\b/i.test(message);
+
+const directVerifiedAnswer = (message) => {
+  const q = message.toLowerCase();
+
+  if (/\b(sem|semester)\b/.test(q)) {
+    return RAJAT_PROFILE.academicNotes.semester;
+  }
+
+  if (/\b(age|dob|date of birth|birthday)\b/.test(q)) {
+    return "I do not have Rajat's verified age or date of birth, so I will not guess it. I can share his current college year, projects, skills, or contact.";
+  }
+
+  if (/\b(dbms|database management)\b/.test(q)) {
+    return RAJAT_PROFILE.academicNotes.dbms;
+  }
+
+  if (/\b(ece|electronics|electrical)\b/.test(q)) {
+    return RAJAT_PROFILE.academicNotes.ece;
+  }
+
+  return null;
+};
 
 const createGroqAnswer = async (messages) => {
   if (!process.env.GROQ_API_KEY) {
@@ -200,7 +236,7 @@ export default async function handler(req, res) {
   ];
 
   try {
-    const answer = (await createAiAnswer(messages)) || "I could not form a clean answer there. Ask me about Rajat's projects, skills, resume, or current role.";
+    const answer = directVerifiedAnswer(cleanMessage) || (await createAiAnswer(messages)) || "I could not form a clean answer there. Ask me about Rajat's projects, skills, resume, or current role.";
 
     return res.status(200).json({
       answer,

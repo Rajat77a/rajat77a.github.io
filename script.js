@@ -497,8 +497,11 @@ const answerRajat = (question) => {
     return { text: knowledge.boundaries.refusal, source: "Scope guard" };
   }
 
-  if (includesAny(q, ["doing", "current", "now", "right now", "today", "role", "flyrank"])) {
-    return { text: knowledge.current.summary, source: "Resume" };
+  if (includesAny(q, ["sem", "semester", "which sem", "which semester"])) {
+    return {
+      text: knowledge.academicNotes.semester,
+      source: "Confirmed academic timeline"
+    };
   }
 
   if (includesAny(q, ["which year", "college year", "what year", "year of college", "2nd year", "second year", "third year", "3rd year"])) {
@@ -506,6 +509,10 @@ const answerRajat = (question) => {
       text: "Rajat is currently a third-year Computer Science student at VIT-AP.",
       source: "Resume + confirmed profile update"
     };
+  }
+
+  if (includesAny(q, ["doing", "current", "now", "right now", "today", "role", "flyrank"])) {
+    return { text: knowledge.current.summary, source: "Resume" };
   }
 
   const rankedMatch = matchedKnowledgeAnswer(q);
@@ -547,7 +554,9 @@ const answerRajat = (question) => {
   if (includesAny(q, ["age", "birthday", "date of birth", "dob", "gpa", "cgpa", "salary", "expected salary", "private", "address"])) {
     return {
       text:
-        "I do not have that verified public detail for Rajat. I can answer accurately about his work, projects, skills, education, experience, certifications, availability, and contact.",
+        includesAny(q, ["age", "birthday", "date of birth", "dob"])
+          ? knowledge.academicNotes.age
+          : "I do not have that verified public detail for Rajat. I can answer accurately about his work, projects, skills, education, experience, certifications, availability, and contact.",
       source: "Privacy + verified-data guard"
     };
   }
@@ -592,6 +601,20 @@ const answerRajat = (question) => {
       text:
         "Rajat has full-stack proof through Node.js, Express, MongoDB, SQLite, REST APIs, JWT auth, and projects like UniEvents and PrepPeer.",
       source: "Resume + GitHub"
+    };
+  }
+
+  if (includesAny(q, ["dbms", "database management"])) {
+    return {
+      text: knowledge.academicNotes.dbms,
+      source: "Resume + GitHub"
+    };
+  }
+
+  if (includesAny(q, ["ece", "electronics", "electrical"])) {
+    return {
+      text: knowledge.academicNotes.ece,
+      source: "Verified academic guard"
     };
   }
 

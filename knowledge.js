@@ -18,8 +18,19 @@ window.RAJAT_KNOWLEDGE = {
     mode: "Remote",
     period: "2026 - Present",
     collegeYear: "Third-year Computer Science student at VIT-AP",
+    semester: "5th semester, based on the 2024 - 2029 VIT-AP academic timeline",
     summary:
       "Rajat is a third-year Computer Science student at VIT-AP and an AI Fluency Intern at FlyRank AI, working on prompt design, model-output evaluation, and deployable AI-assisted website builds."
+  },
+  academicNotes: {
+    semester:
+      "Rajat is currently in third year; based on his 2024 - 2029 VIT-AP timeline, that corresponds to 5th semester right now.",
+    dbms:
+      "Yes, Rajat has practical database experience through MongoDB, SQLite, REST APIs, JWT auth, UniEvents, GridWatch, and full-stack web projects. The verified profile does not separately list a DBMS course name.",
+    ece:
+      "Rajat's verified academic background is Computer Science, not ECE. I can claim AI, web, data, and database work for him, but not ECE-specific expertise unless Rajat confirms it.",
+    age:
+      "I do not have Rajat's verified date of birth or age, so I will not guess it. I can share his current college year, work, projects, skills, or contact."
   },
   availability:
     "Yes. Rajat is open to internships in AI product engineering, full-stack web, prompt engineering, automation, and data tools.",
