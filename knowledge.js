@@ -3,6 +3,7 @@ window.RAJAT_KNOWLEDGE = {
     name: "Rajat Krishnan",
     location: "Payyanur, Kerala, India",
     email: "Rajatkrishnan321@gmail.com",
+    phone: "+91 9778742750",
     github: "https://github.com/Rajat77a",
     linkedin: "https://www.linkedin.com/in/rajat-krishnan77",
     portfolio: "https://rajat77a.github.io",

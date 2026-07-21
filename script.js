@@ -194,6 +194,11 @@ const normalizeQuestion = (value) =>
 
 const includesAny = (text, words) => words.some((word) => text.includes(word));
 
+const hasAnyWord = (text, words) => {
+  const tokens = new Set(text.split(" "));
+  return words.some((word) => tokens.has(word));
+};
+
 const conciseList = (items, count = 4) => items.slice(0, count).join(", ");
 
 const projectLine = (project) => `${project.name}: ${project.summary}`;
@@ -203,6 +208,76 @@ const fullProfileSummary = () =>
 
 const closestProfileAnswer = () =>
   "Verified snapshot: Rajat is a CSE student at VIT-AP, AI Fluency Intern at FlyRank AI, and a build-first developer focused on AI products, full-stack web, prompt workflows, automation, and data tools.";
+
+const roleFitAnswer = (role) => {
+  const roleMap = {
+    frontend:
+      "Yes. Rajat fits frontend/product UI roles through React, Next.js, Tailwind, Framer Motion, and shipped interfaces for PrepPeer and NextStep.AI.",
+    ai:
+      "Yes. Rajat fits AI product roles through prompt engineering, LLM workflow testing, model-output evaluation, and AI-assisted product builds.",
+    backend:
+      "Rajat has full-stack proof through Node.js, Express, MongoDB, SQLite, REST APIs, JWT auth, and projects like UniEvents and PrepPeer.",
+    data:
+      "Yes. Rajat has data/ML proof through GridWatch and Bitcoin Sentiment Analysis using Python, Scikit-learn, Pandas, Streamlit, Plotly, and notebooks.",
+    design:
+      "Yes. Rajat has creative/design proof through ZedWorks, Canva-based branded assets, content strategy, and polished product interfaces."
+  };
+  return roleMap[role] || roleMap.ai;
+};
+
+const matchedKnowledgeAnswer = (q) => {
+  const categories = [
+    {
+      keywords: ["what does rajat do", "what does he do", "what is he doing", "what does rajat build", "what he does", "who is he", "profile", "background", "describe rajat", "describe him", "about him"],
+      text: fullProfileSummary(),
+      source: "Resume + GitHub"
+    },
+    {
+      keywords: ["is rajat good", "is he good", "how good is rajat", "how good is he", "is rajat talented", "is he talented", "is rajat smart", "is he smart", "is rajat hardworking", "is he hardworking"],
+      text:
+        "Rajat's verified strengths are build-first execution, AI fluency, prompt engineering, full-stack product work, and clear communication across five languages.",
+      source: "Resume + GitHub"
+    },
+    {
+      keywords: ["where is rajat from", "where is he from", "location", "hometown", "where does rajat live", "where he lives"],
+      text: `Rajat is based in ${knowledge.identity.location}. He studies at VIT-AP in Amaravati, Andhra Pradesh.`,
+      source: "Resume"
+    },
+    {
+      keywords: ["contact number", "phone", "phone number", "mobile", "mobile number", "call"],
+      text: `Rajat's verified contact details are email ${knowledge.identity.email} and phone ${knowledge.identity.phone}.`,
+      source: "Resume"
+    },
+    {
+      keywords: ["github link", "github profile", "linkedin link", "portfolio link", "social links", "links"],
+      text: `Portfolio: ${knowledge.identity.portfolio}. GitHub: ${knowledge.identity.github}. LinkedIn: ${knowledge.identity.linkedin}.`,
+      source: "Submitted links + GitHub"
+    },
+    {
+      keywords: ["full profile", "complete profile", "overview", "bio", "introduction", "intro"],
+      text: fullProfileSummary(),
+      source: "Resume + GitHub + submitted links"
+    },
+    {
+      keywords: ["data role", "data analyst", "machine learning", "ml role"],
+      text: roleFitAnswer("data"),
+      source: "Resume + GitHub"
+    },
+    {
+      keywords: ["design role", "creative role", "content role", "canva", "content creation"],
+      text: roleFitAnswer("design"),
+      source: "Resume + GitHub"
+    },
+    {
+      keywords: ["all projects", "project list", "list projects"],
+      text: `Rajat's verified projects are ${knowledge.projects.map((project) => project.name).join(", ")}.`,
+      source: "Resume + GitHub"
+    }
+  ];
+
+  const match = categories.find((category) => includesAny(q, category.keywords));
+  return match ? { text: match.text, source: match.source } : null;
+};
 
 const answerRajat = (question) => {
   if (!knowledge) {
@@ -256,6 +331,13 @@ const answerRajat = (question) => {
     };
   }
 
+  if (includesAny(q, ["tell me more", "more about rajat", "more about him", "details about rajat", "give details"])) {
+    return {
+      text: fullProfileSummary(),
+      source: "Resume + GitHub + submitted links"
+    };
+  }
+
   if (includesAny(q, ["thanks", "thank you", "ty", "nice", "cool", "great"])) {
     return {
       text: "Anytime. Want a quick recruiter-style summary of Rajat or a project breakdown?",
@@ -263,8 +345,8 @@ const answerRajat = (question) => {
     };
   }
 
-  const rajatTerms = ["rajat", "him", "his", "profile", "portfolio", "internship", "project", "skill", "study", "college", "github", "linkedin", "resume", "certification", "experience", "work", "contact", "email", "available", "tech", "stack", "flyrank", "vit", "preppeer", "nextstep", "gridwatch", "zedworks", "frontend", "backend", "full-stack", "fullstack", "python", "react", "next.js", "why", "summary", "recruiter", "fit", "developer", "person", "good", "strong", "background"];
-  const knownTopic = includesAny(q, rajatTerms);
+  const rajatTerms = ["rajat", "profile", "portfolio", "internship", "project", "skill", "study", "college", "github", "linkedin", "resume", "certification", "experience", "work", "contact", "email", "available", "tech", "stack", "flyrank", "vit", "preppeer", "nextstep", "gridwatch", "zedworks", "frontend", "backend", "full-stack", "fullstack", "python", "react", "next.js", "why", "summary", "recruiter", "fit", "developer", "person", "good", "strong", "background", "location", "hometown", "phone", "links", "bio", "overview"];
+  const knownTopic = includesAny(q, rajatTerms) || hasAnyWord(q, ["he", "him", "his"]);
 
   if (includesAny(q, ["capital", "weather", "recipe", "movie", "sports", "news", "bitcoin price", "write code for me", "homework"]) && !knownTopic) {
     return { text: knowledge.boundaries.refusal, source: "Scope guard" };
@@ -272,6 +354,11 @@ const answerRajat = (question) => {
 
   if (includesAny(q, ["doing", "current", "now", "right now", "today", "role", "flyrank"])) {
     return { text: knowledge.current.summary, source: "Resume" };
+  }
+
+  const rankedMatch = matchedKnowledgeAnswer(q);
+  if (rankedMatch) {
+    return rankedMatch;
   }
 
   if (includesAny(q, ["recruiter summary", "quick summary", "short summary", "summarize rajat", "pitch", "elevator pitch"])) {
