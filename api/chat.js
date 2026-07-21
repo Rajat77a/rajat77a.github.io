@@ -171,6 +171,10 @@ const directVerifiedAnswer = (message) => {
     return ageAnswer();
   }
 
+  if (/\b(gpa|cgpa|salary|expected salary|address|hostel|relationship|girlfriend|boyfriend|passport|aadhaar)\b/.test(q)) {
+    return "I do not have that verified public detail for Rajat. I can answer accurately about his work, projects, skills, education, experience, certifications, availability, resume, and contact.";
+  }
+
   if (/\b(dbms|database management)\b/.test(q)) {
     return RAJAT_PROFILE.academicNotes.dbms;
   }
