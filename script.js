@@ -204,10 +204,10 @@ const conciseList = (items, count = 4) => items.slice(0, count).join(", ");
 const projectLine = (project) => `${project.name}: ${project.summary}`;
 
 const fullProfileSummary = () =>
-  "Rajat is an AI-focused CSE student at VIT-AP and an AI Fluency Intern at FlyRank AI. He builds AI products and full-stack apps like PrepPeer, NextStep.AI, GridWatch, and UniEvents, and he is open to strong internship roles.";
+  "Rajat is a third-year AI-focused CSE student at VIT-AP and an AI Fluency Intern at FlyRank AI. He builds AI products and full-stack apps like PrepPeer, NextStep.AI, GridWatch, and UniEvents, and he is open to strong internship roles.";
 
 const closestProfileAnswer = () =>
-  "Rajat is a CSE student at VIT-AP, an AI Fluency Intern at FlyRank AI, and a build-first developer focused on AI products, full-stack web, prompt workflows, automation, and data tools.";
+  "Rajat is a third-year CSE student at VIT-AP, an AI Fluency Intern at FlyRank AI, and a build-first developer focused on AI products, full-stack web, prompt workflows, automation, and data tools.";
 
 const roleFitAnswer = (role) => {
   const roleMap = {
@@ -488,6 +488,13 @@ const answerRajat = (question) => {
     return { text: knowledge.current.summary, source: "Resume" };
   }
 
+  if (includesAny(q, ["which year", "college year", "what year", "year of college", "2nd year", "second year", "third year", "3rd year"])) {
+    return {
+      text: "Rajat is currently a third-year Computer Science student at VIT-AP.",
+      source: "Resume + confirmed profile update"
+    };
+  }
+
   const rankedMatch = matchedKnowledgeAnswer(q);
   if (rankedMatch) {
     return rankedMatch;
@@ -496,7 +503,7 @@ const answerRajat = (question) => {
   if (includesAny(q, ["recruiter summary", "quick summary", "short summary", "summarize rajat", "pitch", "elevator pitch"])) {
     return {
       text:
-        "Rajat is an AI-focused CSE student at VIT-AP and AI Fluency Intern at FlyRank AI, building practical AI products across web, data, and automation.",
+        "Rajat is a third-year AI-focused CSE student at VIT-AP and AI Fluency Intern at FlyRank AI, building practical AI products across web, data, and automation.",
       source: "Resume + GitHub"
     };
   }

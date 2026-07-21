@@ -17,13 +17,14 @@ window.RAJAT_KNOWLEDGE = {
     company: "FlyRank AI",
     mode: "Remote",
     period: "2026 - Present",
+    collegeYear: "Third-year Computer Science student at VIT-AP",
     summary:
-      "Rajat is an AI Fluency Intern at FlyRank AI, working on prompt design, model-output evaluation, and deployable AI-assisted website builds."
+      "Rajat is a third-year Computer Science student at VIT-AP and an AI Fluency Intern at FlyRank AI, working on prompt design, model-output evaluation, and deployable AI-assisted website builds."
   },
   availability:
     "Yes. Rajat is open to internships in AI product engineering, full-stack web, prompt engineering, automation, and data tools.",
   education: [
-    "Integrated M.Tech in Computer Science Engineering at VIT-AP, Amaravati, 2024 - 2029.",
+    "Third-year Integrated M.Tech in Computer Science Engineering at VIT-AP, Amaravati, 2024 - 2029.",
     "High School Diploma from Ursuline English Medium School, Pariyaram, Kerala, 2023 - 2024."
   ],
   experience: [

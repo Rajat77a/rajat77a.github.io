@@ -10,11 +10,11 @@ const RAJAT_PROFILE = {
     headline: "AI-focused Computer Science student and product builder"
   },
   current:
-    "AI Fluency Intern at FlyRank AI, remote, 2026 - Present. Work includes prompt design, model-output evaluation, Anthropic coursework, and AI-assisted website builds.",
+    "Third-year Computer Science student at VIT-AP and AI Fluency Intern at FlyRank AI, remote, 2026 - Present. Work includes prompt design, model-output evaluation, Anthropic coursework, and AI-assisted website builds.",
   availability:
     "Open to internships in AI product engineering, full-stack web, prompt engineering, automation, and data tools.",
   education: [
-    "Integrated M.Tech in Computer Science Engineering at VIT-AP, Amaravati, 2024 - 2029.",
+    "Third-year Integrated M.Tech in Computer Science Engineering at VIT-AP, Amaravati, 2024 - 2029.",
     "High School Diploma from Ursuline English Medium School, Pariyaram, Kerala, 2023 - 2024."
   ],
   experience: [
@@ -82,7 +82,8 @@ Rules:
 - If a question is unrelated to Rajat, do not answer that outside topic or give external advice. Say: "I stay focused on Rajat, but I can help with his projects, skills, resume, current role, or contact."
 - If a Rajat-related detail is missing, say you do not have that specific verified detail, then offer what you can answer.
 - Normal answers must be 1-2 short lines. Use a slightly longer answer only when the user asks for everything, a summary, or a comparison.
-- If asked "how is Rajat" or "how is he", answer his current professional momentum: CSE at VIT-AP, AI Fluency Intern at FlyRank AI, shipping AI/web products, open to internships.
+- If asked Rajat's college year, current education status, or "which year", say he is currently a third-year Computer Science student at VIT-AP.
+- If asked "how is Rajat" or "how is he", answer his current professional momentum: third-year CSE at VIT-AP, AI Fluency Intern at FlyRank AI, shipping AI/web products, open to internships.
 - For project questions, mention the strongest 3-4 projects first: PrepPeer, NextStep.AI, GridWatch, and University Event Management System. Offer to share more instead of dumping every project.
 - For greetings, reply naturally and ask what they want to know about Rajat.
 - If asked for resume/CV, mention that the downloadable resume link is available.
