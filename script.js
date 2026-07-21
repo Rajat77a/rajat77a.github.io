@@ -204,10 +204,10 @@ const conciseList = (items, count = 4) => items.slice(0, count).join(", ");
 const projectLine = (project) => `${project.name}: ${project.summary}`;
 
 const fullProfileSummary = () =>
-  "Rajat Krishnan is an AI-focused CSE student at VIT-AP and AI Fluency Intern at FlyRank AI. He builds AI products and full-stack web apps like PrepPeer, NextStep.AI, GridWatch, UniEvents, and data/creative tools; he is open to internships in AI product engineering, full-stack web, prompt engineering, automation, and data tools.";
+  "Rajat is an AI-focused CSE student at VIT-AP and an AI Fluency Intern at FlyRank AI. He builds AI products and full-stack apps like PrepPeer, NextStep.AI, GridWatch, and UniEvents, and he is open to strong internship roles.";
 
 const closestProfileAnswer = () =>
-  "Verified snapshot: Rajat is a CSE student at VIT-AP, AI Fluency Intern at FlyRank AI, and a build-first developer focused on AI products, full-stack web, prompt workflows, automation, and data tools.";
+  "Rajat is a CSE student at VIT-AP, an AI Fluency Intern at FlyRank AI, and a build-first developer focused on AI products, full-stack web, prompt workflows, automation, and data tools.";
 
 const roleFitAnswer = (role) => {
   const roleMap = {
@@ -235,7 +235,7 @@ const matchedKnowledgeAnswer = (q) => {
     {
       keywords: ["is rajat good", "is he good", "how good is rajat", "how good is he", "is rajat talented", "is he talented", "is rajat smart", "is he smart", "is rajat hardworking", "is he hardworking"],
       text:
-        "Rajat's verified strengths are build-first execution, AI fluency, prompt engineering, full-stack product work, and clear communication across five languages.",
+        "From his work, yes. Rajat shows build-first execution, AI fluency, prompt engineering, full-stack product work, and clear communication across five languages.",
       source: "Resume + GitHub"
     },
     {
@@ -279,6 +279,62 @@ const matchedKnowledgeAnswer = (q) => {
   return match ? { text: match.text, source: match.source } : null;
 };
 
+const followUpFor = (q, answer) => {
+  if (answer.link) {
+    return "Want a quick summary of the resume too?";
+  }
+
+  if (answer.source === "Scope guard") {
+    return "Try asking about Rajat's projects, skills, resume, current role, or contact.";
+  }
+
+  if (answer.source?.includes("Privacy")) {
+    return "I can still answer the professional stuff clearly.";
+  }
+
+  if (includesAny(q, ["hi", "hello", "hey", "how are you", "whats up", "what's up"])) {
+    return "Want the quick version of what he is building right now?";
+  }
+
+  if (includesAny(q, ["project", "preppeer", "nextstep", "gridwatch", "built", "apps"])) {
+    return "Want me to pick his strongest project for recruiters?";
+  }
+
+  if (includesAny(q, ["skill", "stack", "tech", "frontend", "backend", "ai", "data"])) {
+    return "Want proof of where he used those skills?";
+  }
+
+  if (includesAny(q, ["available", "internship", "hire", "job", "role"])) {
+    return "Want a short hiring pitch for him?";
+  }
+
+  if (includesAny(q, ["contact", "email", "phone", "linkedin", "github"])) {
+    return "Want his resume link as well?";
+  }
+
+  if (includesAny(q, ["who", "about", "profile", "background", "how is", "good", "person", "rajat"])) {
+    return "Want his projects, skills, or current role next?";
+  }
+
+  return "What do you want to know next: projects, skills, resume, or contact?";
+};
+
+const humanizeAnswer = (answer, question) => {
+  const q = normalizeQuestion(question);
+  let text = answer.text
+    .replace(/^Yes\. Rajat/g, "Yes. Rajat")
+    .replace(/^Verified snapshot:\s*/i, "")
+    .replace(/I only answer about Rajat's/g, "I’m built to stay focused on Rajat’s")
+    .replace(/I do not have that verified public detail for Rajat\./g, "I don’t have that public verified detail, so I won’t invent it.");
+
+  const followUp = followUpFor(q, answer);
+  if (followUp && !text.includes("?") && !text.includes(followUp)) {
+    text = `${text} ${followUp}`;
+  }
+
+  return { ...answer, text };
+};
+
 const answerRajat = (question) => {
   if (!knowledge) {
     return {
@@ -298,14 +354,14 @@ const answerRajat = (question) => {
 
   if (["hi", "hello", "hey", "yo", "hii", "helo", "helloo"].includes(q)) {
     return {
-      text: "Hey, I'm Rajat Intelligence. Ask me about Rajat's projects, current work, skills, certifications, or internship availability.",
+      text: "Hey, I’m Rajat’s portfolio AI. I can tell you what he is building, what he is good at, and whether he is a fit for a role.",
       source: "Conversation"
     };
   }
 
   if (includesAny(q, ["how are you", "how r u", "how you doing", "what's up", "whats up"])) {
     return {
-      text: "I'm sharp and ready. Want the quick version of Rajat's current work, best projects, or tech stack?",
+      text: "I’m good, locked in, and ready to talk about Rajat without making things boring.",
       source: "Conversation"
     };
   }
@@ -319,14 +375,14 @@ const answerRajat = (question) => {
 
   if (includesAny(q, ["who are you", "what are you", "your name", "introduce yourself"])) {
     return {
-      text: "I'm Rajat Intelligence, a custom portfolio assistant built to answer verified questions about Rajat. What do you want to know first?",
+      text: "I’m Rajat Intelligence, the AI assistant inside his portfolio. I answer from his resume, projects, GitHub, and submitted profile details.",
       source: "Conversation"
     };
   }
 
   if (includesAny(q, ["what can you do", "help", "what should i ask", "questions can i ask"])) {
     return {
-      text: "Ask me about Rajat's current role, internship availability, projects, tech stack, education, certifications, experience, or contact.",
+      text: "You can ask about Rajat’s current work, internships, projects, tech stack, education, certifications, experience, resume, or contact.",
       source: "Conversation"
     };
   }
@@ -387,7 +443,7 @@ const answerRajat = (question) => {
   if (includesAny(q, ["good developer", "good candidate", "good fit", "how good", "as a developer", "as a person", "kind of person", "personality", "mindset", "strength", "strengths"])) {
     return {
       text:
-        "Rajat's verified strengths are build-first execution, AI fluency, prompt engineering, full-stack product work, and clear communication across five languages.",
+        "From his work, yes. Rajat shows build-first execution, AI fluency, prompt engineering, full-stack product work, and clear communication across five languages.",
       source: "Resume + GitHub"
     };
   }
@@ -584,9 +640,10 @@ const appendMessage = (container, text, type = "bot", source = "", link = null) 
     anchor.setAttribute("download", "");
     message.appendChild(anchor);
   }
-  if (source && type === "bot") {
+  const quietSources = ["Conversation", "Guide", "Scope guard", "System"];
+  if (source && type === "bot" && !quietSources.includes(source)) {
     const small = document.createElement("small");
-    small.textContent = `Source: ${source}`;
+    small.textContent = `Checked against ${source}`;
     message.appendChild(small);
   }
   container.appendChild(message);
@@ -603,7 +660,7 @@ const handleChat = (form, input, messages) => {
 
     appendMessage(messages, question, "user");
     input.value = "";
-    const answer = answerRajat(question);
+    const answer = humanizeAnswer(answerRajat(question), question);
     window.setTimeout(() => appendMessage(messages, answer.text, "bot", answer.source, answer.link), 180);
   });
 };
@@ -623,7 +680,7 @@ handleChat(
 
 document.querySelectorAll("[data-ask]").forEach((button) => {
   button.addEventListener("click", () => {
-    const answer = answerRajat(button.dataset.ask);
+    const answer = humanizeAnswer(answerRajat(button.dataset.ask), button.dataset.ask);
     appendMessage(pageMessages, button.dataset.ask, "user");
     window.setTimeout(() => appendMessage(pageMessages, answer.text, "bot", answer.source, answer.link), 180);
   });
