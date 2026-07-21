@@ -224,6 +224,86 @@ img {
   flex-direction: column;
   justify-content: center;
   padding-top: 140px;
+  overflow: hidden;
+  --hx: 0;
+  --hy: 0;
+  --hero-light-x: 50%;
+  --hero-light-y: 50%;
+}
+
+.hero::before,
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.hero::before {
+  background:
+    radial-gradient(circle at var(--hero-light-x) var(--hero-light-y), rgba(200, 255, 77, 0.18), transparent 18rem),
+    radial-gradient(circle at calc(100% - var(--hero-light-x)) calc(100% - var(--hero-light-y)), rgba(38, 45, 192, 0.2), transparent 24rem);
+  opacity: 0.82;
+  transition: opacity 240ms ease;
+}
+
+.hero::after {
+  background:
+    linear-gradient(115deg, transparent 0 39%, rgba(245, 242, 236, 0.11) 48%, transparent 58%),
+    repeating-linear-gradient(90deg, rgba(245, 242, 236, 0.035) 0 1px, transparent 1px 120px);
+  transform: translate3d(calc(var(--hx) * 24px), calc(var(--hy) * 16px), 0);
+  opacity: 0.36;
+  mix-blend-mode: screen;
+}
+
+.hero-field {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+
+.hero-field span {
+  position: absolute;
+  border: 1px solid rgba(200, 255, 77, 0.16);
+  border-radius: 999px;
+  opacity: 0.78;
+  transform: translate3d(calc(var(--hx) * var(--drift-x)), calc(var(--hy) * var(--drift-y)), 0) rotate(var(--angle));
+  transition: transform 180ms ease-out;
+}
+
+.hero-field span:nth-child(1) {
+  --drift-x: 42px;
+  --drift-y: 24px;
+  --angle: -12deg;
+  width: 42vw;
+  height: 14vw;
+  left: 3%;
+  top: 22%;
+}
+
+.hero-field span:nth-child(2) {
+  --drift-x: -54px;
+  --drift-y: 34px;
+  --angle: 18deg;
+  width: 48vw;
+  height: 17vw;
+  right: -8%;
+  bottom: 23%;
+  border-color: rgba(245, 242, 236, 0.12);
+}
+
+.hero-field span:nth-child(3) {
+  --drift-x: 30px;
+  --drift-y: -48px;
+  --angle: 4deg;
+  width: 22vw;
+  height: 22vw;
+  left: 42%;
+  top: 47%;
+  border-color: rgba(240, 90, 63, 0.18);
 }
 
 .hero-grid {
@@ -232,6 +312,8 @@ img {
   gap: 36px;
   align-items: end;
   transform-style: preserve-3d;
+  transform: translate3d(calc(var(--hx) * -10px), calc(var(--hy) * -6px), 0);
+  transition: transform 180ms ease-out;
 }
 
 .eyebrow {
@@ -257,7 +339,9 @@ p {
   line-height: 0.86;
   font-weight: 400;
   letter-spacing: 0;
-  transform: translate3d(calc(var(--mx, 0) * -18px), calc(var(--my, 0) * -10px), 0);
+  text-shadow: calc(var(--hx) * -10px) calc(var(--hy) * -8px) 28px rgba(200, 255, 77, 0.08);
+  transform: translate3d(calc(var(--hx, 0) * -22px), calc(var(--hy, 0) * -13px), 0) rotateX(calc(var(--hy, 0) * 2deg)) rotateY(calc(var(--hx, 0) * -2deg));
+  transition: text-shadow 180ms ease-out, transform 180ms ease-out;
 }
 
 .hero-left,
@@ -292,6 +376,8 @@ p {
   color: rgba(245, 242, 236, 0.84);
   font-size: clamp(1rem, 1.35vw, 1.25rem);
   line-height: 1.45;
+  transform: translate3d(calc(var(--hx) * 16px), calc(var(--hy) * 10px), 0);
+  transition: transform 180ms ease-out;
 }
 
 .hero-orbit {
@@ -308,6 +394,7 @@ p {
   box-shadow: 0 0 80px rgba(200, 255, 77, 0.22);
   transform-style: preserve-3d;
   animation: slowSpin 9s ease-in-out infinite alternate;
+  will-change: transform;
 }
 
 .hero-orbit::before,
@@ -350,6 +437,8 @@ p {
   justify-content: space-between;
   gap: 24px;
   margin-top: 74px;
+  transform: translate3d(calc(var(--hx) * 10px), calc(var(--hy) * -7px), 0);
+  transition: transform 180ms ease-out;
 }
 
 .hand-button {

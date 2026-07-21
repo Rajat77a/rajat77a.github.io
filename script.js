@@ -114,22 +114,35 @@ if (canHover && cursor) {
 }
 
 if (hero && orbit) {
-  hero.addEventListener("pointermove", (event) => {
+  window.addEventListener("pointermove", (event) => {
     if (!canHover) {
       return;
     }
 
     const bounds = hero.getBoundingClientRect();
+    const insideHero = event.clientY >= bounds.top && event.clientY <= bounds.bottom;
+    if (!insideHero) {
+      return;
+    }
+
     const x = (event.clientX - bounds.left) / bounds.width - 0.5;
     const y = (event.clientY - bounds.top) / bounds.height - 0.5;
     hero.style.setProperty("--mx", x.toFixed(3));
     hero.style.setProperty("--my", y.toFixed(3));
-    orbit.style.transform = `translate(calc(-50% + ${x * 30}px), calc(-50% + ${y * 30}px)) rotateX(${y * -18}deg) rotateY(${x * 24}deg)`;
-  });
+    hero.style.setProperty("--hx", x.toFixed(3));
+    hero.style.setProperty("--hy", y.toFixed(3));
+    hero.style.setProperty("--hero-light-x", `${((event.clientX - bounds.left) / bounds.width) * 100}%`);
+    hero.style.setProperty("--hero-light-y", `${((event.clientY - bounds.top) / bounds.height) * 100}%`);
+    orbit.style.transform = `translate(calc(-50% + ${x * 54}px), calc(-50% + ${y * 42}px)) rotateX(${y * -26}deg) rotateY(${x * 34}deg) scale(${1 + Math.abs(x) * 0.04})`;
+  }, { passive: true });
 
   hero.addEventListener("pointerleave", () => {
     hero.style.setProperty("--mx", 0);
     hero.style.setProperty("--my", 0);
+    hero.style.setProperty("--hx", 0);
+    hero.style.setProperty("--hy", 0);
+    hero.style.setProperty("--hero-light-x", "50%");
+    hero.style.setProperty("--hero-light-y", "50%");
     orbit.style.transform = "";
   });
 }
