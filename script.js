@@ -335,6 +335,82 @@ const humanizeAnswer = (answer, question) => {
   return { ...answer, text };
 };
 
+const getAiEndpoint = () => {
+  const configured = window.RAJAT_AI_ENDPOINT || knowledge?.ai?.endpoint || "";
+  if (configured) {
+    return configured;
+  }
+
+  if (window.location.hostname.endsWith("github.io")) {
+    return "";
+  }
+
+  return "/api/chat";
+};
+
+const chatMemory = new WeakMap();
+
+const getHistory = (container) => chatMemory.get(container) || [];
+
+const rememberTurn = (container, question, answer) => {
+  if (!container) {
+    return;
+  }
+
+  const history = [
+    ...getHistory(container),
+    { role: "user", content: question },
+    { role: "assistant", content: answer.text }
+  ].slice(-10);
+
+  chatMemory.set(container, history);
+};
+
+const resolveLink = (link) => {
+  if (!link?.href) {
+    return link;
+  }
+
+  return {
+    ...link,
+    href: link.href.startsWith("/") ? link.href.slice(1) : link.href
+  };
+};
+
+const askRajat = async (question, container) => {
+  const endpoint = getAiEndpoint();
+
+  if (endpoint) {
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: question,
+          history: getHistory(container)
+        })
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || "AI backend failed");
+      }
+
+      return {
+        text: payload.answer,
+        source: payload.source || "Rajat AI",
+        link: resolveLink(payload.link)
+      };
+    } catch (error) {
+      console.warn("Rajat AI backend fallback:", error);
+    }
+  }
+
+  return humanizeAnswer(answerRajat(question), question);
+};
+
 const answerRajat = (question) => {
   if (!knowledge) {
     return {
@@ -624,7 +700,7 @@ const answerRajat = (question) => {
 
 const appendMessage = (container, text, type = "bot", source = "", link = null) => {
   if (!container) {
-    return;
+    return null;
   }
 
   const message = document.createElement("div");
@@ -648,20 +724,36 @@ const appendMessage = (container, text, type = "bot", source = "", link = null) 
   }
   container.appendChild(message);
   container.scrollTop = container.scrollHeight;
+  return message;
 };
 
 const handleChat = (form, input, messages) => {
-  form?.addEventListener("submit", (event) => {
+  form?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const question = input.value.trim();
     if (!question) {
       return;
     }
 
+    const button = form.querySelector("button");
     appendMessage(messages, question, "user");
     input.value = "";
-    const answer = humanizeAnswer(answerRajat(question), question);
-    window.setTimeout(() => appendMessage(messages, answer.text, "bot", answer.source, answer.link), 180);
+    input.disabled = true;
+    if (button) {
+      button.disabled = true;
+    }
+
+    const thinking = appendMessage(messages, "Thinking...", "bot thinking");
+    const answer = await askRajat(question, messages);
+    thinking?.remove();
+    appendMessage(messages, answer.text, "bot", answer.source, answer.link);
+    rememberTurn(messages, question, answer);
+
+    input.disabled = false;
+    if (button) {
+      button.disabled = false;
+    }
+    input.focus();
   });
 };
 
@@ -679,10 +771,14 @@ handleChat(
 );
 
 document.querySelectorAll("[data-ask]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const answer = humanizeAnswer(answerRajat(button.dataset.ask), button.dataset.ask);
-    appendMessage(pageMessages, button.dataset.ask, "user");
-    window.setTimeout(() => appendMessage(pageMessages, answer.text, "bot", answer.source, answer.link), 180);
+  button.addEventListener("click", async () => {
+    const question = button.dataset.ask;
+    appendMessage(pageMessages, question, "user");
+    const thinking = appendMessage(pageMessages, "Thinking...", "bot thinking");
+    const answer = await askRajat(question, pageMessages);
+    thinking?.remove();
+    appendMessage(pageMessages, answer.text, "bot", answer.source, answer.link);
+    rememberTurn(pageMessages, question, answer);
   });
 });
 

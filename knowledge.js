@@ -9,6 +9,9 @@ window.RAJAT_KNOWLEDGE = {
     portfolio: "https://rajat77a.github.io",
     headline: "AI-focused Computer Science student and product builder"
   },
+  ai: {
+    endpoint: ""
+  },
   current: {
     role: "AI Fluency Intern",
     company: "FlyRank AI",
