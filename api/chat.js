@@ -17,7 +17,7 @@ const RAJAT_PROFILE = {
     dbms:
       "Yes, Rajat has practical database experience through MongoDB, SQLite, REST APIs, JWT auth, UniEvents, GridWatch, and full-stack web projects. The verified profile does not separately list a DBMS course name.",
     ece:
-      "Rajat's verified academic background is Computer Science, not ECE. Claim AI, web, data, and database work for him; do not claim ECE-specific expertise unless Rajat confirms it.",
+      "Rajat's verified academic background is Computer Science, not ECE. His confirmed strengths are AI, web, data, and database work; ECE-specific expertise is not verified yet.",
     age:
       "Rajat's verified date of birth or age is not available, so do not guess it."
   },
