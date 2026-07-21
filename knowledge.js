@@ -4,6 +4,7 @@ window.RAJAT_KNOWLEDGE = {
     location: "Payyanur, Kerala, India",
     email: "Rajatkrishnan321@gmail.com",
     phone: "+91 9778742750",
+    dateOfBirth: "2006-11-07",
     github: "https://github.com/Rajat77a",
     linkedin: "https://www.linkedin.com/in/rajat-krishnan77",
     portfolio: "https://rajat77a.github.io",
@@ -30,7 +31,7 @@ window.RAJAT_KNOWLEDGE = {
     ece:
       "Rajat's verified academic background is Computer Science, not ECE. I can claim AI, web, data, and database work for him, but not ECE-specific expertise unless Rajat confirms it.",
     age:
-      "I do not have Rajat's verified date of birth or age, so I will not guess it. I can share his current college year, work, projects, skills, or contact."
+      "Rajat's verified date of birth is 7 November 2006. Calculate his age from the current date instead of hardcoding it."
   },
   availability:
     "Yes. Rajat is open to internships in AI product engineering, full-stack web, prompt engineering, automation, and data tools.",

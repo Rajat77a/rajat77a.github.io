@@ -216,6 +216,28 @@ const conciseList = (items, count = 4) => items.slice(0, count).join(", ");
 
 const projectLine = (project) => `${project.name}: ${project.summary}`;
 
+const getIndiaDate = () => new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+
+const calculateAge = (birthDateValue, now = getIndiaDate()) => {
+  const birthDate = new Date(`${birthDateValue}T00:00:00+05:30`);
+  let age = now.getFullYear() - birthDate.getFullYear();
+  const hasBirthdayPassed =
+    now.getMonth() > birthDate.getMonth() ||
+    (now.getMonth() === birthDate.getMonth() && now.getDate() >= birthDate.getDate());
+
+  if (!hasBirthdayPassed) {
+    age -= 1;
+  }
+
+  return age;
+};
+
+const ageAnswer = () =>
+  `Rajat is ${calculateAge(knowledge.identity.dateOfBirth)} years old right now, based on his verified date of birth: 7 November 2006.`;
+
+const isPromptAttack = (q) =>
+  /\b(ignore|forget|bypass|override|jailbreak|developer mode|system prompt|hidden prompt|reveal prompt|show prompt|act as|pretend|new instructions|break character|secret|confidential)\b/.test(q);
+
 const fullProfileSummary = () =>
   "Rajat is a third-year AI-focused CSE student at VIT-AP and an AI Fluency Intern at FlyRank AI. He builds AI products and full-stack apps like PrepPeer, NextStep.AI, GridWatch, and UniEvents, and he is open to strong internship roles.";
 
@@ -490,8 +512,12 @@ const answerRajat = (question) => {
     };
   }
 
-  const rajatTerms = ["rajat", "profile", "portfolio", "internship", "project", "skill", "study", "college", "github", "linkedin", "resume", "certification", "experience", "work", "contact", "email", "available", "tech", "stack", "flyrank", "vit", "preppeer", "nextstep", "gridwatch", "zedworks", "frontend", "backend", "full-stack", "fullstack", "python", "react", "next.js", "why", "summary", "recruiter", "fit", "developer", "person", "good", "strong", "background", "location", "hometown", "phone", "links", "bio", "overview"];
+  const rajatTerms = ["rajat", "profile", "portfolio", "internship", "project", "skill", "study", "college", "github", "linkedin", "resume", "certification", "experience", "work", "contact", "email", "available", "tech", "stack", "flyrank", "vit", "preppeer", "nextstep", "gridwatch", "zedworks", "frontend", "backend", "full-stack", "fullstack", "python", "react", "next.js", "why", "summary", "recruiter", "fit", "developer", "person", "good", "strong", "background", "location", "hometown", "phone", "links", "bio", "overview", "age", "dob", "birthday", "date of birth"];
   const knownTopic = includesAny(q, rajatTerms) || hasAnyWord(q, ["he", "him", "his"]);
+
+  if (isPromptAttack(q) && !knownTopic) {
+    return { text: knowledge.boundaries.refusal, source: "Prompt guard" };
+  }
 
   if (includesAny(q, ["capital", "weather", "recipe", "movie", "sports", "news", "bitcoin price", "write code for me", "homework"]) && !knownTopic) {
     return { text: knowledge.boundaries.refusal, source: "Scope guard" };
@@ -555,7 +581,7 @@ const answerRajat = (question) => {
     return {
       text:
         includesAny(q, ["age", "birthday", "date of birth", "dob"])
-          ? knowledge.academicNotes.age
+          ? ageAnswer()
           : "I do not have that verified public detail for Rajat. I can answer accurately about his work, projects, skills, education, experience, certifications, availability, and contact.",
       source: "Privacy + verified-data guard"
     };
