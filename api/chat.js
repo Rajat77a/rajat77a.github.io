@@ -89,7 +89,7 @@ Verified Rajat profile data:
 ${profileContext()}
 `;
 
-const getTextFromResponse = (payload) => {
+const getOpenAiText = (payload) => {
   if (payload.output_text) {
     return payload.output_text.trim();
   }
@@ -102,7 +102,67 @@ const getTextFromResponse = (payload) => {
   return chunks?.join("\n").trim() || "";
 };
 
+const getGroqText = (payload) => payload.choices?.[0]?.message?.content?.trim() || "";
+
 const wantsResume = (message) => /\b(resume|cv|curriculum vitae|download)\b/i.test(message);
+
+const createGroqAnswer = async (messages) => {
+  if (!process.env.GROQ_API_KEY) {
+    throw new Error("GROQ_API_KEY is not configured on the backend.");
+  }
+
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: process.env.GROQ_MODEL || "llama-3.1-8b-instant",
+      messages,
+      max_completion_tokens: 180,
+      temperature: 0.45
+    })
+  });
+
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload.error?.message || "The Groq AI backend could not answer right now.");
+  }
+
+  return getGroqText(payload);
+};
+
+const createOpenAiAnswer = async (messages) => {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY is not configured on the backend.");
+  }
+
+  const response = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
+      input: messages,
+      max_output_tokens: 180
+    })
+  });
+
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload.error?.message || "The OpenAI backend could not answer right now.");
+  }
+
+  return getOpenAiText(payload);
+};
+
+const createAiAnswer = async (messages) => {
+  const provider = (process.env.AI_PROVIDER || "groq").toLowerCase();
+  return provider === "openai" ? createOpenAiAnswer(messages) : createGroqAnswer(messages);
+};
 
 export default async function handler(req, res) {
   setCors(req, res);
@@ -113,10 +173,6 @@ export default async function handler(req, res) {
 
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Use POST for chat messages." });
-  }
-
-  if (!process.env.OPENAI_API_KEY) {
-    return res.status(500).json({ error: "OPENAI_API_KEY is not configured on the backend." });
   }
 
   const { message, history = [] } = req.body || {};
@@ -133,34 +189,14 @@ export default async function handler(req, res) {
       }))
     : [];
 
-  const input = [
+  const messages = [
     { role: "system", content: systemPrompt() },
     ...cleanHistory,
     { role: "user", content: cleanMessage }
   ];
 
   try {
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
-        input,
-        max_output_tokens: 180
-      })
-    });
-
-    const payload = await response.json();
-    if (!response.ok) {
-      return res.status(response.status).json({
-        error: payload.error?.message || "The AI backend could not answer right now."
-      });
-    }
-
-    const answer = getTextFromResponse(payload) || "I could not form a clean answer there. Ask me about Rajat's projects, skills, resume, or current role.";
+    const answer = (await createAiAnswer(messages)) || "I could not form a clean answer there. Ask me about Rajat's projects, skills, resume, or current role.";
 
     return res.status(200).json({
       answer,
@@ -174,7 +210,7 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     return res.status(500).json({
-      error: "The AI backend is temporarily unavailable."
+      error: error.message || "The AI backend is temporarily unavailable."
     });
   }
 }

@@ -15,12 +15,14 @@ back to the local verified assistant powered by `knowledge.js`.
 ### Vercel AI setup
 
 1. Import this GitHub repository into Vercel.
-2. Add these Vercel environment variables:
-   - `OPENAI_API_KEY`
-   - `OPENAI_MODEL` set to `gpt-4.1-mini` unless you choose another available model.
-   - `ALLOWED_ORIGINS` set to `https://rajat77a.github.io,http://localhost:4173,http://127.0.0.1:4173`
-3. Deploy the Vercel project.
-4. If the portfolio stays on GitHub Pages, copy the Vercel function URL and set
+2. Create a free GroqCloud API key.
+3. Add these Vercel environment variables:
+   - `AI_PROVIDER=groq`
+   - `GROQ_API_KEY`
+   - `GROQ_MODEL=llama-3.1-8b-instant`
+   - `ALLOWED_ORIGINS=https://rajat77a.github.io,http://localhost:4173,http://127.0.0.1:4173`
+4. Deploy the Vercel project.
+5. If the portfolio stays on GitHub Pages, copy the Vercel function URL and set
    `ai.endpoint` in `knowledge.js` to:
 
 ```js
@@ -29,6 +31,9 @@ back to the local verified assistant powered by `knowledge.js`.
 
 If the whole portfolio is hosted on Vercel, leave `ai.endpoint` empty. The site
 will call `/api/chat` automatically.
+
+OpenAI is still supported only as an optional paid fallback by setting
+`AI_PROVIDER=openai` and adding `OPENAI_API_KEY`.
 
 ## Deploy
 
