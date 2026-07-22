@@ -208,8 +208,27 @@
             <span class="floating-label label-one">PARENT UX</span>
             <span class="floating-label label-two">PORTAL</span>
             <picture>
-              <source srcset="assets/captures/nextstep-hero.webp" type="image/webp" />
-              <img src="assets/captures/nextstep-hero.png" alt="NextStep.AI landing page hero" width="1800" height="1125" loading="lazy" decoding="async" />
+              <source
+                srcset="
+                  assets/captures/nextstep-hero-640.avif 640w,
+                  assets/captures/nextstep-hero-960.avif 960w,
+                  assets/captures/nextstep-hero-1280.avif 1280w,
+                  assets/captures/nextstep-hero-1594.avif 1594w
+                "
+                sizes="(max-width: 680px) 82vw, (max-width: 980px) 78vw, (max-width: 1240px) 50vw, 620px"
+                type="image/avif"
+              />
+              <source
+                srcset="
+                  assets/captures/nextstep-hero-640.webp 640w,
+                  assets/captures/nextstep-hero-960.webp 960w,
+                  assets/captures/nextstep-hero-1280.webp 1280w,
+                  assets/captures/nextstep-hero-1594.webp 1594w
+                "
+                sizes="(max-width: 680px) 82vw, (max-width: 980px) 78vw, (max-width: 1240px) 50vw, 620px"
+                type="image/webp"
+              />
+              <img src="assets/captures/nextstep-hero.png" alt="NextStep.AI landing page hero" width="1594" height="932" loading="lazy" decoding="async" />
             </picture>
             <picture>
               <source srcset="assets/captures/nextstep-login.webp" type="image/webp" />
