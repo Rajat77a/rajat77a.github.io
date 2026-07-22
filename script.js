@@ -99,6 +99,10 @@ if (canHover && cursor) {
   animateCursor();
 
   document.querySelectorAll("[data-cursor], a, button").forEach((element) => {
+    if (element.closest(".hero")) {
+      return;
+    }
+
     element.addEventListener("pointerenter", () => {
       cursor.classList.add("active");
       cursorText.textContent = element.dataset.cursor || "OPEN";

@@ -265,7 +265,6 @@ img {
     repeating-linear-gradient(90deg, rgba(245, 242, 236, 0.035) 0 1px, transparent 1px 120px);
   opacity: 0.36;
   mix-blend-mode: screen;
-  animation: heroLightSweep 8s ease-in-out infinite alternate;
 }
 
 .hero-field {
@@ -282,7 +281,6 @@ img {
   border-radius: 999px;
   opacity: 0.78;
   transform: rotate(var(--angle));
-  animation: heroFieldDrift 11s ease-in-out infinite alternate;
 }
 
 .hero-field span:nth-child(1) {
@@ -400,8 +398,6 @@ p {
   background: var(--lime);
   box-shadow: 0 0 80px rgba(200, 255, 77, 0.22);
   transform-style: preserve-3d;
-  animation: slowSpin 9s ease-in-out infinite alternate;
-  will-change: transform;
 }
 
 .hero-orbit::before,
@@ -435,15 +431,6 @@ p {
   border: 4px solid #101010;
 }
 
-@keyframes slowSpin {
-  from {
-    rotate: -2deg;
-  }
-  to {
-    rotate: 4deg;
-  }
-}
-
 .hero-footer {
   width: min(100%, 1344px);
   display: flex;
@@ -452,26 +439,6 @@ p {
   gap: 24px;
   margin-top: 74px;
   margin-inline: auto;
-}
-
-@keyframes heroLightSweep {
-  from {
-    transform: translate3d(-2%, 0, 0);
-    opacity: 0.28;
-  }
-  to {
-    transform: translate3d(2%, 0, 0);
-    opacity: 0.42;
-  }
-}
-
-@keyframes heroFieldDrift {
-  from {
-    transform: translate3d(-10px, 8px, 0) rotate(var(--angle));
-  }
-  to {
-    transform: translate3d(14px, -10px, 0) rotate(calc(var(--angle) + 3deg));
-  }
 }
 
 .hand-button {
@@ -485,11 +452,6 @@ p {
   font-weight: 800;
   text-align: center;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.36);
-  transition: transform 260ms ease;
-}
-
-.hand-button:hover {
-  transform: rotate(-8deg) scale(1.04);
 }
 
 .availability {
