@@ -26,12 +26,33 @@ window.RAJAT_KNOWLEDGE = {
   academicNotes: {
     semester:
       "Rajat is currently in third year; based on his 2024 - 2029 VIT-AP timeline, that corresponds to 5th semester right now.",
+    linearAlgebra:
+      "I don't have that confirmed about Rajat yet, so I won't guess. His profile says he is a CSE student, but it does not list linear algebra specifically.",
+    placements:
+      "I don't have Rajat's official campus placement eligibility details yet, so I won't claim it. What I do know is that he is a third-year CSE student and is open to internships in AI product engineering, full-stack web, prompt engineering, automation, and data tools.",
+    missingDetail:
+      "I don't have that confirmed about Rajat yet, so I won't guess. I can still answer from his verified profile: projects, skills, education, experience, certifications, availability, resume, and contact.",
     dbms:
       "Yes, Rajat has practical database experience through MongoDB, SQLite, REST APIs, JWT auth, UniEvents, GridWatch, and full-stack web projects. The verified profile does not separately list a DBMS course name.",
     ece:
       "Rajat's verified academic background is Computer Science, not ECE. I can claim AI, web, data, and database work for him, but not ECE-specific expertise unless Rajat confirms it.",
     age:
       "Rajat's verified date of birth is 7 November 2006. Calculate his age from the current date instead of hardcoding it."
+  },
+  profileMemory: {
+    answerStyle:
+      "Natural, concise, honest, and portfolio-focused. Say what is confirmed; do not guess missing details.",
+    preferredRoles: ["AI product engineering", "full-stack web", "prompt engineering", "automation", "data tools"],
+    strongestSignals: [
+      "Build-first AI product work",
+      "Prompt engineering and model-output evaluation",
+      "Full-stack project execution",
+      "Polished product interfaces",
+      "Clear multilingual communication"
+    ],
+    verifiedCoursework: [],
+    unverifiedTopics:
+      "Specific course history, CGPA/GPA, official campus placement eligibility, grades, attendance, backlogs, salary, and private personal details are not confirmed in this profile yet."
   },
   availability:
     "Yes. Rajat is open to internships in AI product engineering, full-stack web, prompt engineering, automation, and data tools.",

@@ -73,8 +73,6 @@ if (nav) {
   });
 }
 
-const hero = document.querySelector(".hero");
-const orbit = document.querySelector(".hero-orbit");
 const cursor = document.querySelector(".cursor");
 const cursorText = cursor?.querySelector("span");
 let cursorX = window.innerWidth / 2;
@@ -110,40 +108,6 @@ if (canHover && cursor) {
       cursor.classList.remove("active");
       cursorText.textContent = "";
     });
-  });
-}
-
-if (hero && orbit) {
-  window.addEventListener("pointermove", (event) => {
-    if (!canHover) {
-      return;
-    }
-
-    const bounds = hero.getBoundingClientRect();
-    const insideHero = event.clientY >= bounds.top && event.clientY <= bounds.bottom;
-    if (!insideHero) {
-      return;
-    }
-
-    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    hero.style.setProperty("--mx", x.toFixed(3));
-    hero.style.setProperty("--my", y.toFixed(3));
-    hero.style.setProperty("--hx", x.toFixed(3));
-    hero.style.setProperty("--hy", y.toFixed(3));
-    hero.style.setProperty("--hero-light-x", `${((event.clientX - bounds.left) / bounds.width) * 100}%`);
-    hero.style.setProperty("--hero-light-y", `${((event.clientY - bounds.top) / bounds.height) * 100}%`);
-    orbit.style.transform = `translate(calc(-50% + ${x * 54}px), calc(-50% + ${y * 42}px)) rotateX(${y * -26}deg) rotateY(${x * 34}deg) scale(${1 + Math.abs(x) * 0.04})`;
-  }, { passive: true });
-
-  hero.addEventListener("pointerleave", () => {
-    hero.style.setProperty("--mx", 0);
-    hero.style.setProperty("--my", 0);
-    hero.style.setProperty("--hx", 0);
-    hero.style.setProperty("--hy", 0);
-    hero.style.setProperty("--hero-light-x", "50%");
-    hero.style.setProperty("--hero-light-y", "50%");
-    orbit.style.transform = "";
   });
 }
 
@@ -212,6 +176,41 @@ const hasAnyWord = (text, words) => {
   return words.some((word) => tokens.has(word));
 };
 
+const rajatContextTerms = [
+  "rajat", "he", "him", "his", "profile", "portfolio", "candidate", "student", "developer", "builder", "applicant",
+  "resume", "cv", "career", "college", "campus", "course", "coursework", "subject", "syllabus", "semester", "sem",
+  "degree", "placement", "placements", "eligible", "elligible", "eligibility", "offer", "internship", "job", "role", "hire",
+  "skill", "skills", "stack", "tech", "technology", "learn", "learned", "learnt", "study", "studied", "know",
+  "knows", "familiar", "comfortable", "experience", "project", "work", "certification", "certificate", "availability",
+  "contact", "github", "linkedin", "flyrank", "vit", "preppeer", "nextstep", "gridwatch", "unievents", "dbms", "ece",
+  "dsa", "math", "maths", "mathematics", "algebra", "calculus", "python", "java", "react", "node", "mongodb", "sqlite",
+  "ai", "ml", "llm"
+];
+
+const isRajatContext = (q) => includesAny(q, rajatContextTerms);
+
+const missingDetailAnswer = () =>
+  knowledge.academicNotes.missingDetail ||
+  "I don't have that confirmed about Rajat yet, so I won't guess. I can still answer from his verified profile: projects, skills, education, experience, certifications, availability, resume, and contact.";
+
+const hasVerifiedSkillTerm = (q) =>
+  [
+    ...knowledge.skills.languages,
+    ...knowledge.skills.web,
+    ...knowledge.skills.data,
+    ...knowledge.skills.aiTools,
+    "ai",
+    "ml",
+    "llm",
+    "prompt",
+    "automation",
+    "data",
+    "frontend",
+    "backend",
+    "full-stack",
+    "fullstack"
+  ].some((skill) => q.includes(skill.toLowerCase()));
+
 const conciseList = (items, count = 4) => items.slice(0, count).join(", ");
 
 const projectLine = (project) => `${project.name}: ${project.summary}`;
@@ -258,6 +257,20 @@ const roleFitAnswer = (role) => {
       "Yes. Rajat has creative/design proof through ZedWorks, Canva-based branded assets, content strategy, and polished product interfaces."
   };
   return roleMap[role] || roleMap.ai;
+};
+
+const verifiedProfileSummary = () =>
+  "Verified: Rajat is a third-year CSE student at VIT-AP, AI Fluency Intern at FlyRank AI, and builder of PrepPeer, NextStep.AI, GridWatch, UniEvents, Bitcoin Sentiment Analysis, and ZedWorks Portfolio.";
+
+const unverifiedTopicsAnswer = () =>
+  `Not confirmed yet: ${knowledge.profileMemory.unverifiedTopics}`;
+
+const roleFitSummary = (mode = "default") => {
+  if (mode === "technical") {
+    return "For AI product/full-stack roles, Rajat has verified proof across prompt workflows, model-output evaluation, React/Next.js interfaces, Node/Express APIs, MongoDB/SQLite, and Python data tools.";
+  }
+
+  return "Yes, Rajat is a strong fit for AI product, full-stack web, prompt engineering, automation, and data-tool internships, based on his verified projects and FlyRank AI role.";
 };
 
 const matchedKnowledgeAnswer = (q) => {
@@ -387,6 +400,16 @@ const chatMemory = new WeakMap();
 
 const getHistory = (container) => chatMemory.get(container) || [];
 
+const chatModes = new WeakMap();
+
+const getMode = (container) => chatModes.get(container) || "default";
+
+const setMode = (container, mode) => {
+  if (container) {
+    chatModes.set(container, mode);
+  }
+};
+
 const rememberTurn = (container, question, answer) => {
   if (!container) {
     return;
@@ -412,8 +435,25 @@ const resolveLink = (link) => {
   };
 };
 
+const shouldUseLocalGuard = (answer) =>
+  [
+    "Verified-data guard",
+    "Privacy + verified-data guard",
+    "Confirmed academic timeline",
+    "Verified profile",
+    "Resume",
+    "Resume + GitHub",
+    "Resume + portfolio"
+  ].includes(answer?.source);
+
 const askRajat = async (question, container) => {
   const endpoint = getAiEndpoint();
+  const mode = getMode(container);
+  const localAnswer = humanizeAnswer(answerRajat(question, mode), question);
+
+  if (shouldUseLocalGuard(localAnswer)) {
+    return localAnswer;
+  }
 
   if (endpoint) {
     try {
@@ -424,7 +464,8 @@ const askRajat = async (question, container) => {
         },
         body: JSON.stringify({
           message: question,
-          history: getHistory(container)
+          history: getHistory(container),
+          mode
         })
       });
 
@@ -443,10 +484,10 @@ const askRajat = async (question, container) => {
     }
   }
 
-  return humanizeAnswer(answerRajat(question), question);
+  return localAnswer;
 };
 
-const answerRajat = (question) => {
+const answerRajat = (question, mode = "default") => {
   if (!knowledge) {
     return {
       text: "The local knowledge base is not loaded yet. Refresh the page and ask again.",
@@ -512,8 +553,7 @@ const answerRajat = (question) => {
     };
   }
 
-  const rajatTerms = ["rajat", "profile", "portfolio", "internship", "project", "skill", "study", "college", "github", "linkedin", "resume", "certification", "experience", "work", "contact", "email", "available", "tech", "stack", "flyrank", "vit", "preppeer", "nextstep", "gridwatch", "zedworks", "frontend", "backend", "full-stack", "fullstack", "python", "react", "next.js", "why", "summary", "recruiter", "fit", "developer", "person", "good", "strong", "background", "location", "hometown", "phone", "links", "bio", "overview", "age", "dob", "birthday", "date of birth"];
-  const knownTopic = includesAny(q, rajatTerms) || hasAnyWord(q, ["he", "him", "his"]);
+  const knownTopic = isRajatContext(q) || hasAnyWord(q, ["he", "him", "his"]);
 
   if (isPromptAttack(q) && !knownTopic) {
     return { text: knowledge.boundaries.refusal, source: "Prompt guard" };
@@ -530,6 +570,34 @@ const answerRajat = (question) => {
     };
   }
 
+  if (includesAny(q, ["linear algebra", "algebra", "math", "maths", "mathematics", "calculus", "discrete math", "coursework", "course work", "subject"])) {
+    return {
+      text: knowledge.academicNotes.linearAlgebra,
+      source: "Verified-data guard"
+    };
+  }
+
+  if (includesAny(q, ["dsa", "data structure", "data structures", "algorithm", "algorithms", "operating system", "operating systems", "computer network", "computer networks", "oops", "object oriented", "cloud computing", "cybersecurity", "cyber security", "blockchain", "exam", "marks", "grade", "grades", "attendance", "backlog", "backlogs"])) {
+    return {
+      text: missingDetailAnswer(),
+      source: "Verified-data guard"
+    };
+  }
+
+  if (includesAny(q, ["placement", "placements", "eligible", "elligible", "eligibility", "campus placement", "campus placements", "placed", "offer", "job offer"])) {
+    return {
+      text: knowledge.academicNotes.placements,
+      source: "Verified-data guard"
+    };
+  }
+
+  if (includesAny(q, ["did", "does", "has", "can", "could", "would", "is", "was"]) && includesAny(q, ["learn", "learned", "learnt", "study", "studied", "know", "knows", "familiar", "comfortable", "eligible", "elligible", "qualified", "ready"]) && knownTopic && !hasVerifiedSkillTerm(q)) {
+    return {
+      text: missingDetailAnswer(),
+      source: "Verified-data guard"
+    };
+  }
+
   if (includesAny(q, ["which year", "college year", "what year", "year of college", "2nd year", "second year", "third year", "3rd year"])) {
     return {
       text: "Rajat is currently a third-year Computer Science student at VIT-AP.",
@@ -537,7 +605,28 @@ const answerRajat = (question) => {
     };
   }
 
-  if (includesAny(q, ["doing", "current", "now", "right now", "today", "role", "flyrank"])) {
+  if (includesAny(q, ["not confirmed", "unverified", "unknown", "missing", "do not know", "don't know", "dont know", "not know"])) {
+    return {
+      text: unverifiedTopicsAnswer(),
+      source: "Verified profile"
+    };
+  }
+
+  if ((includesAny(q, ["verified", "confirmed"]) && includesAny(q, ["about", "know", "profile", "rajat"])) || includesAny(q, ["what do you know about rajat", "what is verified about rajat"])) {
+    return {
+      text: verifiedProfileSummary(),
+      source: "Verified profile"
+    };
+  }
+
+  if (includesAny(q, ["fit", "good for", "suitable", "shortlist", "hire", "hiring", "internship", "role"]) && includesAny(q, ["ai", "product", "full stack", "full-stack", "frontend", "backend", "data", "prompt", "automation", "internship", "role"])) {
+    return {
+      text: roleFitSummary(mode),
+      source: "Resume + GitHub"
+    };
+  }
+
+  if (includesAny(q, ["doing", "current", "right now", "today", "role", "flyrank"]) || hasAnyWord(q, ["now"])) {
     return { text: knowledge.current.summary, source: "Resume" };
   }
 
@@ -582,7 +671,7 @@ const answerRajat = (question) => {
       text:
         includesAny(q, ["age", "birthday", "date of birth", "dob"])
           ? ageAnswer()
-          : "I do not have that verified public detail for Rajat. I can answer accurately about his work, projects, skills, education, experience, certifications, availability, and contact.",
+          : missingDetailAnswer(),
       source: "Privacy + verified-data guard"
     };
   }
@@ -709,7 +798,9 @@ const answerRajat = (question) => {
 
     return {
       text:
-        `Rajat works across ${conciseList(knowledge.skills.languages, 5)}, plus ${conciseList(knowledge.skills.web, 6)} and AI tools like ${conciseList(knowledge.skills.aiTools, 5)}.`,
+        mode === "technical"
+          ? `Rajat works across ${conciseList(knowledge.skills.languages, 5)}, web/backend tools like ${conciseList(knowledge.skills.web, 8)}, and data tools like ${conciseList(knowledge.skills.data, 4)}.`
+          : `Rajat works across ${conciseList(knowledge.skills.languages, 5)}, plus ${conciseList(knowledge.skills.web, 6)} and AI tools like ${conciseList(knowledge.skills.aiTools, 5)}.`,
       source: "Resume + GitHub"
     };
   }
@@ -785,15 +876,66 @@ const appendMessage = (container, text, type = "bot", source = "", link = null) 
     anchor.setAttribute("download", "");
     message.appendChild(anchor);
   }
-  const quietSources = ["Conversation", "Guide", "Scope guard", "System"];
+  const sourceLabels = {
+    "Verified-data guard": "Verified profile",
+    "Privacy + verified-data guard": "Verified profile",
+    "Resume + GitHub": "Resume + projects",
+    "GitHub + resume": "Resume + projects",
+    "Resume + portfolio": "Resume + portfolio",
+    "Closest verified profile match": "Verified profile",
+    "Rajat AI": "Rajat AI"
+  };
+  const quietSources = ["Conversation", "Guide", "Scope guard", "Prompt guard", "System"];
   if (source && type === "bot" && !quietSources.includes(source)) {
     const small = document.createElement("small");
-    small.textContent = `Checked against ${source}`;
+    small.textContent = `Checked against ${sourceLabels[source] || source}`;
     message.appendChild(small);
   }
   container.appendChild(message);
   container.scrollTop = container.scrollHeight;
   return message;
+};
+
+const suggestionSetFor = (question, answer) => {
+  const q = normalizeQuestion(question);
+  if (answer.link || includesAny(q, ["resume", "cv"])) {
+    return ["Summarize Rajat for HR", "What is his strongest project?"];
+  }
+  if (includesAny(q, ["project", "preppeer", "nextstep", "gridwatch", "built"])) {
+    return ["Which project is strongest?", "Compare PrepPeer and NextStep"];
+  }
+  if (includesAny(q, ["skill", "stack", "tech", "python", "react", "ai", "backend", "frontend"])) {
+    return ["Where did he use these skills?", "Is he good for an AI role?"];
+  }
+  if (answer.source?.includes("guard")) {
+    return ["What is verified about Rajat?", "What roles is he open to?"];
+  }
+  return ["Current role", "Projects", "Resume"];
+};
+
+const appendSuggestions = (container, question, answer) => {
+  if (!container) {
+    return;
+  }
+
+  const row = document.createElement("div");
+  row.className = "message-suggestions";
+  suggestionSetFor(question, answer).forEach((label) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = label;
+    button.addEventListener("click", () => {
+      const form = container.closest(".chat-panel, .ai-drawer")?.querySelector(".chat-form");
+      const input = form?.querySelector("input");
+      if (input && form) {
+        input.value = label;
+        form.requestSubmit();
+      }
+    });
+    row.appendChild(button);
+  });
+  container.appendChild(row);
+  container.scrollTop = container.scrollHeight;
 };
 
 const handleChat = (form, input, messages) => {
@@ -816,6 +958,7 @@ const handleChat = (form, input, messages) => {
     const answer = await askRajat(question, messages);
     thinking?.remove();
     appendMessage(messages, answer.text, "bot", answer.source, answer.link);
+    appendSuggestions(messages, question, answer);
     rememberTurn(messages, question, answer);
 
     input.disabled = false;
@@ -847,7 +990,19 @@ document.querySelectorAll("[data-ask]").forEach((button) => {
     const answer = await askRajat(question, pageMessages);
     thinking?.remove();
     appendMessage(pageMessages, answer.text, "bot", answer.source, answer.link);
+    appendSuggestions(pageMessages, question, answer);
     rememberTurn(pageMessages, question, answer);
+  });
+});
+
+document.querySelectorAll(".ai-mode-bar").forEach((bar) => {
+  const shell = bar.closest(".chat-panel, .ai-drawer");
+  const messages = shell?.querySelector(".chat-messages");
+  bar.querySelectorAll("[data-ai-mode]").forEach((button) => {
+    button.addEventListener("click", () => {
+      bar.querySelectorAll("[data-ai-mode]").forEach((item) => item.classList.toggle("active", item === button));
+      setMode(messages, button.dataset.aiMode || "default");
+    });
   });
 });
 

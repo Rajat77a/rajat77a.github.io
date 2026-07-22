@@ -46,6 +46,7 @@
 
     <main id="home">
       <section class="hero section">
+        <canvas class="hero-3d" data-hero-3d aria-hidden="true"></canvas>
         <div class="hero-field" aria-hidden="true">
           <span></span>
           <span></span>
@@ -296,6 +297,8 @@
               <button type="button" data-ask="Is Rajat available for internships?" data-cursor="AVAIL">Availability</button>
               <button type="button" data-ask="What projects has Rajat built?" data-cursor="PROJECTS">Projects</button>
               <button type="button" data-ask="What is Rajat's strongest tech stack?" data-cursor="STACK">Stack</button>
+              <button type="button" data-ask="Is Rajat a good fit for an AI product internship?" data-cursor="FIT">Role fit</button>
+              <button type="button" data-ask="What details about Rajat are not confirmed yet?" data-cursor="TRUST">Trust guard</button>
               <button type="button" data-ask="Tell me everything about Rajat" data-cursor="PROFILE">Full profile</button>
               <button type="button" data-ask="Can I download Rajat's resume?" data-cursor="RESUME">Resume</button>
             </div>
@@ -307,6 +310,12 @@
                 <strong>Rajat Intelligence</strong>
                 <p>Live AI assistant</p>
               </div>
+            </div>
+            <div class="ai-mode-bar" aria-label="Answer style">
+              <button type="button" class="active" data-ai-mode="default">Natural</button>
+              <button type="button" data-ai-mode="recruiter">Recruiter</button>
+              <button type="button" data-ai-mode="technical">Technical</button>
+              <button type="button" data-ai-mode="short">Short</button>
             </div>
             <div class="chat-messages" data-chat-messages>
               <div class="message bot">
@@ -365,6 +374,12 @@
         </div>
         <button type="button" data-ai-close aria-label="Close Rajat Intelligence" data-cursor="CLOSE">Close</button>
       </div>
+      <div class="ai-mode-bar drawer-mode-bar" aria-label="Answer style">
+        <button type="button" class="active" data-ai-mode="default">Natural</button>
+        <button type="button" data-ai-mode="recruiter">Recruiter</button>
+        <button type="button" data-ai-mode="technical">Technical</button>
+        <button type="button" data-ai-mode="short">Short</button>
+      </div>
       <div class="chat-messages drawer-messages" data-drawer-messages>
         <div class="message bot">
           Ask me about Rajat's current role, projects, stack, certifications, education, availability, or contact.
@@ -387,6 +402,7 @@
     </footer>
 
     <script src="knowledge.js"></script>
+    <script type="module" src="hero3d.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
