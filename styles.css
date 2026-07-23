@@ -327,7 +327,7 @@ img {
   width: min(100%, 1344px);
   margin-inline: auto;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   gap: 36px;
   align-items: end;
   transform-style: preserve-3d;
@@ -383,9 +383,11 @@ p {
 
 .hero-right {
   text-align: right;
+  min-width: 0;
 }
 
 .hero .hero-right h2 {
+  font-size: clamp(5.2rem, 8.4vw, 8.8rem);
   transform: translateY(-24px);
 }
 
