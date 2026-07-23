@@ -385,10 +385,6 @@ p {
   text-align: right;
 }
 
-.hero .hero-right h2 {
-  transform: translateY(-24px);
-}
-
 .hero-right p {
   width: min(100%, 440px);
   margin: 14px 0 0 auto;
@@ -1515,10 +1511,6 @@ footer {
   .hero h2,
   .project-visual {
     transform: none;
-  }
-
-  .hero .hero-right h2 {
-    transform: translateY(-14px);
   }
 
   .project-showcase.reverse .project-copy,
