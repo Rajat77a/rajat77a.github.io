@@ -21,10 +21,8 @@ const makeLabelTexture = (label, sublabel, accent = "#c8ff4d") => {
   ctx.lineWidth = 10;
   ctx.strokeRect(28, 28, 456, 456);
 
-  const labelSize = label.length > 7 ? 68 : label.length > 5 ? 92 : 138;
-
   ctx.fillStyle = accent;
-  ctx.font = `900 ${labelSize}px Arial, sans-serif`;
+  ctx.font = "900 138px Arial, sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(label, 256, 236);
@@ -73,12 +71,12 @@ if (canvas && hero) {
   scene.add(fill);
 
   const faceData = [
-    ["RAJAT", "AI BUILDER", "#c8ff4d"],
-    ["CSE", "VIT-AP", "#f5f2ec"],
-    ["FLYRANK", "AI INTERN", "#66d9ff"],
-    ["PREPPEER", "AI INTERVIEWS", "#ff7a59"],
-    ["NEXTSTEP", "EDTECH AI", "#c8ff4d"],
-    ["STACK", "WEB + API", "#f5f2ec"]
+    ["AI", "PROMPTS", "#c8ff4d"],
+    ["WEB", "PRODUCT UI", "#f5f2ec"],
+    ["DATA", "SIGNALS", "#66d9ff"],
+    ["UX", "POLISH", "#ff7a59"],
+    ["API", "SYSTEMS", "#c8ff4d"],
+    ["SHIP", "LIVE WORK", "#f5f2ec"]
   ];
 
   const cubeMaterials = faceData.map(([label, sublabel, accent]) =>
@@ -193,10 +191,10 @@ if (canvas && hero) {
   particles.position.set(0.8, 0, -0.55);
   scene.add(particles);
 
-  const targetRotation = new THREE.Vector3(0, 0, 0);
+  const targetRotation = new THREE.Vector2(cube.rotation.y, cube.rotation.x);
   const currentRotation = targetRotation.clone();
   const dragStart = new THREE.Vector2();
-  const rotationStart = new THREE.Vector3();
+  const rotationStart = new THREE.Vector2();
   let dragging = false;
 
   const isInteractiveTarget = (target) => target.closest?.("a, button, input, textarea, select, [data-ai-drawer]");
@@ -214,7 +212,7 @@ if (canvas && hero) {
     hero.setPointerCapture?.(event.pointerId);
   });
 
-  window.addEventListener("pointermove", (event) => {
+  hero.addEventListener("pointermove", (event) => {
     if (!dragging) {
       return;
     }
@@ -222,9 +220,8 @@ if (canvas && hero) {
     event.preventDefault();
     const dx = (event.clientX - dragStart.x) / Math.max(1, hero.clientWidth);
     const dy = (event.clientY - dragStart.y) / Math.max(1, hero.clientHeight);
-    targetRotation.y = rotationStart.y + dx * Math.PI * 3.2;
-    targetRotation.x = rotationStart.x + dy * Math.PI * 3.2;
-    targetRotation.z = rotationStart.z + (dx - dy) * Math.PI * 0.35;
+    targetRotation.x = rotationStart.x + dx * Math.PI * 2.1;
+    targetRotation.y = THREE.MathUtils.clamp(rotationStart.y + dy * Math.PI * 1.7, -1.25, 1.25);
   });
 
   const endDrag = (event) => {
@@ -235,8 +232,9 @@ if (canvas && hero) {
     }
   };
 
-  window.addEventListener("pointerup", endDrag);
-  window.addEventListener("pointercancel", endDrag);
+  hero.addEventListener("pointerup", endDrag);
+  hero.addEventListener("pointercancel", endDrag);
+  hero.addEventListener("pointerleave", endDrag);
 
   const clock = new THREE.Clock();
 
@@ -264,14 +262,14 @@ if (canvas && hero) {
     const speed = reduceMotion ? 0.08 : 1;
 
     if (!dragging) {
-      targetRotation.y += 0.0017 * speed;
-      targetRotation.x += Math.sin(elapsed * 0.38 * speed) * 0.0007;
+      targetRotation.x += 0.0017 * speed;
+      targetRotation.y += Math.sin(elapsed * 0.38 * speed) * 0.0007;
     }
 
     currentRotation.x += (targetRotation.x - currentRotation.x) * 0.08;
     currentRotation.y += (targetRotation.y - currentRotation.y) * 0.08;
-    currentRotation.z += (targetRotation.z - currentRotation.z) * 0.08;
-    rig.rotation.set(currentRotation.x, currentRotation.y, currentRotation.z);
+    rig.rotation.y = currentRotation.x;
+    rig.rotation.x = currentRotation.y;
     cube.rotation.z = 0.12 + Math.sin(elapsed * 0.26 * speed) * 0.035;
 
     rings.forEach((ring, index) => {
