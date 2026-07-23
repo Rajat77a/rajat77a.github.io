@@ -4,6 +4,39 @@ const canvas = document.querySelector("[data-hero-3d]");
 const hero = canvas?.closest(".hero");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+const makeLabelTexture = (label, sublabel, accent = "#c8ff4d") => {
+  const labelCanvas = document.createElement("canvas");
+  labelCanvas.width = 512;
+  labelCanvas.height = 512;
+  const ctx = labelCanvas.getContext("2d");
+
+  const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+  gradient.addColorStop(0, "rgba(245, 242, 236, 0.16)");
+  gradient.addColorStop(0.52, "rgba(12, 14, 12, 0.88)");
+  gradient.addColorStop(1, "rgba(200, 255, 77, 0.16)");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 512, 512);
+
+  ctx.strokeStyle = "rgba(200, 255, 77, 0.42)";
+  ctx.lineWidth = 10;
+  ctx.strokeRect(28, 28, 456, 456);
+
+  ctx.fillStyle = accent;
+  ctx.font = "900 138px Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(label, 256, 236);
+
+  ctx.fillStyle = "rgba(245, 242, 236, 0.78)";
+  ctx.font = "800 34px Arial, sans-serif";
+  ctx.fillText(sublabel, 256, 340);
+
+  const texture = new THREE.CanvasTexture(labelCanvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 8;
+  return texture;
+};
+
 if (canvas && hero) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
@@ -19,37 +52,61 @@ if (canvas && hero) {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-  camera.position.set(0, 0.2, 7.8);
+  camera.position.set(0, 0.2, 8.2);
 
   const rig = new THREE.Group();
-  rig.position.set(1.65, -0.12, -0.25);
+  rig.position.set(1.55, -0.05, -0.3);
   scene.add(rig);
 
-  const key = new THREE.PointLight(0xc8ff4d, 6.8, 18);
+  const key = new THREE.PointLight(0xc8ff4d, 7.4, 18);
   key.position.set(2.7, 2.4, 3.4);
   scene.add(key);
 
-  const warm = new THREE.PointLight(0xf05a3f, 2.2, 14);
-  warm.position.set(-3.6, -2.2, 2.6);
+  const warm = new THREE.PointLight(0xf05a3f, 2.1, 14);
+  warm.position.set(-3.8, -2.2, 2.6);
   scene.add(warm);
 
-  const fill = new THREE.DirectionalLight(0xf5f2ec, 1.4);
+  const fill = new THREE.DirectionalLight(0xf5f2ec, 1.5);
   fill.position.set(-2, 3, 5);
   scene.add(fill);
 
-  const coreMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0x11130f,
-    metalness: 0.76,
-    roughness: 0.28,
-    clearcoat: 0.7,
-    clearcoatRoughness: 0.22,
-    emissive: 0x203000,
-    emissiveIntensity: 0.18
-  });
+  const faceData = [
+    ["AI", "PROMPTS", "#c8ff4d"],
+    ["WEB", "PRODUCT UI", "#f5f2ec"],
+    ["DATA", "SIGNALS", "#66d9ff"],
+    ["UX", "POLISH", "#ff7a59"],
+    ["API", "SYSTEMS", "#c8ff4d"],
+    ["SHIP", "LIVE WORK", "#f5f2ec"]
+  ];
 
-  const core = new THREE.Mesh(new THREE.TorusKnotGeometry(1.05, 0.16, 220, 18, 2, 3), coreMaterial);
-  core.rotation.set(0.4, -0.58, 0.18);
-  rig.add(core);
+  const cubeMaterials = faceData.map(([label, sublabel, accent]) =>
+    new THREE.MeshPhysicalMaterial({
+      map: makeLabelTexture(label, sublabel, accent),
+      color: 0xffffff,
+      metalness: 0.42,
+      roughness: 0.2,
+      clearcoat: 0.82,
+      clearcoatRoughness: 0.16,
+      transparent: true,
+      opacity: 0.88,
+      emissive: 0x101806,
+      emissiveIntensity: 0.2
+    })
+  );
+
+  const cube = new THREE.Mesh(new THREE.BoxGeometry(1.86, 1.86, 1.86, 16, 16, 16), cubeMaterials);
+  cube.rotation.set(0.26, -0.58, 0.12);
+  rig.add(cube);
+
+  const edge = new THREE.LineSegments(
+    new THREE.EdgesGeometry(cube.geometry),
+    new THREE.LineBasicMaterial({
+      color: 0xc8ff4d,
+      transparent: true,
+      opacity: 0.42
+    })
+  );
+  cube.add(edge);
 
   const ringMaterial = new THREE.MeshBasicMaterial({
     color: 0xc8ff4d,
@@ -61,18 +118,41 @@ if (canvas && hero) {
 
   const rings = [];
   [
-    [2.55, 0.012, 0.82, 0.18],
-    [3.25, 0.01, -0.72, -0.34],
-    [4.05, 0.008, 1.12, 0.48]
+    [2.58, 0.012, 0.82, 0.18],
+    [3.18, 0.01, -0.72, -0.34],
+    [3.72, 0.008, 1.12, 0.48]
   ].forEach(([radius, tube, x, z], index) => {
     const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, tube, 220, 8), ringMaterial.clone());
     ring.rotation.set(x, index * 0.72, z);
-    ring.material.opacity = 0.22 - index * 0.035;
+    ring.material.opacity = 0.24 - index * 0.04;
     rig.add(ring);
     rings.push(ring);
   });
 
-  const particleCount = 520;
+  const nodeMaterial = new THREE.MeshPhysicalMaterial({
+    color: 0xc8ff4d,
+    metalness: 0.18,
+    roughness: 0.24,
+    emissive: 0x638000,
+    emissiveIntensity: 0.85,
+    clearcoat: 0.5
+  });
+
+  const nodeGroup = new THREE.Group();
+  const nodePositions = [
+    [2.5, 0.24, 0],
+    [-2.1, -0.72, 0.8],
+    [0.34, 1.9, -0.7],
+    [0.85, -1.8, -0.94]
+  ];
+  nodePositions.forEach((position) => {
+    const node = new THREE.Mesh(new THREE.SphereGeometry(0.085, 24, 16), nodeMaterial);
+    node.position.set(...position);
+    nodeGroup.add(node);
+  });
+  rig.add(nodeGroup);
+
+  const particleCount = 430;
   const positions = new Float32Array(particleCount * 3);
   const colors = new Float32Array(particleCount * 3);
   const colorA = new THREE.Color(0xc8ff4d);
@@ -81,12 +161,11 @@ if (canvas && hero) {
 
   for (let i = 0; i < particleCount; i += 1) {
     const i3 = i * 3;
-    const radius = 1.7 + Math.random() * 5.2;
+    const radius = 1.8 + Math.random() * 5.4;
     const angle = Math.random() * Math.PI * 2;
-    const depth = -2.2 + Math.random() * 3.8;
     positions[i3] = Math.cos(angle) * radius;
-    positions[i3 + 1] = (Math.random() - 0.5) * 4.8;
-    positions[i3 + 2] = Math.sin(angle) * radius * 0.42 + depth;
+    positions[i3 + 1] = (Math.random() - 0.5) * 4.7;
+    positions[i3 + 2] = Math.sin(angle) * radius * 0.42 - 0.7 + Math.random() * 2.6;
 
     const mixed = (i % 9 === 0 ? colorC : i % 3 === 0 ? colorA : colorB).clone();
     colors[i3] = mixed.r;
@@ -104,28 +183,58 @@ if (canvas && hero) {
       size: 0.026,
       vertexColors: true,
       transparent: true,
-      opacity: 0.58,
+      opacity: 0.52,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     })
   );
-  particles.position.set(0.9, 0, -0.4);
+  particles.position.set(0.8, 0, -0.55);
   scene.add(particles);
 
-  const veil = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(2.2, 2),
-    new THREE.MeshBasicMaterial({
-      color: 0xc8ff4d,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.045,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    })
-  );
-  veil.position.set(-1.4, -0.9, -1.4);
-  veil.scale.set(1.6, 0.78, 1);
-  scene.add(veil);
+  const targetRotation = new THREE.Vector2(cube.rotation.y, cube.rotation.x);
+  const currentRotation = targetRotation.clone();
+  const dragStart = new THREE.Vector2();
+  const rotationStart = new THREE.Vector2();
+  let dragging = false;
+
+  const isInteractiveTarget = (target) => target.closest?.("a, button, input, textarea, select, [data-ai-drawer]");
+
+  hero.addEventListener("pointerdown", (event) => {
+    if (isInteractiveTarget(event.target)) {
+      return;
+    }
+
+    event.preventDefault();
+    dragging = true;
+    dragStart.set(event.clientX, event.clientY);
+    rotationStart.copy(targetRotation);
+    hero.classList.add("is-rotating-3d");
+    hero.setPointerCapture?.(event.pointerId);
+  });
+
+  hero.addEventListener("pointermove", (event) => {
+    if (!dragging) {
+      return;
+    }
+
+    event.preventDefault();
+    const dx = (event.clientX - dragStart.x) / Math.max(1, hero.clientWidth);
+    const dy = (event.clientY - dragStart.y) / Math.max(1, hero.clientHeight);
+    targetRotation.x = rotationStart.x + dx * Math.PI * 2.1;
+    targetRotation.y = THREE.MathUtils.clamp(rotationStart.y + dy * Math.PI * 1.7, -1.25, 1.25);
+  });
+
+  const endDrag = (event) => {
+    dragging = false;
+    hero.classList.remove("is-rotating-3d");
+    if (event?.pointerId !== undefined) {
+      hero.releasePointerCapture?.(event.pointerId);
+    }
+  };
+
+  hero.addEventListener("pointerup", endDrag);
+  hero.addEventListener("pointercancel", endDrag);
+  hero.addEventListener("pointerleave", endDrag);
 
   const clock = new THREE.Clock();
 
@@ -138,10 +247,10 @@ if (canvas && hero) {
     camera.updateProjectionMatrix();
 
     const mobile = width < 760;
-    rig.position.set(mobile ? 0.42 : 1.65, mobile ? -1.25 : -0.12, mobile ? -0.75 : -0.25);
-    rig.scale.setScalar(mobile ? 0.5 : 0.88);
-    particles.position.x = mobile ? 0 : 0.9;
-    camera.position.z = mobile ? 9.3 : 7.8;
+    rig.position.set(mobile ? 0.38 : 1.55, mobile ? -1.22 : -0.05, mobile ? -0.85 : -0.3);
+    rig.scale.setScalar(mobile ? 0.54 : 0.86);
+    particles.position.x = mobile ? 0 : 0.8;
+    camera.position.z = mobile ? 9.4 : 8.2;
   };
 
   const observer = new ResizeObserver(resize);
@@ -152,20 +261,26 @@ if (canvas && hero) {
     const elapsed = clock.getElapsedTime();
     const speed = reduceMotion ? 0.08 : 1;
 
-    core.rotation.x = 0.4 + Math.sin(elapsed * 0.32 * speed) * 0.08;
-    core.rotation.y = -0.58 + elapsed * 0.14 * speed;
-    core.rotation.z = 0.18 + Math.sin(elapsed * 0.23 * speed) * 0.05;
+    if (!dragging) {
+      targetRotation.x += 0.0017 * speed;
+      targetRotation.y += Math.sin(elapsed * 0.38 * speed) * 0.0007;
+    }
+
+    currentRotation.x += (targetRotation.x - currentRotation.x) * 0.08;
+    currentRotation.y += (targetRotation.y - currentRotation.y) * 0.08;
+    rig.rotation.y = currentRotation.x;
+    rig.rotation.x = currentRotation.y;
+    cube.rotation.z = 0.12 + Math.sin(elapsed * 0.26 * speed) * 0.035;
 
     rings.forEach((ring, index) => {
-      ring.rotation.z += (0.0018 + index * 0.0007) * speed;
-      ring.rotation.y += (0.001 + index * 0.0005) * speed;
+      ring.rotation.z += (0.0014 + index * 0.0006) * speed;
+      ring.rotation.y += (0.0008 + index * 0.0004) * speed;
     });
 
-    particles.rotation.y = elapsed * 0.024 * speed;
+    nodeGroup.rotation.y = -rig.rotation.y * 0.42 + elapsed * 0.05 * speed;
+    particles.rotation.y = elapsed * 0.022 * speed;
     particles.rotation.z = Math.sin(elapsed * 0.13 * speed) * 0.035;
-    veil.rotation.x = elapsed * 0.035 * speed;
-    veil.rotation.y = elapsed * -0.045 * speed;
-    key.intensity = 6.2 + Math.sin(elapsed * 0.8 * speed) * 0.8;
+    key.intensity = 6.6 + Math.sin(elapsed * 0.8 * speed) * 0.8;
 
     renderer.render(scene, camera);
     requestAnimationFrame(render);
