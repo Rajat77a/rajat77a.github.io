@@ -327,7 +327,7 @@ img {
   width: min(100%, 1344px);
   margin-inline: auto;
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 36px;
   align-items: end;
   transform-style: preserve-3d;
@@ -383,12 +383,6 @@ p {
 
 .hero-right {
   text-align: right;
-  min-width: 0;
-}
-
-.hero .hero-right h2 {
-  font-size: clamp(4.6rem, 7.2vw, 7.4rem);
-  transform: translateY(-16px);
 }
 
 .hero-right p {
@@ -894,11 +888,6 @@ p {
 }
 
 @media (min-width: 981px) and (max-width: 1240px) {
-  .hero .hero-right h2 {
-    font-size: clamp(4.3rem, 7vw, 6.1rem);
-    transform: translateY(-8px);
-  }
-
   .project-showcase {
     grid-template-columns: minmax(300px, 0.4fr) minmax(560px, 0.6fr);
   }
@@ -933,55 +922,6 @@ p {
     width: 68%;
     left: 0;
     bottom: 10%;
-  }
-}
-
-@media (min-width: 981px) and (max-height: 720px) {
-  .hero {
-    min-height: 100vh;
-    padding-top: 92px;
-    padding-bottom: 34px;
-  }
-
-  .hero h1,
-  .hero h2 {
-    font-size: clamp(4.6rem, 8.8vw, 7.4rem);
-  }
-
-  .hero .hero-right h2 {
-    font-size: clamp(4rem, 6.6vw, 5.8rem);
-    transform: translateY(-8px);
-  }
-
-  .eyebrow {
-    margin-bottom: 10px;
-    font-size: clamp(1.15rem, 1.9vw, 1.65rem);
-  }
-
-  .hero-right p {
-    margin-top: 8px;
-    font-size: clamp(0.92rem, 1.2vw, 1.08rem);
-    line-height: 1.36;
-  }
-
-  .hero-orbit {
-    top: 54%;
-    width: clamp(96px, 9.4vw, 128px);
-  }
-
-  .hero-footer {
-    margin-top: 34px;
-    padding-right: 166px;
-  }
-
-  .hand-button {
-    width: 96px;
-    height: 96px;
-  }
-
-  .availability {
-    max-width: 430px;
-    text-align: right;
   }
 }
 
@@ -1571,10 +1511,6 @@ footer {
   .hero h2,
   .project-visual {
     transform: none;
-  }
-
-  .hero .hero-right h2 {
-    transform: translateY(-14px);
   }
 
   .project-showcase.reverse .project-copy,

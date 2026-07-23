@@ -249,14 +249,9 @@ if (canvas && hero) {
     camera.updateProjectionMatrix();
 
     const mobile = width < 760;
-    const compactDesktop = !mobile && height < 720;
-    rig.position.set(
-      mobile ? 0.78 : compactDesktop ? 3.55 : 3.72,
-      mobile ? -1.38 : compactDesktop ? -0.34 : -0.72,
-      mobile ? -1.02 : -0.5
-    );
-    rig.scale.setScalar(mobile ? 0.3 : compactDesktop ? 0.34 : 0.42);
-    particles.position.x = mobile ? 0.28 : compactDesktop ? 1.44 : 1.56;
+    rig.position.set(mobile ? 0.38 : 1.55, mobile ? -1.22 : -0.05, mobile ? -0.85 : -0.3);
+    rig.scale.setScalar(mobile ? 0.54 : 0.86);
+    particles.position.x = mobile ? 0 : 0.8;
     camera.position.z = mobile ? 9.4 : 8.2;
   };
 
