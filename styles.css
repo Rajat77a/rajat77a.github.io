@@ -387,8 +387,8 @@ p {
 }
 
 .hero .hero-right h2 {
-  font-size: clamp(5.2rem, 8.4vw, 8.8rem);
-  transform: translateY(-24px);
+  font-size: clamp(4.6rem, 7.2vw, 7.4rem);
+  transform: translateY(-16px);
 }
 
 .hero-right p {
@@ -894,6 +894,11 @@ p {
 }
 
 @media (min-width: 981px) and (max-width: 1240px) {
+  .hero .hero-right h2 {
+    font-size: clamp(4.3rem, 7vw, 6.1rem);
+    transform: translateY(-8px);
+  }
+
   .project-showcase {
     grid-template-columns: minmax(300px, 0.4fr) minmax(560px, 0.6fr);
   }
