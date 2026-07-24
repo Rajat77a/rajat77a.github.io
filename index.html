@@ -22,8 +22,16 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
+    <script>
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem("rajat-theme") || "dark";
+      } catch {
+        document.documentElement.dataset.theme = "dark";
+      }
+    </script>
   </head>
   <body>
+    <div class="theme-wipe" data-theme-wipe aria-hidden="true"></div>
     <div class="noise" aria-hidden="true"></div>
     <div class="cursor" aria-hidden="true"><span></span></div>
     <header class="site-header">
@@ -41,6 +49,10 @@
         <a href="#about" data-cursor="ABOUT">About</a>
         <a href="#ask-ai" data-cursor="ASK">AI</a>
         <a href="#contact" class="nav-contact" data-cursor="CONTACT">Contact</a>
+        <button class="theme-prism" type="button" data-theme-toggle aria-label="Switch to light mode">
+          <span class="prism-core" aria-hidden="true"></span>
+          <span class="theme-label" data-theme-label>Light</span>
+        </button>
       </nav>
     </header>
 

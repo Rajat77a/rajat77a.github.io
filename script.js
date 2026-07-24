@@ -73,6 +73,49 @@ if (nav) {
   });
 }
 
+const themeToggle = document.querySelector("[data-theme-toggle]");
+const themeLabel = document.querySelector("[data-theme-label]");
+const themeWipe = document.querySelector("[data-theme-wipe]");
+
+const setTheme = (theme, persist = true) => {
+  const nextTheme = theme === "light" ? "light" : "dark";
+  document.documentElement.dataset.theme = nextTheme;
+
+  if (persist) {
+    try {
+      localStorage.setItem("rajat-theme", nextTheme);
+    } catch {
+      // Theme still changes for this visit if storage is unavailable.
+    }
+  }
+
+  if (themeLabel) {
+    themeLabel.textContent = nextTheme === "light" ? "Dark" : "Light";
+  }
+
+  themeToggle?.setAttribute(
+    "aria-label",
+    nextTheme === "light" ? "Switch to dark mode" : "Switch to light mode"
+  );
+};
+
+setTheme(document.documentElement.dataset.theme, false);
+
+themeToggle?.addEventListener("click", () => {
+  const nextTheme = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+  const buttonBox = themeToggle.getBoundingClientRect();
+
+  if (themeWipe) {
+    themeWipe.style.setProperty("--wipe-x", `${buttonBox.left + buttonBox.width / 2}px`);
+    themeWipe.style.setProperty("--wipe-y", `${buttonBox.top + buttonBox.height / 2}px`);
+    themeWipe.classList.remove("active");
+    void themeWipe.offsetWidth;
+    themeWipe.classList.add("active");
+  }
+
+  window.setTimeout(() => setTheme(nextTheme), 120);
+});
+
 const cursor = document.querySelector(".cursor");
 const cursorText = cursor?.querySelector("span");
 let cursorX = window.innerWidth / 2;
@@ -352,6 +395,10 @@ const followUpFor = (q, answer) => {
     return "Want me to pick his strongest project for recruiters?";
   }
 
+  if (includesAny(q, ["where", "used", "proof", "prove", "proves"])) {
+    return "Want to see which project is strongest?";
+  }
+
   if (includesAny(q, ["skill", "stack", "tech", "frontend", "backend", "ai", "data"])) {
     return "Want proof of where he used those skills?";
   }
@@ -388,21 +435,30 @@ const humanizeAnswer = (answer, question) => {
 };
 
 const getAiEndpoint = () => {
-  const configured = window.RAJAT_AI_ENDPOINT || knowledge?.ai?.endpoint || "";
+  const configured = window.RAJAT_AI_ENDPOINT || "";
   if (configured) {
     return configured;
   }
-
-  if (window.location.hostname.endsWith("github.io")) {
-    return "";
-  }
-
-  return "/api/chat";
+  return "";
 };
 
 const chatMemory = new WeakMap();
 
 const getHistory = (container) => chatMemory.get(container) || [];
+
+const suggestionMemory = new WeakMap();
+
+const getShownSuggestions = (container) => suggestionMemory.get(container) || new Set();
+
+const rememberSuggestions = (container, labels) => {
+  if (!container) {
+    return;
+  }
+
+  const shown = getShownSuggestions(container);
+  labels.forEach((label) => shown.add(label));
+  suggestionMemory.set(container, shown);
+};
 
 const chatModes = new WeakMap();
 
@@ -412,6 +468,41 @@ const setMode = (container, mode) => {
   if (container) {
     chatModes.set(container, mode);
   }
+};
+
+const resolveContextualQuestion = (question, container) => {
+  const q = normalizeQuestion(question);
+  if (!["yes", "yeah", "yep", "sure", "ok", "okay", "please", "go on", "tell me", "tell me more"].includes(q)) {
+    return question;
+  }
+
+  const lastAssistant = [...getHistory(container)].reverse().find((turn) => turn.role === "assistant")?.content?.toLowerCase() || "";
+
+  if (lastAssistant.includes("proof of where he used those skills")) {
+    return "Where did Rajat use these skills?";
+  }
+
+  if (lastAssistant.includes("strongest project") || lastAssistant.includes("project is strongest") || lastAssistant.includes("pick his strongest project")) {
+    return "What is Rajat's strongest project?";
+  }
+
+  if (lastAssistant.includes("project list") || lastAssistant.includes("project breakdown")) {
+    return "What projects has Rajat built?";
+  }
+
+  if (lastAssistant.includes("hiring pitch") || lastAssistant.includes("recruiter-style summary")) {
+    return "Give a short recruiter summary of Rajat.";
+  }
+
+  if (lastAssistant.includes("resume link")) {
+    return "Can I download Rajat's resume?";
+  }
+
+  if (lastAssistant.includes("building right now") || lastAssistant.includes("current role")) {
+    return "What is Rajat doing right now?";
+  }
+
+  return "Tell me more about Rajat's projects and skills.";
 };
 
 const rememberTurn = (container, question, answer) => {
@@ -453,7 +544,8 @@ const shouldUseLocalGuard = (answer) =>
 const askRajat = async (question, container) => {
   const endpoint = getAiEndpoint();
   const mode = getMode(container);
-  const localAnswer = humanizeAnswer(answerRajat(question, mode), question);
+  const resolvedQuestion = resolveContextualQuestion(question, container);
+  const localAnswer = humanizeAnswer(answerRajat(resolvedQuestion, mode), resolvedQuestion);
 
   if (shouldUseLocalGuard(localAnswer)) {
     return localAnswer;
@@ -467,7 +559,7 @@ const askRajat = async (question, container) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          message: question,
+          message: resolvedQuestion,
           history: getHistory(container),
           mode
         })
@@ -634,6 +726,22 @@ const answerRajat = (question, mode = "default") => {
     return { text: knowledge.current.summary, source: "Resume" };
   }
 
+  if (includesAny(q, ["best project", "strongest project", "project is strongest", "strongest one", "top project", "main project"])) {
+    return {
+      text:
+        "PrepPeer is the strongest AI product proof: role-specific interviews, AI scoring, peer ranking, percentile leaderboards, and shareable score cards.",
+      source: "Resume + GitHub"
+    };
+  }
+
+  if (includesAny(q, ["compare preppeer and nextstep", "preppeer vs nextstep", "nextstep vs preppeer", "difference between preppeer and nextstep"])) {
+    return {
+      text:
+        "PrepPeer helps job seekers train with AI interviews and ranking. NextStep.AI helps parents turn report cards into clear action plans.",
+      source: "GitHub"
+    };
+  }
+
   const rankedMatch = matchedKnowledgeAnswer(q);
   if (rankedMatch) {
     return rankedMatch;
@@ -744,10 +852,18 @@ const answerRajat = (question, mode = "default") => {
     };
   }
 
-  if (includesAny(q, ["best project", "strongest project", "top project", "main project"])) {
+  if (includesAny(q, ["best project", "strongest project", "project is strongest", "strongest one", "top project", "main project"])) {
     return {
       text:
         "PrepPeer is the strongest AI product proof: role-specific interviews, AI scoring, peer ranking, percentile leaderboards, and shareable score cards.",
+      source: "Resume + GitHub"
+    };
+  }
+
+  if (includesAny(q, ["which project proves", "project proves this", "proves this best", "proof project"])) {
+    return {
+      text:
+        "PrepPeer proves Rajat's AI product skills best, while NextStep.AI proves he can turn AI into a polished user-facing web experience. GridWatch is strongest for Python/data proof.",
       source: "Resume + GitHub"
     };
   }
@@ -798,6 +914,12 @@ const answerRajat = (question, mode = "default") => {
           source: "Resume + GitHub"
         };
       }
+
+      return {
+        text:
+          "Verified project proof: React/Next.js/TypeScript show up in PrepPeer, NextStep.AI, UniEvents, and this portfolio; Python/data tools show up in GridWatch and Bitcoin Sentiment Analysis; Node/Express/MongoDB/API work shows up in UniEvents and backend-oriented web work.",
+        source: "Resume + GitHub"
+      };
     }
 
     return {
@@ -900,21 +1022,42 @@ const appendMessage = (container, text, type = "bot", source = "", link = null) 
   return message;
 };
 
-const suggestionSetFor = (question, answer) => {
+const uniqueSuggestions = (container, preferred, count = 3) => {
+  const fallback = [
+    "What is Rajat doing right now?",
+    "Which project is strongest?",
+    "Compare PrepPeer and NextStep",
+    "Where did Rajat use these skills?",
+    "Is Rajat good for an AI role?",
+    "Give a recruiter summary",
+    "What roles is he open to?",
+    "What is verified about Rajat?",
+    "What is not confirmed yet?",
+    "Can I download Rajat's resume?",
+    "How can I contact Rajat?",
+    "What certifications does he have?"
+  ];
+  const shown = getShownSuggestions(container);
+  const candidates = [...preferred, ...fallback].filter((label, index, labels) => labels.indexOf(label) === index);
+  const fresh = candidates.filter((label) => !shown.has(label)).slice(0, count);
+  return fresh.length ? fresh : candidates.slice(0, count);
+};
+
+const suggestionSetFor = (question, answer, container) => {
   const q = normalizeQuestion(question);
   if (answer.link || includesAny(q, ["resume", "cv"])) {
-    return ["Summarize Rajat for HR", "What is his strongest project?"];
+    return uniqueSuggestions(container, ["Give a recruiter summary", "Which project is strongest?", "How can I contact Rajat?"]);
   }
   if (includesAny(q, ["project", "preppeer", "nextstep", "gridwatch", "built"])) {
-    return ["Which project is strongest?", "Compare PrepPeer and NextStep"];
+    return uniqueSuggestions(container, ["Which project is strongest?", "Compare PrepPeer and NextStep", "Where did Rajat use these skills?"]);
   }
   if (includesAny(q, ["skill", "stack", "tech", "python", "react", "ai", "backend", "frontend"])) {
-    return ["Where did he use these skills?", "Is he good for an AI role?"];
+    return uniqueSuggestions(container, ["Where did Rajat use these skills?", "Is Rajat good for an AI role?", "Which project proves this best?"]);
   }
   if (answer.source?.includes("guard")) {
-    return ["What is verified about Rajat?", "What roles is he open to?"];
+    return uniqueSuggestions(container, ["What is verified about Rajat?", "What roles is he open to?", "What projects has Rajat built?"]);
   }
-  return ["Current role", "Projects", "Resume"];
+  return uniqueSuggestions(container, ["What is Rajat doing right now?", "What projects has Rajat built?", "Can I download Rajat's resume?"]);
 };
 
 const appendSuggestions = (container, question, answer) => {
@@ -924,7 +1067,9 @@ const appendSuggestions = (container, question, answer) => {
 
   const row = document.createElement("div");
   row.className = "message-suggestions";
-  suggestionSetFor(question, answer).forEach((label) => {
+  const labels = suggestionSetFor(question, answer, container);
+  rememberSuggestions(container, labels);
+  labels.forEach((label) => {
     const button = document.createElement("button");
     button.type = "button";
     button.textContent = label;
@@ -933,6 +1078,7 @@ const appendSuggestions = (container, question, answer) => {
       const input = form?.querySelector("input");
       if (input && form) {
         input.value = label;
+        row.remove();
         form.requestSubmit();
       }
     });
