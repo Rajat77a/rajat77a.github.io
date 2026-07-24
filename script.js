@@ -142,7 +142,7 @@ if (canHover && cursor) {
   animateCursor();
 
   document.querySelectorAll("[data-cursor], a, button").forEach((element) => {
-    if (element.closest(".hero")) {
+    if (element.closest(".hero") || element.hasAttribute("data-cursor-static")) {
       return;
     }
 
