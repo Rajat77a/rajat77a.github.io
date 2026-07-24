@@ -531,7 +531,7 @@ const answerRajat = (question, mode = "default") => {
 
   if (includesAny(q, ["who are you", "what are you", "your name", "introduce yourself"])) {
     return {
-      text: "I’m Rajat Intelligence, the AI assistant inside his portfolio. I answer from his resume, projects, GitHub, and submitted profile details.",
+      text: "I’m Rajat Portfolio Guide, the AI assistant inside this portfolio. I answer from Rajat’s resume, projects, GitHub, and submitted profile details.",
       source: "Conversation"
     };
   }
@@ -1013,6 +1013,7 @@ document.querySelectorAll(".ai-mode-bar").forEach((bar) => {
 const drawer = document.querySelector("[data-ai-drawer]");
 const launcher = document.querySelector("[data-ai-launcher]");
 const drawerInput = document.querySelector("[data-drawer-input]");
+const aiSection = document.querySelector("#ask-ai");
 
 launcher?.addEventListener("click", () => {
   drawer?.classList.add("open");
@@ -1031,3 +1032,14 @@ window.addEventListener("keydown", (event) => {
     drawer?.setAttribute("aria-hidden", "true");
   }
 });
+
+if (launcher && aiSection && "IntersectionObserver" in window) {
+  const launcherObserver = new IntersectionObserver(
+    ([entry]) => {
+      launcher.classList.toggle("is-hidden", entry.isIntersecting && entry.intersectionRatio > 0.22);
+    },
+    { threshold: [0, 0.22] }
+  );
+
+  launcherObserver.observe(aiSection);
+}
