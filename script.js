@@ -113,7 +113,7 @@ themeToggle?.addEventListener("click", () => {
     themeWipe.classList.add("active");
   }
 
-  window.setTimeout(() => setTheme(nextTheme), 120);
+  window.requestAnimationFrame(() => setTheme(nextTheme));
 });
 
 const cursor = document.querySelector(".cursor");
