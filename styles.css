@@ -1991,7 +1991,16 @@ footer {
 .work-row:hover .work-arrow { transform: translate(3px, -3px); }
 .achievement-section { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .achievement-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 48px; align-items: start; }
-.achievement-visual { min-height: 560px; }
+.achievement-visual { min-height: 620px; }
+.achievement-visual picture { transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), top 420ms ease, bottom 420ms ease, width 420ms ease, filter 320ms ease; }
+.achievement-visual picture:first-of-type { z-index: 2; animation-name: previewDriftFront; }
+.achievement-visual picture:last-of-type { z-index: 1; animation-name: previewDriftBack; }
+.achievement-visual:hover picture,
+.achievement-visual:focus-visible picture { animation: none; }
+.achievement-visual:hover picture:first-of-type,
+.achievement-visual:focus-visible picture:first-of-type { top: 0; right: 0; width: 72%; transform: translateZ(70px); }
+.achievement-visual:hover picture:last-of-type,
+.achievement-visual:focus-visible picture:last-of-type { bottom: 0; left: 0; width: 64%; transform: translateZ(70px); }
 .achievement-visual .label-one { left: 0; top: 22%; }
 .achievement-visual .label-two { right: 0; bottom: 24%; }
 .achievement-copy { padding-top: 36px; }
@@ -2005,3 +2014,9 @@ footer {
 .certificate-link span { display: block; margin-top: 12px; font-size: .8rem; font-weight: 700; }
 @media (max-width: 680px) { .achievement-grid { grid-template-columns: 1fr; gap: 28px; } .work-row { grid-template-columns: 26px 1fr 20px; gap: 12px; } .more-work { margin-top: 56px; } }
 @media (max-width: 680px) { .achievement-visual { min-height: 420px; } .achievement-copy { padding-top: 0; } }
+@media (hover: none) {
+  .achievement-visual { display: grid; gap: 24px; min-height: 0; padding: 24px 0; }
+  .achievement-visual picture:first-of-type,
+  .achievement-visual picture:last-of-type { position: relative; inset: auto; width: 100%; transform: none; animation: none; }
+  .achievement-visual .floating-label { display: none; }
+}
