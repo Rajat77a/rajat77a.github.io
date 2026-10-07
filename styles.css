@@ -2042,3 +2042,5 @@ footer {
   .chat-form textarea { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .thinking span { animation: none; } }
+
+.ai-drawer { background: var(--bg); }
