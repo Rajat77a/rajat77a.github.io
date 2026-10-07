@@ -1,4 +1,4 @@
-window.RAJAT_KNOWLEDGE = {
+const profile = {
   identity: {
     name: "Rajat Krishnan",
     location: "Payyanur, Kerala, India",
@@ -10,6 +10,7 @@ window.RAJAT_KNOWLEDGE = {
     portfolio: "https://rajat77a.github.io",
     headline: "AI-focused Computer Science student and product builder"
   },
+  resumeUrl: "/assets/docs/Rajat_Krishnan_Resume.pdf",
   ai: {
     endpoint: "https://rajat77a-github-io.vercel.app/api/chat"
   },
@@ -156,3 +157,6 @@ window.RAJAT_KNOWLEDGE = {
       "I do not have that verified detail about Rajat yet. Ask about his projects, skills, education, experience, certifications, or contact."
   }
 };
+
+if (typeof window !== "undefined") window.RAJAT_KNOWLEDGE = profile;
+export default profile;

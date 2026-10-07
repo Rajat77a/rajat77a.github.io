@@ -21,7 +21,7 @@
       href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=icon-only" />
+    <link rel="stylesheet" href="styles.css?v=chat-v2" />
     <script>
       try {
         document.documentElement.dataset.theme = localStorage.getItem("rajat-theme") || "dark";
@@ -344,7 +344,7 @@
       <section id="ask-ai" class="section intelligence-section">
         <div class="section-heading">
           <p class="eyebrow">PORTFOLIO GUIDE</p>
-          <h2>Ask the portfolio. Get verified answers.</h2>
+          <h2>Get to know my work.</h2>
         </div>
         <div class="intelligence-shell">
           <div class="intel-copy">
@@ -353,23 +353,20 @@
               Ask here, or download my resume below.
             </p>
             <div class="intel-prompts" aria-label="Suggested questions">
-              <button type="button" data-ask="What is Rajat doing right now?" data-cursor="ROLE">Current role</button>
-              <button type="button" data-ask="Is Rajat available for internships?" data-cursor="AVAIL">Availability</button>
-              <button type="button" data-ask="What projects has Rajat built?" data-cursor="PROJECTS">Projects</button>
-              <button type="button" data-ask="What is Rajat's strongest tech stack?" data-cursor="STACK">Tech stack</button>
-              <button type="button" data-ask="Is Rajat a good fit for an AI product internship?" data-cursor="FIT">Internship fit</button>
-              <button type="button" data-ask="What details about Rajat are not confirmed yet?" data-cursor="TRUST">Unverified details</button>
-              <button type="button" data-ask="Tell me everything about Rajat" data-cursor="PROFILE">Full profile</button>
-              <button type="button" data-ask="Can I download Rajat's resume?" data-cursor="RESUME">Resume</button>
+              <button type="button" data-ask="Give me a quick introduction to Rajat." data-cursor="ASK">Start with the short version ↗</button>
+              <button type="button" data-ask="Compare PrepPeer and GridWatch. What did Rajat build in each?" data-cursor="ASK">Explore his projects ↗</button>
+              <button type="button" data-ask="What experience does Rajat have with prompt engineering?" data-cursor="ASK">Prompt engineering experience ↗</button>
+              <button type="button" data-ask="Can I download Rajat's resume?" data-cursor="RESUME">Get the resume ↗</button>
             </div>
           </div>
-          <div class="chat-panel" aria-label="Rajat Portfolio Guide chat">
+          <div class="chat-panel" aria-label="Rajat’s assistant chat">
             <div class="chat-header">
               <span class="ai-logo" aria-hidden="true">RK</span>
               <div>
-                <strong>Rajat Portfolio Guide</strong>
-                <p>Verified AI assistant</p>
+                <strong>Rajat’s assistant</strong>
+                <p>Projects, experience & the details</p>
               </div>
+              <button class="new-chat" type="button" data-new-chat>New chat</button>
             </div>
             <div class="ai-mode-bar" aria-label="Answer style">
               <button type="button" class="active" data-ai-mode="default" title="Balanced answers for most visitors" aria-label="General answer style">General</button>
@@ -377,20 +374,14 @@
               <button type="button" data-ai-mode="technical" title="More detail about tools, stack, and implementation" aria-label="Technical answer style">Tech</button>
               <button type="button" data-ai-mode="short" title="Short, direct answers" aria-label="Quick answer style">Quick</button>
             </div>
-            <div class="chat-messages" data-chat-messages>
+            <div class="chat-messages" data-chat-messages role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation">
               <div class="message bot">
-                Ask about Rajat's work, projects, skills, education, experience, certifications, or contact.
+                Hi, I'm Rajat's portfolio assistant. Ask me about a project, his experience, or the kind of work he's looking for.
               </div>
             </div>
             <form class="chat-form" data-chat-form>
-              <input
-                data-chat-input
-                type="text"
-                autocomplete="off"
-                placeholder="Ask about Rajat..."
-                aria-label="Ask Rajat Portfolio Guide"
-              />
-              <button type="submit" data-cursor="ASK">Ask</button>
+              <textarea data-chat-input rows="2" maxlength="600" placeholder="Ask about Rajat’s work…" aria-label="Ask Rajat’s assistant"></textarea>
+              <button type="submit" data-cursor="SEND" aria-label="Send message">Send ↗</button>
             </form>
           </div>
         </div>
@@ -426,16 +417,17 @@
       Ask Rajat AI
     </button>
 
-    <aside class="ai-drawer" data-ai-drawer aria-label="Ask Rajat Portfolio Guide drawer" aria-hidden="true">
+    <aside inert class="ai-drawer" data-ai-drawer aria-label="Ask Rajat’s assistant drawer" aria-hidden="true">
       <div class="drawer-head">
         <div class="drawer-title">
           <span class="ai-logo compact" aria-hidden="true">RK</span>
           <div>
-            <strong>Rajat Portfolio Guide</strong>
-            <p>Verified answers about Rajat</p>
+            <strong>Rajat’s assistant</strong>
+            <p>Ask about his work</p>
           </div>
         </div>
-        <button type="button" data-ai-close aria-label="Close Rajat Portfolio Guide" data-cursor="CLOSE">Close</button>
+        <button class="new-chat" type="button" data-new-chat aria-label="Start a new conversation">New chat</button>
+        <button type="button" data-ai-close aria-label="Close Rajat’s assistant" data-cursor="CLOSE">Close</button>
       </div>
       <div class="ai-mode-bar drawer-mode-bar" aria-label="Answer style">
         <button type="button" class="active" data-ai-mode="default" title="Balanced answers for most visitors" aria-label="General answer style">General</button>
@@ -443,20 +435,14 @@
         <button type="button" data-ai-mode="technical" title="More detail about tools, stack, and implementation" aria-label="Technical answer style">Tech</button>
         <button type="button" data-ai-mode="short" title="Short, direct answers" aria-label="Quick answer style">Quick</button>
       </div>
-      <div class="chat-messages drawer-messages" data-drawer-messages>
+      <div class="chat-messages drawer-messages" data-drawer-messages role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation">
         <div class="message bot">
-          Ask me about Rajat's current role, projects, stack, certifications, education, availability, or contact.
+          Hi, I'm Rajat's portfolio assistant. Ask me about a project, his experience, or the kind of work he's looking for.
         </div>
       </div>
       <form class="chat-form" data-drawer-form>
-        <input
-          data-drawer-input
-          type="text"
-          autocomplete="off"
-          placeholder="Ask about Rajat..."
-          aria-label="Ask Rajat AI"
-        />
-        <button type="submit" data-cursor="ASK">Ask</button>
+        <textarea data-drawer-input rows="2" maxlength="600" placeholder="Ask about Rajat’s work…" aria-label="Ask Rajat AI"></textarea>
+        <button type="submit" data-cursor="SEND" aria-label="Send message">Send ↗</button>
       </form>
     </aside>
 
@@ -464,8 +450,7 @@
       <p>&copy; 2026 Rajat Krishnan. Built with attention, motion, and product proof.</p>
     </footer>
 
-    <script src="knowledge.js"></script>
     <script type="module" src="hero3d.js"></script>
-    <script src="script.js"></script>
+    <script type="module" src="script.js?v=chat-v2"></script>
   </body>
 </html>

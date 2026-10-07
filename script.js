@@ -1,3 +1,5 @@
+import knowledge from "./knowledge.js?v=chat-v2";
+
 const revealTargets = document.querySelectorAll(
   ".section-heading, .proof-card, .cert-wall, .project-showcase, .about-section, .capabilities, .contact-section"
 );
@@ -212,7 +214,7 @@ window.addEventListener("resize", () => {
   setScrollDepth();
 });
 
-const knowledge = window.RAJAT_KNOWLEDGE;
+
 const normalizeQuestion = (value) =>
   value.toLowerCase().replace(/[^a-z0-9+#.\s-]/g, " ").replace(/\s+/g, " ").trim();
 
@@ -282,7 +284,7 @@ const ageAnswer = () =>
   `Rajat is ${calculateAge(knowledge.identity.dateOfBirth)} years old right now, based on his verified date of birth: 7 November 2006.`;
 
 const isPromptAttack = (q) =>
-  /\b(ignore|forget|bypass|override|jailbreak|developer mode|system prompt|hidden prompt|reveal prompt|show prompt|act as|pretend|new instructions|break character|secret|confidential)\b/.test(q);
+  /\b(jailbreak|developer mode|system prompt|hidden prompts?|reveal prompt|show prompt|new instructions|break character)\b|\b(ignore|forget|bypass|override)\b.{0,40}\b(instructions|rules|prompt)\b/.test(q);
 
 const fullProfileSummary = () =>
   "Rajat is a third-year AI-focused CSE student at VIT-AP with AI Fluency internship experience at FlyRank AI. He builds AI products and full-stack apps like PrepPeer, NextStep.AI, GridWatch, and UniEvents, and he is open to strong internship roles.";
@@ -418,33 +420,14 @@ const followUpFor = (q, answer) => {
   return "What do you want to know next: projects, skills, resume, or contact?";
 };
 
-const humanizeAnswer = (answer, question) => {
-  const q = normalizeQuestion(question);
-  let text = answer.text
-    .replace(/^Yes\. Rajat/g, "Yes. Rajat")
-    .replace(/^Verified snapshot:\s*/i, "")
-    .replace(/I only answer about Rajat's/g, "I’m built to stay focused on Rajat’s")
-    .replace(/I do not have that verified public detail for Rajat\./g, "I don’t have that public verified detail, so I won’t invent it.");
+const humanizeAnswer = (answer) => ({
+  ...answer,
+  text: answer.text.replace(/^Verified(?: snapshot)?:\s*/i, "")
+});
 
-  const followUp = followUpFor(q, answer);
-  if (followUp && !text.includes("?") && !text.includes(followUp)) {
-    text = `${text} ${followUp}`;
-  }
-
-  return { ...answer, text };
-};
-
-const getAiEndpoint = () => {
-  const configured = window.RAJAT_AI_ENDPOINT || "";
-  if (configured) {
-    return configured;
-  }
-  return "";
-};
-
-const chatMemory = new WeakMap();
-
-const getHistory = (container) => chatMemory.get(container) || [];
+const getAiEndpoint = () => window.RAJAT_AI_ENDPOINT || knowledge.ai?.endpoint || "";
+let conversation = [];
+const getHistory = () => conversation;
 
 const suggestionMemory = new WeakMap();
 
@@ -470,53 +453,19 @@ const setMode = (container, mode) => {
   }
 };
 
-const resolveContextualQuestion = (question, container) => {
+const resolveContextualQuestion = (question) => {
   const q = normalizeQuestion(question);
-  if (!["yes", "yeah", "yep", "sure", "ok", "okay", "please", "go on", "tell me", "tell me more"].includes(q)) {
-    return question;
+  const lastQuestion = [...conversation].reverse().find(t => t.role === "user")?.content || "";
+  const project = knowledge.projects.find(p => lastQuestion.toLowerCase().includes(p.name.toLowerCase()));
+  if (project && /\b(it|its|that|this|more)\b/.test(q) && !knowledge.projects.some(p=>q.includes(p.name.toLowerCase()))) {
+    if (/\b(stack|tech|built with|tools|technology)\b/.test(q)) return `What is the tech stack of ${project.name}?`;
+    return `About ${project.name}: ${question}`;
   }
-
-  const lastAssistant = [...getHistory(container)].reverse().find((turn) => turn.role === "assistant")?.content?.toLowerCase() || "";
-
-  if (lastAssistant.includes("proof of where he used those skills")) {
-    return "Where did Rajat use these skills?";
-  }
-
-  if (lastAssistant.includes("strongest project") || lastAssistant.includes("project is strongest") || lastAssistant.includes("pick his strongest project")) {
-    return "What is Rajat's strongest project?";
-  }
-
-  if (lastAssistant.includes("project list") || lastAssistant.includes("project breakdown")) {
-    return "What projects has Rajat built?";
-  }
-
-  if (lastAssistant.includes("hiring pitch") || lastAssistant.includes("recruiter-style summary")) {
-    return "Give a short recruiter summary of Rajat.";
-  }
-
-  if (lastAssistant.includes("resume link")) {
-    return "Can I download Rajat's resume?";
-  }
-
-  if (lastAssistant.includes("building right now") || lastAssistant.includes("current role")) {
-    return "What is Rajat doing right now?";
-  }
-
-  return "Tell me more about Rajat's projects and skills.";
+  return question;
 };
 
-const rememberTurn = (container, question, answer) => {
-  if (!container) {
-    return;
-  }
-
-  const history = [
-    ...getHistory(container),
-    { role: "user", content: question },
-    { role: "assistant", content: answer.text }
-  ].slice(-10);
-
-  chatMemory.set(container, history);
+const rememberTurn = (_container, question, answer) => {
+  conversation = [...conversation, {role: "user", content: question}, {role: "assistant", content: answer.text}].slice(-12);
 };
 
 const resolveLink = (link) => {
@@ -530,58 +479,27 @@ const resolveLink = (link) => {
   };
 };
 
-const shouldUseLocalGuard = (answer) =>
-  [
-    "Verified-data guard",
-    "Privacy + verified-data guard",
-    "Confirmed academic timeline",
-    "Verified profile",
-    "Resume",
-    "Resume + GitHub",
-    "Resume + portfolio",
-    "Resume + competition certificate"
-  ].includes(answer?.source);
-
 const askRajat = async (question, container) => {
-  const endpoint = getAiEndpoint();
   const mode = getMode(container);
-  const resolvedQuestion = resolveContextualQuestion(question, container);
-  const localAnswer = humanizeAnswer(answerRajat(resolvedQuestion, mode), resolvedQuestion);
-
-  if (shouldUseLocalGuard(localAnswer)) {
+  const localQuestion = resolveContextualQuestion(question);
+  const localAnswer = humanizeAnswer(answerRajat(localQuestion, mode));
+  const q = normalizeQuestion(question);
+  if (isPromptAttack(q) || /\b(cgpa|gpa|salary|passport|aadhaar|home address|relationship|backlogs|attendance)\b/.test(q)) {
     return localAnswer;
   }
-
-  if (endpoint) {
-    try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: resolvedQuestion,
-          history: getHistory(container),
-          mode
-        })
-      });
-
-      const payload = await response.json();
-      if (!response.ok) {
-        throw new Error(payload.error || "AI backend failed");
-      }
-
-      return {
-        text: payload.answer,
-        source: payload.source || "Rajat AI",
-        link: resolveLink(payload.link)
-      };
-    } catch (error) {
-      console.warn("Rajat AI backend fallback:", error);
-    }
+  try {
+    const response = await fetch(getAiEndpoint(), {
+      method: "POST",
+      signal: AbortSignal.timeout(13000),
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({message: question, history: getHistory(), mode})
+    });
+    const payload = await response.json();
+    if (!response.ok || typeof payload.answer !== "string" || !payload.answer.trim()) throw new Error("Unavailable");
+    return {text: payload.answer, source: payload.source || "AI answer", link: resolveLink(payload.link)};
+  } catch {
+    return {...localAnswer, source: "Profile answer"};
   }
-
-  return localAnswer;
 };
 
 const answerRajat = (question, mode = "default") => {
@@ -725,6 +643,11 @@ const answerRajat = (question, mode = "default") => {
       text: roleFitSummary(mode),
       source: "Resume + GitHub"
     };
+  }
+
+  const selectedProject = knowledge.projects.find(p => q.includes(p.name.toLowerCase()));
+  if (selectedProject && /\b(stack|tech|tools|technology|built with)\b/.test(q)) {
+    return {text: `${selectedProject.name} uses ${selectedProject.stack}.`, source: "Resume + GitHub"};
   }
 
   if (includesAny(q, ["doing", "current", "right now", "today", "role", "flyrank"]) || hasAnyWord(q, ["now"])) {
@@ -1016,10 +939,10 @@ const appendMessage = (container, text, type = "bot", source = "", link = null) 
     "Closest verified profile match": "Verified profile",
     "Rajat AI": "Rajat AI"
   };
-  const quietSources = ["Conversation", "Guide", "Scope guard", "Prompt guard", "System"];
+  const quietSources = ["Conversation", "Guide", "Scope guard", "Prompt guard", "System", "AI answer"];
   if (source && type === "bot" && !quietSources.includes(source)) {
     const small = document.createElement("small");
-    small.textContent = `Checked against ${sourceLabels[source] || source}`;
+    small.textContent = source === "Profile answer" ? "From the portfolio profile · live AI unavailable" : "Resume & projects";
     message.appendChild(small);
   }
   container.appendChild(message);
@@ -1027,7 +950,7 @@ const appendMessage = (container, text, type = "bot", source = "", link = null) 
   return message;
 };
 
-const uniqueSuggestions = (container, preferred, count = 3) => {
+const uniqueSuggestions = (container, preferred, count = 2) => {
   const fallback = [
     "What is Rajat doing right now?",
     "Which project is strongest?",
@@ -1080,7 +1003,7 @@ const appendSuggestions = (container, question, answer) => {
     button.textContent = label;
     button.addEventListener("click", () => {
       const form = container.closest(".chat-panel, .ai-drawer")?.querySelector(".chat-form");
-      const input = form?.querySelector("input");
+      const input = form?.querySelector("textarea, input");
       if (input && form) {
         input.value = label;
         row.remove();
@@ -1093,70 +1016,77 @@ const appendSuggestions = (container, question, answer) => {
   container.scrollTop = container.scrollHeight;
 };
 
-const handleChat = (form, input, messages) => {
-  form?.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const question = input.value.trim();
-    if (!question) {
-      return;
-    }
-
-    const button = form.querySelector("button");
-    appendMessage(messages, question, "user");
-    input.value = "";
-    input.disabled = true;
-    if (button) {
-      button.disabled = true;
-    }
-
-    const thinking = appendMessage(messages, "Thinking...", "bot thinking");
-    const answer = await askRajat(question, messages);
-    thinking?.remove();
-    appendMessage(messages, answer.text, "bot", answer.source, answer.link);
-    appendSuggestions(messages, question, answer);
-    rememberTurn(messages, question, answer);
-
-    input.disabled = false;
-    if (button) {
-      button.disabled = false;
-    }
-    input.focus();
-  });
-};
-
 const pageMessages = document.querySelector("[data-chat-messages]");
 const drawerMessages = document.querySelector("[data-drawer-messages]");
-handleChat(
-  document.querySelector("[data-chat-form]"),
-  document.querySelector("[data-chat-input]"),
-  pageMessages
-);
-handleChat(
-  document.querySelector("[data-drawer-form]"),
-  document.querySelector("[data-drawer-input]"),
-  drawerMessages
-);
+const chatContainers = [pageMessages, drawerMessages].filter(Boolean);
+const chatControls = () => document.querySelectorAll(".chat-form textarea, .chat-form button, [data-ask], [data-new-chat]");
+let chatPending = false;
+const greeting = "Hi, I'm Rajat's portfolio assistant. Ask me about a project, his experience, or the kind of work he's looking for.";
 
-document.querySelectorAll("[data-ask]").forEach((button) => {
-  button.addEventListener("click", async () => {
-    const question = button.dataset.ask;
-    appendMessage(pageMessages, question, "user");
-    const thinking = appendMessage(pageMessages, "Thinking...", "bot thinking");
+const sendQuestion = async (question, form) => {
+  question = question.trim().slice(0, 600);
+  if (!question || chatPending) return;
+  chatPending = true;
+  chatControls().forEach(c => c.disabled = true);
+  const loading = chatContainers.map(container => {
+    container.querySelectorAll(".message-suggestions").forEach(row => row.remove());
+    appendMessage(container, question, "user");
+    container.setAttribute("aria-busy", "true");
+    const item = appendMessage(container, "", "bot thinking");
+    item.setAttribute("role", "status");
+    item.setAttribute("aria-label", "Preparing an answer");
+    for (let i = 0; i < 3; i++) { const dot = document.createElement("span"); dot.setAttribute("aria-hidden", "true"); item.appendChild(dot); }
+    return item;
+  });
+  const input = form?.querySelector("textarea, input");
+  if (input) input.value = "";
+  try {
     const answer = await askRajat(question, pageMessages);
-    thinking?.remove();
-    appendMessage(pageMessages, answer.text, "bot", answer.source, answer.link);
-    appendSuggestions(pageMessages, question, answer);
+    loading.forEach(item => item.remove());
+    chatContainers.forEach(container => {
+      appendMessage(container, answer.text, "bot", answer.source, answer.link);
+      appendSuggestions(container, question, answer);
+    });
     rememberTurn(pageMessages, question, answer);
+  } finally {
+    loading.forEach(item => item.remove());
+    chatPending = false;
+    chatControls().forEach(c => c.disabled = false);
+    chatContainers.forEach(c => c.setAttribute("aria-busy", "false"));
+    input?.focus();
+  }
+};
+
+document.querySelectorAll(".chat-form").forEach(form => {
+  const input = form.querySelector("textarea, input");
+  form.addEventListener("submit", event => { event.preventDefault(); sendQuestion(input.value, form); });
+  input.addEventListener("keydown", event => {
+    if (event.key === "Enter" && !event.shiftKey && !event.isComposing) { event.preventDefault(); form.requestSubmit(); }
   });
 });
+
+document.querySelectorAll("[data-ask]").forEach(button => {
+  button.addEventListener("click", () => sendQuestion(button.dataset.ask, document.querySelector("[data-chat-form]")));
+});
+
+document.querySelectorAll("[data-new-chat]").forEach(button => button.addEventListener("click", () => {
+  if (chatPending) return;
+  conversation = [];
+  chatContainers.forEach(container => {
+    container.replaceChildren();
+    suggestionMemory.delete(container);
+    appendMessage(container, greeting, "bot", "Guide");
+  });
+  document.querySelectorAll(".chat-form textarea").forEach(input => input.value = "");
+}));
 
 document.querySelectorAll(".ai-mode-bar").forEach((bar) => {
   const shell = bar.closest(".chat-panel, .ai-drawer");
   const messages = shell?.querySelector(".chat-messages");
   bar.querySelectorAll("[data-ai-mode]").forEach((button) => {
     button.addEventListener("click", () => {
-      bar.querySelectorAll("[data-ai-mode]").forEach((item) => item.classList.toggle("active", item === button));
-      setMode(messages, button.dataset.aiMode || "default");
+      document.querySelectorAll("[data-ai-mode]").forEach((item) => item.classList.toggle("active", item.dataset.aiMode === button.dataset.aiMode));
+      chatContainers.forEach(container => setMode(container, button.dataset.aiMode || "default"));
     });
   });
 });
@@ -1169,18 +1099,24 @@ const aiSection = document.querySelector("#ask-ai");
 launcher?.addEventListener("click", () => {
   drawer?.classList.add("open");
   drawer?.setAttribute("aria-hidden", "false");
+  drawer?.removeAttribute("inert");
+  if (drawerMessages) drawerMessages.scrollTop = drawerMessages.scrollHeight;
   window.setTimeout(() => drawerInput?.focus(), 120);
 });
 
 document.querySelector("[data-ai-close]")?.addEventListener("click", () => {
   drawer?.classList.remove("open");
   drawer?.setAttribute("aria-hidden", "true");
+  drawer?.setAttribute("inert", "");
+  launcher?.focus();
 });
 
 window.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
+  if (event.key === "Escape" && drawer?.classList.contains("open")) {
     drawer?.classList.remove("open");
     drawer?.setAttribute("aria-hidden", "true");
+  drawer?.setAttribute("inert", "");
+  launcher?.focus();
   }
 });
 
