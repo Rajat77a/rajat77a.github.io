@@ -274,23 +274,23 @@ img {
   right: 26px;
   top: 112px;
   z-index: 14;
-  min-height: 62px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
   display: grid;
-  grid-template-columns: 36px auto;
+  grid-template-columns: 1fr;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px 10px 10px;
-  border: 1px solid color-mix(in srgb, var(--lime) 46%, var(--line));
-  border-radius: 999px;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.08), transparent 40%),
-    var(--surface-stronger);
+  gap: 0;
+  padding: 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--ink);
-  box-shadow: 0 8px 24px var(--shadow);
+  box-shadow: none;
   font: inherit;
   cursor: none;
   transform: translateZ(0);
-  backdrop-filter: blur(18px);
+  backdrop-filter: none;
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,
@@ -304,8 +304,8 @@ img {
 
 .theme-prism:hover {
   transform: translate3d(0, -2px, 0);
-  border-color: var(--lime);
-  box-shadow: 0 10px 28px var(--shadow);
+  color: var(--lime);
+  box-shadow: none;
 }
 
 .prism-core {
@@ -313,7 +313,7 @@ img {
   place-items: center;
   width: 36px;
   height: 36px;
-  color: var(--ink);
+  color: inherit;
   transition: transform 220ms ease;
 }
 .prism-core svg { width: 26px; height: 26px; }
@@ -1857,9 +1857,9 @@ footer {
     top: auto;
     right: 14px;
     bottom: 82px;
-    min-height: 54px;
-    grid-template-columns: 32px;
-    padding: 10px;
+    min-height: 44px;
+    grid-template-columns: 1fr;
+    padding: 4px;
     transform: none;
   }
 
