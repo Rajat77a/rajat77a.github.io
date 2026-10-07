@@ -11,7 +11,7 @@ const RAJAT_PROFILE = {
     headline: "AI-focused Computer Science student and product builder"
   },
   current:
-    "Third-year Computer Science student at VIT-AP and AI Fluency Intern at FlyRank AI, remote, 2026 - Present. Work includes prompt design, model-output evaluation, Anthropic coursework, and AI-assisted website builds.",
+    "Third-year Computer Science student at VIT-AP with AI Fluency internship experience at FlyRank AI, remote, July - August 2026. Work includes prompt design, model-output evaluation, Anthropic coursework, and AI-assisted website builds.",
   academicNotes: {
     semester:
       "Rajat is currently in third year; based on his 2024 - 2029 VIT-AP academic timeline, that corresponds to 5th semester right now.",
@@ -50,10 +50,13 @@ const RAJAT_PROFILE = {
     "High School Diploma from Ursuline English Medium School, Pariyaram, Kerala, 2023 - 2024."
   ],
   experience: [
-    "AI Fluency Intern at FlyRank AI, 2026 - Present.",
+    "AI Fluency Intern at FlyRank AI, July - August 2026.",
     "Freelance AI Content Developer & Creative Designer at ZedWorks / IgniteWithoutCaffeine, June 2024 - Present."
   ],
+  achievements: ["1st place in PWN Grounds, King of the Hill cybersecurity competition at V-TAPP 2026, VIT-AP, 11-12 September 2026, using AI tools as part of the approach."],
   skills: {
+    prompting: ["Prompt crafting and tuning", "LLM pipeline automation", "Response evaluation", "Behaviour testing", "Cross-model adaptation"],
+    security: ["AI-assisted CTF and King of the Hill competitions"],
     languages: ["Python", "Java", "C", "JavaScript", "TypeScript"],
     web: ["React", "Next.js", "Node.js", "Express.js", "MongoDB", "SQLite", "REST API", "JWT", "Tailwind CSS", "Framer Motion"],
     data: ["Scikit-learn", "Pandas", "NumPy", "Plotly", "Streamlit", "Folium"],
@@ -141,7 +144,7 @@ Rules:
 - If asked whether Rajat is eligible for placements, say official campus placement eligibility is not confirmed in the profile; do not claim eligibility or mention VIT-AP placement records. You may say he is a third-year CSE student and open to internships.
 - If asked whether Rajat knows ECE, say his verified background is CSE, not ECE; he has AI/web/data/database proof, but ECE-specific expertise is not verified.
 - If asked age, DOB, or birthday, use the verified DOB: 7 November 2006. Calculate current age from today's date.
-- If asked "how is Rajat" or "how is he", answer his current professional momentum: third-year CSE at VIT-AP, AI Fluency Intern at FlyRank AI, shipping AI/web products, open to internships.
+- If asked "how is Rajat" or "how is he", answer his current professional momentum: third-year CSE at VIT-AP, former AI Fluency Intern at FlyRank AI, building AI/web products, open to internships.
 - For project questions, mention the strongest 3-4 projects first: PrepPeer, NextStep.AI, GridWatch, and University Event Management System. Offer to share more instead of dumping every project.
 - For greetings, reply naturally and ask what they want to know about Rajat.
 - If asked for resume/CV, mention that the downloadable resume link is available.
@@ -231,7 +234,7 @@ const verifiedSkillAnswer = (mode = "default") => {
 };
 
 const verifiedProfileSummary = () =>
-  "Verified: Rajat is a third-year CSE student at VIT-AP, AI Fluency Intern at FlyRank AI, and builder of PrepPeer, NextStep.AI, GridWatch, UniEvents, Bitcoin Sentiment Analysis, and ZedWorks Portfolio.";
+  "Verified: Rajat is a third-year CSE student at VIT-AP, former AI Fluency Intern at FlyRank AI, and builder of PrepPeer, NextStep.AI, GridWatch, UniEvents, Bitcoin Sentiment Analysis, and ZedWorks Portfolio.";
 
 const unverifiedTopicsAnswer = () =>
   `Not confirmed yet: ${RAJAT_PROFILE.profileMemory.unverifiedTopics}`;
@@ -242,7 +245,7 @@ const roleFitSummary = (mode = "default") => {
   }
 
   if (mode === "friend") {
-    return "Yes, for AI product or full-stack internships, Rajat has a pretty clear story: he studies CSE, works with FlyRank AI, and ships real AI/web projects.";
+    return "Rajat studies CSE, completed an AI Fluency internship at FlyRank AI in July - August 2026, and builds AI/web projects.";
   }
 
   return "Yes, Rajat is a strong fit for AI product, full-stack web, prompt engineering, automation, and data-tool internships, based on his verified projects and FlyRank AI role.";
@@ -253,6 +256,10 @@ const fallbackAnswer =
 
 const directVerifiedAnswer = (message, mode = "default") => {
   const q = message.toLowerCase();
+
+  if (!isPromptAttack(q) && /\b(koth|king of the hill|pwn grounds|cyber ?security|ctf|competition|achievement)\b/.test(q)) {
+    return RAJAT_PROFILE.achievements.join(" ");
+  }
 
   if (isPromptAttack(q) && !isRajatTopic(q)) {
     return fallbackAnswer;

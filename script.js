@@ -285,10 +285,10 @@ const isPromptAttack = (q) =>
   /\b(ignore|forget|bypass|override|jailbreak|developer mode|system prompt|hidden prompt|reveal prompt|show prompt|act as|pretend|new instructions|break character|secret|confidential)\b/.test(q);
 
 const fullProfileSummary = () =>
-  "Rajat is a third-year AI-focused CSE student at VIT-AP and an AI Fluency Intern at FlyRank AI. He builds AI products and full-stack apps like PrepPeer, NextStep.AI, GridWatch, and UniEvents, and he is open to strong internship roles.";
+  "Rajat is a third-year AI-focused CSE student at VIT-AP with AI Fluency internship experience at FlyRank AI. He builds AI products and full-stack apps like PrepPeer, NextStep.AI, GridWatch, and UniEvents, and he is open to strong internship roles.";
 
 const closestProfileAnswer = () =>
-  "Rajat is a third-year CSE student at VIT-AP, an AI Fluency Intern at FlyRank AI, and a build-first developer focused on AI products, full-stack web, prompt workflows, automation, and data tools.";
+  "Rajat is a third-year CSE student at VIT-AP, a former AI Fluency Intern at FlyRank AI, and a build-first developer focused on AI products, full-stack web, prompt workflows, automation, and data tools.";
 
 const roleFitAnswer = (role) => {
   const roleMap = {
@@ -307,7 +307,7 @@ const roleFitAnswer = (role) => {
 };
 
 const verifiedProfileSummary = () =>
-  "Verified: Rajat is a third-year CSE student at VIT-AP, AI Fluency Intern at FlyRank AI, and builder of PrepPeer, NextStep.AI, GridWatch, UniEvents, Bitcoin Sentiment Analysis, and ZedWorks Portfolio.";
+  "Verified: Rajat is a third-year CSE student at VIT-AP, former AI Fluency Intern at FlyRank AI, and builder of PrepPeer, NextStep.AI, GridWatch, UniEvents, Bitcoin Sentiment Analysis, and ZedWorks Portfolio.";
 
 const unverifiedTopicsAnswer = () =>
   `Not confirmed yet: ${knowledge.profileMemory.unverifiedTopics}`;
@@ -538,7 +538,8 @@ const shouldUseLocalGuard = (answer) =>
     "Verified profile",
     "Resume",
     "Resume + GitHub",
-    "Resume + portfolio"
+    "Resume + portfolio",
+    "Resume + competition certificate"
   ].includes(answer?.source);
 
 const askRajat = async (question, container) => {
@@ -616,7 +617,7 @@ const answerRajat = (question, mode = "default") => {
 
   if (includesAny(q, ["how is rajat", "hows rajat", "how's rajat", "how is he", "how is rajat doing", "how rajat"])) {
     return {
-      text: "Rajat is in build mode: studying CSE at VIT-AP, interning with FlyRank AI, and shipping AI/web products. Want his current role or project list?",
+      text: "Rajat is studying CSE at VIT-AP, building AI/web products, and working on freelance content and design. He completed his FlyRank AI internship in July - August 2026. Want his experience or project list?",
       source: "Resume + GitHub"
     };
   }
@@ -642,7 +643,7 @@ const answerRajat = (question, mode = "default") => {
     };
   }
 
-  if (includesAny(q, ["thanks", "thank you", "ty", "nice", "cool", "great"])) {
+  if (["thanks", "thank you", "ty", "nice", "cool", "great"].includes(q)) {
     return {
       text: "Anytime. Want a quick recruiter-style summary of Rajat or a project breakdown?",
       source: "Conversation"
@@ -671,6 +672,10 @@ const answerRajat = (question, mode = "default") => {
       text: knowledge.academicNotes.linearAlgebra,
       source: "Verified-data guard"
     };
+  }
+
+  if (includesAny(q, ["koth", "king of the hill", "pwn grounds", "cybersecurity", "cyber security", "ctf", "competition", "achievement"])) {
+    return { text: knowledge.achievements.join(" "), source: "Resume + competition certificate" };
   }
 
   if (includesAny(q, ["dsa", "data structure", "data structures", "algorithm", "algorithms", "operating system", "operating systems", "computer network", "computer networks", "oops", "object oriented", "cloud computing", "cybersecurity", "cyber security", "blockchain", "exam", "marks", "grade", "grades", "attendance", "backlog", "backlogs"])) {
@@ -750,7 +755,7 @@ const answerRajat = (question, mode = "default") => {
   if (includesAny(q, ["recruiter summary", "quick summary", "short summary", "summarize rajat", "pitch", "elevator pitch"])) {
     return {
       text:
-        "Rajat is a third-year AI-focused CSE student at VIT-AP and AI Fluency Intern at FlyRank AI, building practical AI products across web, data, and automation.",
+        "Rajat is a third-year AI-focused CSE student at VIT-AP with AI Fluency internship experience at FlyRank AI, building practical AI products across web, data, and automation.",
       source: "Resume + GitHub"
     };
   }
@@ -802,7 +807,7 @@ const answerRajat = (question, mode = "default") => {
   if (includesAny(q, ["experience", "worked", "work experience", "freelance", "zedworks", "ignite", "client"])) {
     return {
       text:
-        "Rajat is an AI Fluency Intern at FlyRank AI and a freelance AI content developer/designer through ZedWorks / IgniteWithoutCaffeine.",
+        "Rajat is a former AI Fluency Intern at FlyRank AI and a freelance AI content developer/designer through ZedWorks / IgniteWithoutCaffeine.",
       source: "Resume"
     };
   }

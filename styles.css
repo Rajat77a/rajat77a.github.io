@@ -1979,3 +1979,24 @@ footer {
     backdrop-filter: blur(18px);
   }
 }
+
+/* Resume additions use the existing typography, surfaces, and theme tokens. */
+.more-work { margin-top: 90px; }
+.work-row { display: grid; grid-template-columns: 50px 1fr 32px; gap: 28px; padding: 32px 0; border-top: 1px solid var(--line); color: var(--ink); text-decoration: none; }
+.work-row:last-child { border-bottom: 1px solid var(--line); }
+.work-row h3 { margin: 0 0 12px; font-family: "Anton", Impact, sans-serif; font-size: clamp(1.8rem, 3vw, 3rem); font-weight: 400; }
+.work-row p { max-width: 760px; margin: 0 0 14px; color: var(--soft-text); line-height: 1.7; }
+.work-stack { color: var(--muted); font-size: .8rem; line-height: 1.7; }
+.work-arrow { font-size: 1.8rem; transition: transform 200ms ease; }
+.work-row:hover .work-arrow { transform: translate(3px, -3px); }
+.achievement-section { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.achievement-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 48px; align-items: start; }
+.achievement-photo { margin: 0; }
+.achievement-photo img { display: block; width: 100%; height: auto; border-radius: 8px; }
+.achievement-photo figcaption { padding-top: 14px; color: var(--muted); font-size: .8rem; }
+.achievement-copy h3 { margin: 14px 0 20px; font-family: "Anton", Impact, sans-serif; font-size: clamp(2.5rem, 4vw, 4rem); font-weight: 400; line-height: 1.1; }
+.achievement-copy > p:not(.eyebrow) { color: var(--soft-text); line-height: 1.7; }
+.certificate-link { display: block; max-width: 320px; margin-top: 24px; color: var(--ink); text-decoration: none; }
+.certificate-link img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; }
+.certificate-link span { display: block; margin-top: 12px; font-size: .8rem; font-weight: 700; }
+@media (max-width: 680px) { .achievement-grid { grid-template-columns: 1fr; gap: 28px; } .work-row { grid-template-columns: 26px 1fr 20px; gap: 12px; } .more-work { margin-top: 56px; } }

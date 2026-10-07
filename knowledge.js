@@ -14,14 +14,14 @@ window.RAJAT_KNOWLEDGE = {
     endpoint: "https://rajat77a-github-io.vercel.app/api/chat"
   },
   current: {
-    role: "AI Fluency Intern",
-    company: "FlyRank AI",
+    role: "Integrated M.Tech CSE student and freelance AI content developer",
+    company: "VIT-AP / ZedWorks",
     mode: "Remote",
-    period: "2026 - Present",
+    period: "2024 - Present",
     collegeYear: "Third-year Computer Science student at VIT-AP",
     semester: "5th semester, based on the 2024 - 2029 VIT-AP academic timeline",
     summary:
-      "Rajat is a third-year Computer Science student at VIT-AP and an AI Fluency Intern at FlyRank AI, working on prompt design, model-output evaluation, and deployable AI-assisted website builds."
+      "Rajat is a third-year Integrated M.Tech CSE student at VIT-AP, building AI products and working on freelance content and design. He completed an AI Fluency internship at FlyRank AI in July - August 2026, testing prompts, evaluating model responses, and supporting AI-assisted website builds."
   },
   academicNotes: {
     semester:
@@ -64,9 +64,9 @@ window.RAJAT_KNOWLEDGE = {
     {
       title: "AI Fluency Intern",
       company: "FlyRank AI",
-      period: "2026 - Present",
+      period: "July - August 2026",
       proof:
-        "Designs and refines prompts, evaluates outputs across AI models, completes Anthropic coursework, and supports AI-assisted website builds."
+        "Tested and refined prompts, compared model outputs for polish, consistency, and accuracy, completed Anthropic coursework, and supported AI-assisted website builds."
     },
     {
       title: "Freelance AI Content Developer & Creative Designer",
@@ -76,7 +76,10 @@ window.RAJAT_KNOWLEDGE = {
         "Creates AI-assisted scripts, visuals, short-form videos, product posts, menus, and marketing assets for wellness and local business clients."
     }
   ],
+  achievements: ["1st place in PWN Grounds, a King of the Hill cybersecurity competition at V-TAPP 2026, VIT-AP, 11-12 September 2026. Used AI tools as part of the competition approach."],
   skills: {
+    prompting: ["Prompt crafting and tuning", "LLM pipeline automation", "Response evaluation", "Behaviour testing", "Cross-model adaptation"],
+    security: ["AI-assisted CTF and King of the Hill competitions"],
     languages: ["Python", "Java", "C", "JavaScript", "TypeScript"],
     web: ["React", "Next.js", "Node.js", "Express.js", "MongoDB", "SQLite", "REST API", "JWT", "Tailwind CSS", "Framer Motion"],
     data: ["Scikit-learn", "Pandas", "NumPy", "Plotly", "Streamlit", "Folium"],
@@ -105,7 +108,7 @@ window.RAJAT_KNOWLEDGE = {
       github: "https://github.com/Rajat77a/gridwatch",
       stack: "Python, Scikit-learn, Streamlit, SQLite, Plotly, Folium",
       summary:
-        "AI-driven smart-grid dashboard for energy theft and anomaly detection using simulated meter data and Isolation Forest-style anomaly detection."
+        "Energy theft dashboard using 30 days of simulated consumer meter data. Flags tampering, bypass connections, and slow-decline fraud without labelled fraud records. Loss tracing compares transformer supply with consumer readings; an offline map shows risk tiers. Built with Python, Scikit-learn, Streamlit, Pandas, NumPy, Folium, SQLite, and Plotly."
     },
     {
       name: "University Event Management System",
