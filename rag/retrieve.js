@@ -101,6 +101,10 @@ export function retrieve(question, history = [], limit = 6) {
   for (const entity of entities) {
     const matching = scored.filter(({ doc }) => normalize(doc.entity || '').includes(normalize(entity))).slice(0, 2);
     matching.forEach(({ doc }) => { if (!selected.includes(doc)) selected.push(doc); });
+    if (entities.length > 1) {
+      const resume = candidates.find(doc => doc.kind === 'resume' && normalize(doc.entity || '').includes(normalize(entity)));
+      if (resume && !selected.includes(resume)) selected.push(resume);
+    }
   }
   for (const { doc } of scored) {
     if (selected.length >= limit) break;
@@ -114,11 +118,15 @@ export function sourceFor(chunk, quote = '') {
 }
 
 export function extractiveAnswer(question, history = []) {
-  const result = retrieve(question, history, 3);
+  const result = retrieve(question, history, 6);
   if (!result.chunks.length) return { text: result.reason === 'ambiguous' ? "Which project do you mean? Name one and I can explain it." : result.reason === 'unrelated' ? "I can help with Rajat's work and background. Try asking about a project, his experience, or his resume." : "I couldn't find that detail in Rajat's documents, so I can't confirm it.", source: 'Document answer', sources: [] };
   const entities = namedEntities(result.query);
   const chosen = entities.length > 1
-    ? entities.map(entity => result.chunks.find(chunk => normalize(chunk.entity || '').includes(normalize(entity)))).filter(Boolean)
+    ? entities.map(entity => {
+      const matching = result.chunks.filter(chunk => normalize(chunk.entity || '').includes(normalize(entity)));
+      return matching.find(chunk => chunk.section === 'Overview' && chunk.text.length >= 100)
+        || matching.find(chunk => chunk.kind === 'resume') || matching[0];
+    }).filter(Boolean)
     : result.chunks.slice(0, 2);
   const quotes = chosen.map(chunk => chunk.text.split('\n').filter(Boolean).slice(0, 5).join('\n').slice(0, 650));
   return { text: quotes.join('\n\n'), source: 'Source excerpts', sources: chosen.map((chunk, i) => sourceFor(chunk, quotes[i])) };

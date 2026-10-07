@@ -73,8 +73,9 @@ test('ambiguous follow-up asks for clarification', () => {
 });
 test('comparison fallback keeps both project sources', () => {
   const result = extractiveAnswer('Compare PrepPeer and GridWatch');
-  assert.ok(result.sources.some(source => source.title.includes('PrepPeer')));
-  assert.ok(result.sources.some(source => source.title.includes('GridWatch')));
+  assert.ok(result.sources.some(source => /PrepPeer/.test(source.quote)));
+  assert.ok(result.sources.some(source => /GridWatch/.test(source.quote)));
+  assert.match(result.text, /simulat/i);
 });
 test('fallback uses source text and has citations', () => {
   const result = extractiveAnswer('Tell me about GridWatch');
