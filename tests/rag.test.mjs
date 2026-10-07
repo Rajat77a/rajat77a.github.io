@@ -57,6 +57,25 @@ test('only exact source quotes are accepted', () => {
 test('model refusal has no fabricated citations', () => {
   assert.deepEqual(validateGroundedOutput({ supported: false, claims: [] }, index.chunks).sources, []);
 });
+test('comparison cannot attach GridWatch claims to PrepPeer evidence', () => {
+  const source = index.chunks.find(chunk => chunk.entity === 'PrepPeer' && chunk.section === 'Stack');
+  assert.equal(validateGroundedOutput({ claims: [{ text: 'PrepPeer uses Supabase while GridWatch detects theft.', source_id: source.id, quote: source.text }] }, [source]), null);
+});
+test('past internship is not described as scheduled without evidence', () => {
+  const source = index.chunks.find(chunk => chunk.entity?.includes('FlyRank'));
+  assert.equal(validateGroundedOutput({ claims: [{ text: 'The FlyRank internship is scheduled for July to August 2026.', source_id: source.id, quote: source.text }] }, [source]), null);
+  assert.match(ragPrompt('Is FlyRank his current job?', 'short', [source]), /completed, not scheduled/);
+});
+test('ambiguous follow-up asks for clarification', () => {
+  const history = [{ role: 'user', content: 'Compare PrepPeer and GridWatch' }];
+  assert.equal(retrieve('What stack does it use?', history).reason, 'ambiguous');
+  assert.match(extractiveAnswer('What stack does it use?', history).text, /Which project/);
+});
+test('comparison fallback keeps both project sources', () => {
+  const result = extractiveAnswer('Compare PrepPeer and GridWatch');
+  assert.ok(result.sources.some(source => source.title.includes('PrepPeer')));
+  assert.ok(result.sources.some(source => source.title.includes('GridWatch')));
+});
 test('fallback uses source text and has citations', () => {
   const result = extractiveAnswer('Tell me about GridWatch');
   assert.ok(result.sources.length);

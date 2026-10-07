@@ -20,8 +20,16 @@ export function validateGroundedOutput(raw, chunks) {
     // A citation must contain the numbers, tool names and formal claims it is said to support.
     const numbers = text.match(/\b\d[\d,.+%-]*\b/g) || [];
     if (numbers.some(number => !quote.includes(number))) return null;
-    const protectedTerms = text.match(/\b(phd|doctorate|senior|professional|production|certified|rust|kubernetes|aws|tensorflow|pytorch|google|microsoft|amazon|next\.js\s*\d+)\b/gi) || [];
+    const protectedTerms = text.match(/\b(phd|doctorate|senior|professional|production|certified|scheduled|upcoming|rust|kubernetes|aws|tensorflow|pytorch|google|microsoft|amazon|supabase|mongodb|postgresql|redis|docker|groq|streamlit|folium|sqlite|react|typescript|python|java|pandas|numpy|plotly|tesseract|next\.js\s*\d+)\b/gi) || [];
     if (protectedTerms.some(term => !quote.toLowerCase().includes(term.toLowerCase()))) return null;
+    const projects = [
+      ['PrepPeer', /\bpreppeer\b/i], ['GridWatch', /\bgridwatch\b/i], ['NextStep', /\bnextstep\b/i],
+      ['University Event Management', /\b(unievents|university event management)\b/i],
+      ['Bitcoin', /\bbitcoin\b/i], ['ZedWorks', /\bzedworks\b/i]
+    ];
+    for (const [entity, pattern] of projects) {
+      if (pattern.test(text) && !`${source.entity || ''} ${source.text}`.toLowerCase().includes(entity.toLowerCase())) return null;
+    }
     if (/\b(system prompt|hidden prompt|developer instructions)\b/i.test(text)) return null;
     accepted.push(text);
     if (!sources.some(item => item.id === source.id && item.quote === quote)) sources.push(sourceFor(source, quote));
