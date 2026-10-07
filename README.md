@@ -7,10 +7,11 @@ Static portfolio website for GitHub Pages at `https://rajat77a.github.io`.
 The portfolio includes Rajat Intelligence, a real AI assistant designed to run
 through a Vercel serverless backend at `api/chat.js`.
 
-The backend sends Rajat's approved profile knowledge to the model and instructs
-it to answer naturally, stay short, avoid hallucinated claims, and redirect
-unrelated questions. If the backend is not configured yet, the frontend falls
-back to the local verified assistant powered by `knowledge.js`.
+The backend retrieves passages from the public resume and project documentation,
+then asks the model to answer with supporting quotations. Answers show source
+links and expandable evidence. On a model outage or invalid citations it returns
+document excerpts, never uncited profile guesses. See [the RAG guide](rag/README.md)
+for source ingestion, limitations, tests, and optional local Ollama testing.
 
 ### Vercel AI setup
 
@@ -19,7 +20,7 @@ back to the local verified assistant powered by `knowledge.js`.
 3. Add these Vercel environment variables:
    - `AI_PROVIDER=groq`
    - `GROQ_API_KEY`
-   - `GROQ_MODEL=llama-3.1-8b-instant`
+   - `GROQ_MODEL=openai/gpt-oss-20b`
    - `ALLOWED_ORIGINS=https://rajat77a.github.io,http://localhost:4173,http://127.0.0.1:4173`
 4. Deploy the Vercel project.
 5. If the portfolio stays on GitHub Pages, copy the Vercel function URL and set

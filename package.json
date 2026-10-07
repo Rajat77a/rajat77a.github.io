@@ -4,6 +4,10 @@
   "type": "module",
   "scripts": {
     "dev": "vercel dev",
-    "start": "vercel dev"
+    "start": "vercel dev",
+    "test": "node --test tests/rag.test.mjs",
+    "rag:build": "node scripts/build-rag.mjs",
+    "rag:refresh": "node scripts/refresh-sources.mjs",
+    "rag:preview": "node scripts/serve-rag.mjs"
   }
 }

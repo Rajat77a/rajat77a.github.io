@@ -1,4 +1,5 @@
 import knowledge from "./knowledge.js?v=chat-v2";
+import { extractiveAnswer } from "./rag/retrieve.js?v=rag-v1";
 
 const revealTargets = document.querySelectorAll(
   ".section-heading, .proof-card, .cert-wall, .project-showcase, .about-section, .capabilities, .contact-section"
@@ -486,25 +487,20 @@ const resolveLink = (link) => {
 };
 
 const askRajat = async (question, container) => {
-  const mode = getMode(container);
-  const localQuestion = resolveContextualQuestion(question);
-  const localAnswer = humanizeAnswer(answerRajat(localQuestion, mode));
-  const q = normalizeQuestion(question);
-  if (isPromptAttack(q) || /\b(cgpa|gpa|salary|passport|aadhaar|home address|relationship|backlogs|attendance)\b/.test(q)) {
-    return localAnswer;
-  }
+  const history = getHistory();
+  if (isPromptAttack(normalizeQuestion(question))) return {text: "I can help with Rajat's work, but I can't change my instructions or share hidden prompts.", source: "Prompt guard"};
   try {
     const response = await fetch(getAiEndpoint(), {
-      method: "POST",
-      signal: AbortSignal.timeout(13000),
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({message: question, history: getHistory(), mode})
+      method: "POST", signal: AbortSignal.timeout(13000), headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({message: question, history, mode: getMode(container)})
     });
     const payload = await response.json();
     if (!response.ok || typeof payload.answer !== "string" || !payload.answer.trim()) throw new Error("Unavailable");
-    return {text: payload.answer, source: payload.source || "AI answer", link: resolveLink(payload.link)};
+    return {text: payload.answer, source: payload.source || "Document answer", sources: payload.sources || [], link: resolveLink(payload.link)};
   } catch {
-    return {...localAnswer, source: "Profile answer"};
+    const answer = extractiveAnswer(question, history);
+    if (/\b(resume|cv)\b/i.test(question) && /\b(download|get|link)\b/i.test(question)) return {text: "Here's Rajat's latest resume.", source: "Document answer", link: resolveLink({href: knowledge.resumeUrl, label: "Download Rajat's resume"})};
+    return answer;
   }
 };
 
@@ -918,7 +914,7 @@ const answerRajat = (question, mode = "default") => {
   };
 };
 
-const appendMessage = (container, text, type = "bot", source = "", link = null) => {
+const appendMessage = (container, text, type = "bot", source = "", link = null, sources = []) => {
   if (!container) {
     return null;
   }
@@ -945,11 +941,34 @@ const appendMessage = (container, text, type = "bot", source = "", link = null) 
     "Closest verified profile match": "Verified profile",
     "Rajat AI": "Rajat AI"
   };
-  const quietSources = ["Conversation", "Guide", "Scope guard", "Prompt guard", "System", "AI answer"];
+  const quietSources = ["Conversation", "Guide", "Scope guard", "Prompt guard", "System", "AI answer", "Document answer", "Source excerpts"];
   if (source && type === "bot" && !quietSources.includes(source)) {
     const small = document.createElement("small");
     small.textContent = source === "Profile answer" ? "From the portfolio profile · live AI unavailable" : "Resume & projects";
     message.appendChild(small);
+  }
+  if (type === "bot" && Array.isArray(sources) && sources.length) {
+    const list = document.createElement("div");
+    list.className = "answer-sources";
+    const label = document.createElement("span");
+    label.textContent = source === "Source excerpts" ? "From the documents" : "Sources";
+    list.appendChild(label);
+    sources.slice(0, 6).forEach((item, index) => {
+      if (typeof item.url !== "string" || typeof item.title !== "string") return;
+      const url = new URL(item.url, window.location.origin);
+      const allowed = (url.origin === window.location.origin && url.pathname === "/assets/docs/Rajat_Krishnan_Resume.pdf") || (url.hostname === "github.com" && url.pathname.startsWith("/Rajat77a/")) || (url.hostname === "rajat77a.github.io" && url.protocol === "https:");
+      if (!allowed) return;
+      const row = document.createElement("details");
+      const summary = document.createElement("summary");
+      summary.textContent = `${index + 1}. ${item.title}${item.section ? " · " + item.section : ""}`;
+      row.appendChild(summary);
+      if (item.quote) { const quote = document.createElement("blockquote"); quote.textContent = item.quote; row.appendChild(quote); }
+      const anchor = document.createElement("a");
+      anchor.href = url.href; anchor.target = "_blank"; anchor.rel = "noreferrer";
+      anchor.textContent = "Open source ↗";
+      row.appendChild(anchor); list.appendChild(row);
+    });
+    message.appendChild(list);
   }
   container.appendChild(message);
   container.scrollTop = container.scrollHeight;
@@ -1055,7 +1074,7 @@ const sendQuestion = async (question, form) => {
     const answer = await askRajat(question, pageMessages);
     loading.forEach(item => item.remove());
     chatContainers.forEach(container => {
-      appendMessage(container, answer.text, "bot", answer.source, answer.link);
+      appendMessage(container, answer.text, "bot", answer.source, answer.link, answer.sources);
       appendSuggestions(container, question, answer);
     });
     rememberTurn(pageMessages, question, answer);

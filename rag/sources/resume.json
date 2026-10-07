@@ -1,0 +1,45 @@
+{
+  "sha256": "9e9480c27e6d04e3253da9452472b8b9b06db0307eb4d078c0ef51697ebeac6c",
+  "sections": [
+    {
+      "section": "CONTACT",
+      "page": 1,
+      "text": "RAJAT KRISHNAN\nPayyanur, Kerala, India | +91 9778742750 | rajatkrishnan321@gmail.com | linkedin.com/in/rajat-krishnan77 | github.com/Rajat77a"
+    },
+    {
+      "section": "SUMMARY",
+      "page": 1,
+      "text": "Computer science student focused on prompt engineering, LLM pipelines and applied generative AI, with a growing pull toward security. Skilled\nat crafting, testing and refining prompts across Claude, ChatGPT and Gemini, and at judging model responses for polish, consistency and\naccuracy. Shipped several products end to end with Cursor, OpenAI Codex and Google Antigravity, and took first place in a King of the Hill\ncybersecurity contest using an AI-driven approach. Holds 14+ certifications from Anthropic, Google Cloud, IBM and NASSCOM. Self-driven and\nbuild-first."
+    },
+    {
+      "section": "SKILLS",
+      "page": 1,
+      "text": "Prompt Eng.\nPrompt crafting and tuning, LLM pipeline automation, response evaluation, behavior testing, cross-model adaptation\n(Claude, ChatGPT, Gemini)\nSecurity\nCTF and KOTH competitions (AI-assisted)\nLanguages\nPython, Java, C, JavaScript, TypeScript | Scikit-learn, Pandas, NumPy, Plotly, Streamlit, Folium\nAI Coding\nCursor, OpenAI Codex, Google Antigravity, Claude Code | Git, VS Code, n8n\nGenerative AI\nClaude, ChatGPT, Midjourney, Runway, ElevenLabs, Canva AI\nWeb / Backend\nNode.js, Express.js, MongoDB, SQLite, REST API, JWT\nHuman Lang.\nEnglish, Malayalam, Hindi, Arabic, Tamil\nInterests\nNew AI tools, soccer and athletic training, content creation"
+    },
+    {
+      "section": "EXPERIENCE",
+      "page": 1,
+      "text": "AI Fluency Intern, FlyRank AI (Remote)\nJuly to August 2026\nCrafted, tested and tuned prompts that powered deployable websites assembled with AI assistance.\nCompared responses from several models, rating polish, consistency and suitability for each use case.\nFinished Anthropic's structured coursework and credentials, sharpening applied AI literacy and prompt-writing craft.\nBacked full website builds with AI pair-programming tools, converting requirements into working products.\nFreelance AI Content Developer and Creative Designer, ZedWorks / IgniteWithoutCaffeine\nJune 2024 to Present\nProduced scripts, visuals and short-form videos for a wellness brand's Instagram and YouTube channels, owning the cycle from ideation\nthrough publishing and audience engagement.\nAssembled branded product visuals, menus and marketing assets for cafes and small businesses, juggling briefs, revisions and delivery\nacross concurrent clients.\nRefined text, image and video generation routines to lift output standards and keep results coherent across differing client styles."
+    },
+    {
+      "section": "PROJECTS",
+      "page": 1,
+      "text": "PrepPeer: AI Mock Interview Platform\n2026\nTypeScript, Next.js | Built with Cursor, Claude Code\nLaunched a mock interview product for job seekers featuring role-specific question generation, instant four-dimension scoring, real-time peer\nleaderboards with percentile rankings and shareable score cards.\nIterated on the directions given to the model so generated questions and scores stay consistent and relevant across job categories.\nGridWatch: Energy Theft Detection System\nMarch 2026\nPython, Scikit-learn, Streamlit, Pandas, NumPy, Folium, SQLite, Plotly | Built with Cursor, OpenAI Codex, Google Antigravity\nEngineered a real-time monitor applying anomaly detection to 30 days of simulated per-consumer meter data, flagging tampering, bypass\nconnections and slow-decline fraud with no labelled fraud records.\nAdded Loss Tracing, which compares transformer-level supply against summed consumer readings to expose pre-meter stealing that\nrule-based systems miss.\nRendered the simulated grid on an interactive map with colour-coded risk tiers, made for offline use. Owned every architectural call, leaning\non AI assistants for speed.\nBitcoin Sentiment Analysis\n2026\nPython, Jupyter Notebook, Pandas\nExamined Hyperliquid trading data alongside the Crypto Fear and Greed Index to study how market mood relates to trader behavior and\nposition sizing.\nUniversity Event Management System\nJan to Feb 2025\nNode.js, Express.js, MongoDB, JavaScript, HTML5, CSS3, JWT, REST API | Built with Cursor, OpenAI Codex\nCreated a full-stack web app where 500+ students and faculty browse, register for and manage campus events through one\nmobile-responsive web interface.\nImplemented three-tier access (Student, Faculty, Admin) with JWT authentication, university email validation and a QR code per registration.\nBundled dynamic event filters, an admin analytics panel and CSV export, directing architecture and scope with Cursor and OpenAI Codex\nassisting."
+    },
+    {
+      "section": "EDUCATION",
+      "page": 1,
+      "text": "Integrated M.Tech, Computer Science Engineering, VIT-AP, Amaravati, Andhra Pradesh\n2024 to 2029\nHigh School Diploma, Ursuline English Medium School, Pariyaram, Kerala\n2023 to 2024"
+    },
+    {
+      "section": "ACHIEVEMENTS",
+      "page": 1,
+      "text": "1st Place, PWN Grounds (King of the Hill cybersecurity competition), V-TAPP 2026\n11-12 Sep 2026\nWon VIT-AP's international tech-fest contest with AI assistance at the core of the approach."
+    },
+    {
+      "section": "CERTIFICATIONS",
+      "page": 1,
+      "text": "Anthropic (2026): Claude Code in Action; AI Fluency: Framework and Foundations; Claude 101\nGoogle Cloud: Introduction to Generative AI (Jan 2026) | IBM SkillsBuild: AI Ethics, MDL-220 (Feb 2026)\nNASSCOM / MeitY: Prompt Engineering Digital Fluency Badge (Nov 2025) | Dubai Future Foundation: 1 Million Prompters (Dec 2025)\nJPMorgan Chase (Forage): Quantitative Research Virtual Experience (Nov 2025) | HP LIFE: AI for Business Professionals (Nov 2025)\nCanva Design School: Graphic Design; Marketing with Canva; AI in the Classroom (Jul 2025)"
+    }
+  ]
+}
