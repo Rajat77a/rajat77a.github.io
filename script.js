@@ -919,7 +919,7 @@ const appendMessage = (container, text, type = "bot", source = "", link = null) 
 
   const message = document.createElement("div");
   message.className = `message ${type}`;
-  message.textContent = text;
+  message.textContent = type.startsWith("bot") ? text.replace(/\*\*/g, "") : text;
   if (link && type === "bot") {
     const anchor = document.createElement("a");
     anchor.className = "message-link";
@@ -1019,6 +1019,7 @@ const appendSuggestions = (container, question, answer) => {
 const pageMessages = document.querySelector("[data-chat-messages]");
 const drawerMessages = document.querySelector("[data-drawer-messages]");
 const chatContainers = [pageMessages, drawerMessages].filter(Boolean);
+chatContainers.forEach(container => container.querySelectorAll(".message").forEach(message => message.textContent = message.textContent.trim()));
 const chatControls = () => document.querySelectorAll(".chat-form textarea, .chat-form button, [data-ask], [data-new-chat]");
 let chatPending = false;
 const greeting = "Hi, I'm Rajat's portfolio assistant. Ask me about a project, his experience, or the kind of work he's looking for.";
