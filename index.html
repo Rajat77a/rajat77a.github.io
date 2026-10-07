@@ -21,7 +21,7 @@
       href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=chat-v3" />
+    <link rel="stylesheet" href="styles.css?v=assistant-ui-v4" />
     <script>
       try {
         document.documentElement.dataset.theme = localStorage.getItem("rajat-theme") || "dark";
@@ -347,26 +347,14 @@
           <h2>Get to know my work.</h2>
         </div>
         <div class="intelligence-shell">
-          <div class="intel-copy">
-            <p>
-              Want to know more about a project, my experience, or the tools I use?
-              Ask here, or download my resume below.
-            </p>
-            <div class="intel-prompts" aria-label="Suggested questions">
-              <button type="button" data-ask="Give me a quick introduction to Rajat." data-cursor="ASK">Start with the short version ↗</button>
-              <button type="button" data-ask="Compare PrepPeer and GridWatch. What did Rajat build in each?" data-cursor="ASK">Explore his projects ↗</button>
-              <button type="button" data-ask="What experience does Rajat have with prompt engineering?" data-cursor="ASK">Prompt engineering experience ↗</button>
-              <button type="button" data-ask="Can I download Rajat's resume?" data-cursor="RESUME">Get the resume ↗</button>
-            </div>
-          </div>
           <div class="chat-panel" aria-label="Rajat’s assistant chat">
             <div class="chat-header">
-              <span class="ai-logo" aria-hidden="true">RK</span>
+              <span class="ai-logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/><path d="M19 3v4M17 5h4"/></svg></span>
               <div>
                 <strong>Rajat’s assistant</strong>
-                <p>Projects, experience & the details</p>
+                <p>Your guide to my work</p>
               </div>
-              <button class="new-chat" type="button" data-new-chat>New chat</button>
+              <button class="new-chat" type="button" data-new-chat title="Start a new conversation"><span aria-hidden="true">↺</span><span class="new-chat-label">New chat</span></button>
             </div>
             <div class="ai-mode-bar" aria-label="Answer style">
               <button type="button" class="active" data-ai-mode="default" title="Balanced answers for most visitors" aria-label="General answer style">General</button>
@@ -380,8 +368,9 @@
               </div>
             </div>
             <form class="chat-form" data-chat-form>
-              <textarea data-chat-input rows="2" maxlength="600" placeholder="Ask about Rajat’s work…" aria-label="Ask Rajat’s assistant"></textarea>
-              <button type="submit" data-cursor="SEND" aria-label="Send message">Send ↗</button>
+              <textarea data-chat-input rows="1" maxlength="600" placeholder="Ask about Rajat’s work…" aria-label="Ask Rajat’s assistant"></textarea>
+              <button type="submit" data-cursor="SEND" aria-label="Send message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg></button>
+              <p class="composer-hint">Answers based on my resume & projects</p>
             </form>
           </div>
         </div>
@@ -414,20 +403,20 @@
     </main>
 
     <button class="ai-launcher" type="button" data-ai-launcher data-cursor="ASK AI">
-      Ask Rajat AI
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/><path d="M19 3v4M17 5h4"/></svg><span>Ask about Rajat</span>
     </button>
 
     <aside inert class="ai-drawer" data-ai-drawer aria-label="Ask Rajat’s assistant drawer" aria-hidden="true">
       <div class="drawer-head">
         <div class="drawer-title">
-          <span class="ai-logo compact" aria-hidden="true">RK</span>
+          <span class="ai-logo compact" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/><path d="M19 3v4M17 5h4"/></svg></span>
           <div>
             <strong>Rajat’s assistant</strong>
-            <p>Ask about his work</p>
+            <p>Your guide to my work</p>
           </div>
         </div>
-        <button class="new-chat" type="button" data-new-chat aria-label="Start a new conversation">New chat</button>
-        <button type="button" data-ai-close aria-label="Close Rajat’s assistant" data-cursor="CLOSE">Close</button>
+        <button class="new-chat" type="button" data-new-chat aria-label="Start a new conversation" title="Start a new conversation"><span aria-hidden="true">↺</span><span class="new-chat-label">New chat</span></button>
+        <button type="button" data-ai-close aria-label="Close Rajat’s assistant" data-cursor="CLOSE"><span aria-hidden="true">×</span></button>
       </div>
       <div class="ai-mode-bar drawer-mode-bar" aria-label="Answer style">
         <button type="button" class="active" data-ai-mode="default" title="Balanced answers for most visitors" aria-label="General answer style">General</button>
@@ -441,16 +430,32 @@
         </div>
       </div>
       <form class="chat-form" data-drawer-form>
-        <textarea data-drawer-input rows="2" maxlength="600" placeholder="Ask about Rajat’s work…" aria-label="Ask Rajat AI"></textarea>
-        <button type="submit" data-cursor="SEND" aria-label="Send message">Send ↗</button>
+        <textarea data-drawer-input rows="1" maxlength="600" placeholder="Ask about Rajat’s work…" aria-label="Ask Rajat AI"></textarea>
+        <button type="submit" data-cursor="SEND" aria-label="Send message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg></button>
+              <p class="composer-hint">Answers based on my resume & projects</p>
       </form>
     </aside>
+
+    <template id="assistant-welcome">
+      <div class="chat-welcome">
+        <span class="welcome-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/><path d="M19 3v4M17 5h4"/></svg></span>
+        <p class="welcome-kicker">MEET THE BUILDER</p>
+        <h3>What would you like to know?</h3>
+        <p class="welcome-description">Explore my projects, experience, and the way I work.</p>
+        <div class="welcome-prompts" aria-label="Suggested questions">
+          <button type="button" data-ask="Give me a quick introduction to Rajat."><span>↗</span><strong>Meet Rajat</strong><small>The short introduction</small></button>
+          <button type="button" data-ask="Compare PrepPeer and GridWatch. What did Rajat build in each?"><span>⌘</span><strong>Explore the projects</strong><small>What I built & how it works</small></button>
+          <button type="button" data-ask="What experience does Rajat have with prompt engineering?"><span>✳</span><strong>Skills & experience</strong><small>Tools, internships & AI work</small></button>
+          <button type="button" data-ask="Can I download Rajat's resume?"><span>↓</span><strong>Get my resume</strong><small>A closer look at my background</small></button>
+        </div>
+      </div>
+    </template>
 
     <footer>
       <p>&copy; 2026 Rajat Krishnan. Built with attention, motion, and product proof.</p>
     </footer>
 
     <script type="module" src="hero3d.js"></script>
-    <script type="module" src="script.js?v=chat-v3"></script>
+    <script type="module" src="script.js?v=assistant-ui-v4"></script>
   </body>
 </html>

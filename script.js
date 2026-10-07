@@ -1019,10 +1019,14 @@ const appendSuggestions = (container, question, answer) => {
 const pageMessages = document.querySelector("[data-chat-messages]");
 const drawerMessages = document.querySelector("[data-drawer-messages]");
 const chatContainers = [pageMessages, drawerMessages].filter(Boolean);
-chatContainers.forEach(container => container.querySelectorAll(".message").forEach(message => message.textContent = message.textContent.trim()));
+const showWelcome = container => {
+  container.replaceChildren(document.querySelector("#assistant-welcome").content.cloneNode(true));
+  container.scrollTop = 0;
+};
+chatContainers.forEach(showWelcome);
 const chatControls = () => document.querySelectorAll(".chat-form textarea, .chat-form button, [data-ask], [data-new-chat]");
 let chatPending = false;
-const greeting = "Hi, I'm Rajat's portfolio assistant. Ask me about a project, his experience, or the kind of work he's looking for.";
+
 
 const sendQuestion = async (question, form) => {
   question = question.trim().slice(0, 600);
@@ -1030,7 +1034,7 @@ const sendQuestion = async (question, form) => {
   chatPending = true;
   chatControls().forEach(c => c.disabled = true);
   const loading = chatContainers.map(container => {
-    container.querySelectorAll(".message-suggestions").forEach(row => row.remove());
+    container.querySelectorAll(".message-suggestions, .chat-welcome").forEach(row => row.remove());
     appendMessage(container, question, "user");
     container.setAttribute("aria-busy", "true");
     const item = appendMessage(container, "", "bot thinking");
@@ -1066,8 +1070,12 @@ document.querySelectorAll(".chat-form").forEach(form => {
   });
 });
 
-document.querySelectorAll("[data-ask]").forEach(button => {
-  button.addEventListener("click", () => sendQuestion(button.dataset.ask, document.querySelector("[data-chat-form]")));
+document.addEventListener("click", event => {
+  const button = event.target.closest("[data-ask]");
+  if (button && !button.disabled) {
+    const shell = button.closest(".chat-panel, .ai-drawer");
+    sendQuestion(button.dataset.ask, shell?.querySelector(".chat-form"));
+  }
 });
 
 document.querySelectorAll("[data-new-chat]").forEach(button => button.addEventListener("click", () => {
@@ -1076,7 +1084,7 @@ document.querySelectorAll("[data-new-chat]").forEach(button => button.addEventLi
   chatContainers.forEach(container => {
     container.replaceChildren();
     suggestionMemory.delete(container);
-    appendMessage(container, greeting, "bot", "Guide");
+    showWelcome(container);
   });
   document.querySelectorAll(".chat-form textarea").forEach(input => input.value = "");
 }));
