@@ -2089,7 +2089,7 @@ footer {
 .ai-launcher { display: flex; align-items: center; gap: 9px; padding: 12px 17px; min-height: 48px; border-radius: 100px; background: var(--bg); box-shadow: 0 5px 24px var(--shadow); }
 .ai-launcher svg { width: 21px; height: 21px; color: var(--lime); }
 .ai-launcher span { font-weight: 500; font-size: .83rem; }
-.ai-drawer { width: min(440px, calc(100vw - 28px)); height: min(680px, calc(100dvh - 120px)); border-radius: 20px; grid-template-rows: auto auto minmax(0, 1fr) auto; }
+.ai-drawer { width: min(440px, calc(100% - 28px)); height: min(680px, calc(100dvh - 120px)); border-radius: 20px; grid-template-rows: auto auto minmax(0, 1fr) auto; }
 .drawer-head { padding: 16px 18px; }
 .drawer-title { flex: 1; gap: 10px; min-width: 0; }
 .drawer-head [data-ai-close] { border: 0; background: transparent; color: var(--muted); padding: 0; width: 32px; min-height: 32px; font-size: 1.5rem; font-weight: 400; }
