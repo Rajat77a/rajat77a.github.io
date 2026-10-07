@@ -2127,3 +2127,13 @@ footer {
   .ai-drawer .ai-mode-bar button { padding-inline: 13px; }
 }
 @media (prefers-reduced-motion: reduce) { .welcome-prompts button { transition: none; } }
+
+/* Native pointer and scrolling inside the assistant. */
+.cursor.in-assistant { opacity: 0; }
+.chat-panel, .ai-drawer, .ai-launcher { cursor: auto; }
+.chat-panel button, .chat-panel a, .ai-drawer button, .ai-drawer a, .ai-launcher { cursor: pointer; }
+.chat-form textarea { cursor: text; }
+.chat-messages { overflow-y: auto; overscroll-behavior-y: auto; scroll-behavior: auto; touch-action: pan-y; }
+.chat-messages > * { flex-shrink: 0; }
+.ai-drawer .chat-messages { overscroll-behavior-y: contain; }
+.chat-messages:focus-visible { outline: 1px solid var(--line); outline-offset: -2px; }

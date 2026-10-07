@@ -21,7 +21,7 @@
       href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=assistant-ui-v5" />
+    <link rel="stylesheet" href="styles.css?v=assistant-ui-v6" />
     <script>
       try {
         document.documentElement.dataset.theme = localStorage.getItem("rajat-theme") || "dark";
@@ -362,7 +362,7 @@
               <button type="button" data-ai-mode="technical" title="More detail about tools, stack, and implementation" aria-label="Technical answer style">Tech</button>
               <button type="button" data-ai-mode="short" title="Short, direct answers" aria-label="Quick answer style">Quick</button>
             </div>
-            <div class="chat-messages" data-chat-messages role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation">
+            <div class="chat-messages" data-chat-messages role="log" tabindex="0" aria-live="polite" aria-relevant="additions" aria-label="Conversation">
               <div class="message bot">
                 Hi, I'm Rajat's portfolio assistant. Ask me about a project, his experience, or the kind of work he's looking for.
               </div>
@@ -424,7 +424,7 @@
         <button type="button" data-ai-mode="technical" title="More detail about tools, stack, and implementation" aria-label="Technical answer style">Tech</button>
         <button type="button" data-ai-mode="short" title="Short, direct answers" aria-label="Quick answer style">Quick</button>
       </div>
-      <div class="chat-messages drawer-messages" data-drawer-messages role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation">
+      <div class="chat-messages drawer-messages" data-drawer-messages role="log" tabindex="0" aria-live="polite" aria-relevant="additions" aria-label="Conversation">
         <div class="message bot">
           Hi, I'm Rajat's portfolio assistant. Ask me about a project, his experience, or the kind of work he's looking for.
         </div>
@@ -456,6 +456,6 @@
     </footer>
 
     <script type="module" src="hero3d.js"></script>
-    <script type="module" src="script.js?v=assistant-ui-v4"></script>
+    <script type="module" src="script.js?v=assistant-ui-v6"></script>
   </body>
 </html>

@@ -131,6 +131,12 @@ if (canHover && cursor) {
   window.addEventListener("pointermove", (event) => {
     cursorX = event.clientX;
     cursorY = event.clientY;
+    const inAssistant = Boolean(event.target.closest?.(".chat-panel, .ai-drawer, .ai-launcher"));
+    cursor.classList.toggle("in-assistant", inAssistant);
+    if (inAssistant) {
+      cursor.classList.remove("active");
+      cursorText.textContent = "";
+    }
   });
 
   const animateCursor = () => {
@@ -144,7 +150,7 @@ if (canHover && cursor) {
   animateCursor();
 
   document.querySelectorAll("[data-cursor], a, button").forEach((element) => {
-    if (element.closest(".hero") || element.hasAttribute("data-cursor-static")) {
+    if (element.closest(".hero, .chat-panel, .ai-drawer, .ai-launcher") || element.hasAttribute("data-cursor-static")) {
       return;
     }
 
