@@ -50,10 +50,14 @@ export function validateGroundedOutput(raw, chunks) {
     const numbers = text.match(/\b\d[\d,.+%-]*\b/g) || [];
     if (numbers.some(number => !new RegExp(`(?<![\\d.])${number.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?![\\d.])`).test(quote))) return null;
     const amounts = [...text.matchAll(/\b(\d[\d,.]*)(?:\+)?[\s-]+(days?|years?|months?|trades?|accounts?|certifications?|employees?|customers?|users?|students?|dimensions?|dollars?)\b/gi)];
-    for (const [,number,unit] of amounts) {
+    for (const amount of amounts) {
+      const [,number,unit] = amount;
       const singular = unit.toLowerCase().replace(/s$/,'');
       const equivalent = ['user','student'].includes(singular) ? '(?:user|student)s?' : `${singular}s?`;
-      if (!new RegExp(`(?<![\\d.])${escape(number)}\\+?[\\s-]+${equivalent}\\b`,'i').test(quote)) return null;
+      if (!new RegExp(`(?<![\\d.])${escape(number)}\\+?[\\s-]+${equivalent}\\b`,'i').test(quote)) {
+        const prefix=text.slice(Math.max(0,amount.index-20),amount.index);
+        if (!/\b(?:not|rather than|instead of)\s*$/i.test(prefix) || !hasQuantityConflict(amount[0],[{text:quote}])) return null;
+      }
     }
     const protectedTerms = text.match(/\b(phd|doctorate|senior|professional|production|certified|scheduled|upcoming|oscp|ceh|cissp|paying|million|billion|actual|real.world|perfect accuracy|every case|all theft|rust|kubernetes|aws|tensorflow|pytorch|google|microsoft|amazon|supabase|mongodb|postgresql|redis|docker|groq|streamlit|folium|sqlite|react|typescript|python|java|pandas|numpy|plotly|tesseract|next\.js\s*\d+)\b/gi) || [];
     if (protectedTerms.some(term => !quote.toLowerCase().includes(term.toLowerCase()))) return null;

@@ -35,3 +35,4 @@ test('known quantity conflicts can point to the documented quantity',()=>{
   assert.equal(hasQuantityConflict('GridWatch uses 30 days?', [grid]),false);
   assert.equal(hasQuantityConflict('Explain this in 3 sentences.', [grid]),false);
 });
+for(const [source,text] of [[grid,'GridWatch uses 30 days, not 30 years, of simulated meter data.'],[bitcoin,'The notebook covers 211,218 trades, not 211,218 accounts.']])test(`Retain documented correction: ${text}`,()=>assert.ok(validateGroundedOutput({claims:[{text,source_id:source.id,quote:source.text}]},[source])));
