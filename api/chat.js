@@ -1,5 +1,5 @@
 import { retrieve, extractiveAnswer } from '../rag/retrieve.js';
-import { validateGroundedOutput, unknownAnswer } from '../rag/grounding.js';
+import { validateGroundedOutput, unknownAnswer, hasQuantityConflict } from '../rag/grounding.js';
 import index from '../rag/index.js';
 
 const origins = (process.env.ALLOWED_ORIGINS || 'https://rajat77a.github.io,http://localhost:4173,http://127.0.0.1:4173').split(',').map(value => value.trim());
@@ -22,6 +22,8 @@ credential, tool, project metric or production deployment. Preserve negation:
 Preserve units and quantities: days are not years, trades are not accounts, and
 certificate counts are not employee counts. A negation in one clause does not
 validate an unsupported assertion in another. A completed internship is not ongoing.
+If a question asserts the wrong quantity but the documents supply the correct
+quantity, answer with the documented value and its citation instead of refusing.
 Use the whole question. Only discuss information that directly answers it.
 Do not confuse a certification with employment, personal skills with a project's
 stack, a plan with a completed feature, or simulated data with production users.
@@ -108,7 +110,7 @@ export default async function handler(req, res) {
   try {
     const raw = await generate(ragPrompt(retrieval.query, mode, retrieval.chunks));
     const result = validateGroundedOutput(raw, retrieval.chunks);
-    if (result && (result.sources.length || !/\bdocumented\b/i.test(message))) return reply(result.answer, result.sources, { grounded: true });
+    if (result && (result.sources.length || (!/\bdocumented\b/i.test(message) && !hasQuantityConflict(message,retrieval.chunks)))) return reply(result.answer, result.sources, { grounded: true });
     if (result) fallbackReason = 'model_abstention';
   } catch (error) {
     fallbackReason = error.message === 'Model rate limited' ? 'rate_limited' : error.name === 'TimeoutError' ? 'timeout' : 'model_unavailable';

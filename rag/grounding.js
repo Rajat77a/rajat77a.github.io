@@ -6,6 +6,16 @@ const negated = text => /\b(not|never|no|isn't|wasn't|didn't|doesn't)\b/i.test(t
 const unknown = "I couldn't find that detail in Rajat's documents, so I can't confirm it.";
 export const unknownAnswer = unknown;
 
+export function hasQuantityConflict(question, chunks) {
+  const pairs = [...question.matchAll(/\b(\d[\d,.]*)[\s-]+(days?|years?|months?|trades?|accounts?)\b/gi)];
+  return pairs.some(([,number,unit]) => {
+    const known = chunks.map(chunk => compact(chunk.text)).join(' ');
+    const exact = new RegExp(`(?<![\\d.])${escape(number)}[\\s-]+${unit.replace(/s$/i,'')}s?\\b`,'i');
+    const another = new RegExp(`(?<![\\d.])${escape(number)}[\\s-]+(?:days?|years?|months?|trades?|accounts?)\\b`,'i');
+    return !exact.test(known) && another.test(known);
+  });
+}
+
 export function validateGroundedOutput(raw, chunks) {
   let payload;
   try { payload = typeof raw === 'string' ? JSON.parse(raw.replace(/^```(?:json)?\s*|\s*```$/g, '')) : raw; }
