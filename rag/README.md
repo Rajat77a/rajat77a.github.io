@@ -97,3 +97,9 @@ The regression suite requires unsupported cases to abstain before calling a
 model, so model outages cannot turn them into loosely related profile excerpts.
 Known missing facts/tools and quote contradictions are guarded; this remains
 heuristic validation rather than a general semantic entailment proof.
+
+`tests/semantic-traps.test.mjs` adds quantity/unit, clause-negation, assistant
+identity, and completed-versus-current employment controls. `--mixed` selects
+24 fresh conversational questions for live evaluation and human review. Guarded
+employment dates use the document's month range and the server's current date;
+ongoing roles explicitly marked Present remain eligible for current-role answers.

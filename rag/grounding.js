@@ -1,6 +1,8 @@
 import { sourceFor } from './retrieve.js';
 
 const compact = text => String(text).replace(/\s+/g, ' ').trim();
+const escape = text => text.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const negated = text => /\b(not|never|no|isn't|wasn't|didn't|doesn't)\b/i.test(text.replace(/\bnot only\b/gi,''));
 const unknown = "I couldn't find that detail in Rajat's documents, so I can't confirm it.";
 export const unknownAnswer = unknown;
 
@@ -17,17 +19,32 @@ export function validateGroundedOutput(raw, chunks) {
     const quote = compact(claim.quote);
     const text = compact(claim.text);
     if (!source || quote.length < 20 || quote.length > 1100 || !compact(source.text).includes(quote) || !text || text.length > 600) return null;
-    if (/\bI (?:am|have|won|built|hold|worked|study)\b/i.test(text)) return null;
-    const employer = text.match(/\b(?:worked|works|employed|engineer|intern|employee)\s+(?:at|for)\s+([\w.-]+)|\bjoined\s+([\w.-]+)/i);
-    if (employer && !/\b(not|never|no|isn't|wasn't|didn't)\b/i.test(text)) {
-      const company = (employer[1] || employer[2]).toLowerCase();
-      if (source.topic !== 'experience' || !(source.entity || '').toLowerCase().includes(company)) return null;
+    if (/\bI (?:am|have|won|built|hold|worked|study)\b|\bI['’](?:m|ve)\b/i.test(text)) return null;
+    for (const clause of text.split(/;|\b(?:but|however|while|whereas)\b/i)) {
+      const employers = [...clause.matchAll(/\b(?:worked|works|employed|engineer|intern|employee)\s+(?:at|for)\s+([\w.-]+)|\bjoined\s+([\w.-]+)/gi)];
+      for (const employer of employers) {
+        if (negated(clause)) continue;
+        const company = (employer[1] || employer[2]).toLowerCase();
+        if (source.topic !== 'experience' || !(source.entity || '').toLowerCase().includes(company)) return null;
+      }
+      if (source.topic === 'experience' && /\b(current|currently|ongoing)\b/i.test(clause) && !negated(clause) && !/\bpresent\b/i.test(source.text)) {
+        const range = source.text.match(/\b([A-Za-z]+)\s+to\s+([A-Za-z]+)\s+(\d{4})\b/);
+        const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+        const month = range ? months.indexOf(range[2].slice(0,3).toLowerCase()) : -1;
+        if (month >= 0 && Date.UTC(Number(range[3]),month+1,1) <= Date.now()) return null;
+      }
     }
     // Provider coursework and certificates cannot substantiate an employment claim.
     if (source.topic === 'certifications' && /\b(worked|employed|intern(?:ed)?|employee|job)\b.{0,25}\b(at|for|with)\b/i.test(text) && !/\b(not|never|no|isn't|wasn't|didn't)\b/i.test(text)) return null;
     // A citation must contain the numbers, tool names and formal claims it is said to support.
     const numbers = text.match(/\b\d[\d,.+%-]*\b/g) || [];
     if (numbers.some(number => !new RegExp(`(?<![\\d.])${number.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?![\\d.])`).test(quote))) return null;
+    const amounts = [...text.matchAll(/\b(\d[\d,.]*)(?:\+)?[\s-]+(days?|years?|months?|trades?|accounts?|certifications?|employees?|customers?|users?|students?|dimensions?|dollars?)\b/gi)];
+    for (const [,number,unit] of amounts) {
+      const singular = unit.toLowerCase().replace(/s$/,'');
+      const equivalent = ['user','student'].includes(singular) ? '(?:user|student)s?' : `${singular}s?`;
+      if (!new RegExp(`(?<![\\d.])${escape(number)}\\+?[\\s-]+${equivalent}\\b`,'i').test(quote)) return null;
+    }
     const protectedTerms = text.match(/\b(phd|doctorate|senior|professional|production|certified|scheduled|upcoming|oscp|ceh|cissp|paying|million|billion|actual|real.world|perfect accuracy|every case|all theft|rust|kubernetes|aws|tensorflow|pytorch|google|microsoft|amazon|supabase|mongodb|postgresql|redis|docker|groq|streamlit|folium|sqlite|react|typescript|python|java|pandas|numpy|plotly|tesseract|next\.js\s*\d+)\b/gi) || [];
     if (protectedTerms.some(term => !quote.toLowerCase().includes(term.toLowerCase()))) return null;
     if (/\bno label(?:l)?ed fraud records\b/i.test(quote) && /\blabel(?:l)?ed fraud records\b/i.test(text) && !/\b(no|without|not|unlabelled|unlabeled)\b/i.test(text)) return null;

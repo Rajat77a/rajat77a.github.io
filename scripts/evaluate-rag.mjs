@@ -1,13 +1,14 @@
 import fs from 'node:fs';
 import cases from '../tests/questions.mjs';
 import hallucinations from '../tests/hallucination-cases.mjs';
+import mixed from '../tests/mixed-premises.mjs';
 import { retrieve } from '../rag/retrieve.js';
 import index from '../rag/index.js';
 
 const live = process.argv.includes('--live');
 const args = process.argv.slice(2);
 const value = (name, fallback) => args.includes(name) ? args[args.indexOf(name)+1] : fallback;
-const corpus = process.argv.includes('--hallucinations') ? hallucinations : cases;
+const corpus = process.argv.includes('--mixed') ? mixed : process.argv.includes('--hallucinations') ? hallucinations : cases;
 const limit = Number(value('--limit', corpus.length));
 const endpoint = value('--endpoint', 'https://rajat77a-github-io.vercel.app/api/chat');
 const ids=value('--ids','').split(',').filter(Boolean);
