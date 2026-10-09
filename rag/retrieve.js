@@ -64,6 +64,9 @@ export function retrieve(question, history = [], limit = 6) {
   const inferredTopic = topicFor(resolved);
   const topic = inferredTopic !== 'unknown' && entities.length && /^(what is|who (?:is|are)|tell me (?:about|more)|explain)\b/i.test(question) ? 'overview' : inferredTopic;
   if (topic === 'unknown') return { chunks: [], query: resolved, reason: 'unknown' };
+  if (/\b(oscp|ceh|cissp|phd|doctorate|drop out|dropped out|employee id|medical diagnoses|credit card)\b/i.test(question) || /\bwho\b.*\b(?:his|rajat'?s) parents\b/i.test(question)) return { chunks: [], query: resolved, reason: 'unknown' };
+  if (/\bprofessional\b.*\b(penetration|pentest)\b/i.test(question)) return { chunks: [], query: resolved, reason: 'unknown' };
+  if (entities.length && /\b(funding|uptime|patent|security audit|perfect accuracy)\b/i.test(question)) return { chunks: [], query: resolved, reason: 'unknown' };
   const queryTerms = expand(resolved);
   if (!topic && !entities.length) return { chunks: [], query: resolved, reason: 'unrelated' };
   let candidates = documents.filter(doc => {
@@ -74,8 +77,12 @@ export function retrieve(question, history = [], limit = 6) {
     if (topic === 'certifications') return doc.topic === topic || doc.topic === 'overview';
     return doc.topic === topic;
   });
-  const employer = question.match(/\b(?:work(?:ed|s)?|employed|interned)\s+(?:at|for)\s+([\w .-]+)[?.!]?$/i)?.[1]?.trim();
-  if (employer && /^(has|have|did|does|was|is)\b/i.test(question) && !candidates.some(doc => doc.topic === 'experience' && normalize(doc.entity || '').includes(normalize(employer)))) return { chunks: [], query: resolved, reason: 'unsupported' };
+  const employer = question.match(/\b(?:work(?:ed|s)?|employed|interned|job|role|position|internship)\s+(?:at|for|with)\s+([\w.-]+)/i)?.[1];
+  if (employer && !candidates.some(doc => doc.topic === 'experience' && normalize(doc.entity || '').includes(normalize(employer)))) return { chunks: [], query: resolved, reason: 'unsupported' };
+  const requestedTools = normalize(question).match(/\b(rust|kubernetes|postgresql|firebase|tensorflow|pytorch|aws|redis|docker|oscp|ceh|cissp)\b/g) || [];
+  if (requestedTools.some(tool => !candidates.some(doc => doc.tokens.includes(tool)))) return { chunks: [], query: resolved, reason: 'unsupported' };
+  const requestedVersions = [...normalize(question).matchAll(/\b(nextjs|react|python|express)\s+(\d+(?:\.\d+)*)\b/g)];
+  if (requestedVersions.some(([,tool,version]) => !candidates.some(doc => new RegExp(`\\b${tool}\\s+${version.replaceAll('.','\\.')}\\b`).test(normalize(doc.text))))) return { chunks: [], query: resolved, reason: 'unsupported' };
   // Named tools/languages/employers in a capability question must occur in its evidence.
   const generic = new Set(groups.flat().concat(['good', 'strong', 'fit', 'now', 'current', 'currently', 'practical', 'familiar', 'comfortable', 'knowledge', 'proficient', 'professional', 'engineering', 'engineer', 'developer', 'ai', 'llm', 'learning', 'model', 'models', 'role', 'roles', 'main', 'key', 'strongest', 'any', 'also', 'yes', 'no', 'list', 'all', 'please', 'really', 'code', 'build', 'websites', 'during', 'done', 'coding', 'made', 'creation']));
   if (!entities.length && ['skills', 'experience'].includes(topic) && /^(does|do|can|has|is|did)\b/i.test(question)) {

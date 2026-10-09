@@ -18,13 +18,19 @@ export function validateGroundedOutput(raw, chunks) {
     const text = compact(claim.text);
     if (!source || quote.length < 20 || quote.length > 1100 || !compact(source.text).includes(quote) || !text || text.length > 600) return null;
     if (/\bI (?:am|have|won|built|hold|worked|study)\b/i.test(text)) return null;
+    const employer = text.match(/\b(?:worked|works|employed|engineer|intern|employee)\s+(?:at|for)\s+([\w.-]+)|\bjoined\s+([\w.-]+)/i);
+    if (employer && !/\b(not|never|no|isn't|wasn't|didn't)\b/i.test(text)) {
+      const company = (employer[1] || employer[2]).toLowerCase();
+      if (source.topic !== 'experience' || !(source.entity || '').toLowerCase().includes(company)) return null;
+    }
     // Provider coursework and certificates cannot substantiate an employment claim.
     if (source.topic === 'certifications' && /\b(worked|employed|intern(?:ed)?|employee|job)\b.{0,25}\b(at|for|with)\b/i.test(text) && !/\b(not|never|no|isn't|wasn't|didn't)\b/i.test(text)) return null;
     // A citation must contain the numbers, tool names and formal claims it is said to support.
     const numbers = text.match(/\b\d[\d,.+%-]*\b/g) || [];
-    if (numbers.some(number => !quote.includes(number))) return null;
-    const protectedTerms = text.match(/\b(phd|doctorate|senior|professional|production|certified|scheduled|upcoming|rust|kubernetes|aws|tensorflow|pytorch|google|microsoft|amazon|supabase|mongodb|postgresql|redis|docker|groq|streamlit|folium|sqlite|react|typescript|python|java|pandas|numpy|plotly|tesseract|next\.js\s*\d+)\b/gi) || [];
+    if (numbers.some(number => !new RegExp(`(?<![\\d.])${number.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?![\\d.])`).test(quote))) return null;
+    const protectedTerms = text.match(/\b(phd|doctorate|senior|professional|production|certified|scheduled|upcoming|oscp|ceh|cissp|paying|million|billion|actual|real.world|perfect accuracy|every case|all theft|rust|kubernetes|aws|tensorflow|pytorch|google|microsoft|amazon|supabase|mongodb|postgresql|redis|docker|groq|streamlit|folium|sqlite|react|typescript|python|java|pandas|numpy|plotly|tesseract|next\.js\s*\d+)\b/gi) || [];
     if (protectedTerms.some(term => !quote.toLowerCase().includes(term.toLowerCase()))) return null;
+    if (/\bno label(?:l)?ed fraud records\b/i.test(quote) && /\blabel(?:l)?ed fraud records\b/i.test(text) && !/\b(no|without|not|unlabelled|unlabeled)\b/i.test(text)) return null;
     const projects = [
       ['PrepPeer', /\bpreppeer\b/i], ['GridWatch', /\bgridwatch\b/i], ['NextStep', /\bnextstep\b/i],
       ['University Event Management', /\b(unievents|university event management)\b/i],

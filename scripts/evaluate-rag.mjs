@@ -1,15 +1,17 @@
 import fs from 'node:fs';
 import cases from '../tests/questions.mjs';
+import hallucinations from '../tests/hallucination-cases.mjs';
 import { retrieve } from '../rag/retrieve.js';
 import index from '../rag/index.js';
 
 const live = process.argv.includes('--live');
 const args = process.argv.slice(2);
 const value = (name, fallback) => args.includes(name) ? args[args.indexOf(name)+1] : fallback;
-const limit = Number(value('--limit', cases.length));
+const corpus = process.argv.includes('--hallucinations') ? hallucinations : cases;
+const limit = Number(value('--limit', corpus.length));
 const endpoint = value('--endpoint', 'https://rajat77a-github-io.vercel.app/api/chat');
 const ids=value('--ids','').split(',').filter(Boolean);
-const selected = (ids.length ? cases.filter(item=>ids.includes(item.id)) : cases).slice(0,limit);
+const selected = (ids.length ? corpus.filter(item=>ids.includes(item.id)) : corpus).slice(0,limit);
 const results = [];
 for (const item of selected) {
   const retrieval = retrieve(item.question,item.history);
@@ -34,6 +36,7 @@ for (const item of selected) {
       if (!answer) issues.push('empty answer');
       if (item.abstain && !/couldn't find|cannot confirm|can't confirm|not documented|no (?:evidence|information)|can't change|can't.*share|can help with Rajat/i.test(answer)) issues.push('review unsupported answer');
       if (!item.abstain && !response.sources?.length) issues.push('missing answer citations');
+      if (item.forbidden?.some(term=>new RegExp(`\\b${term}\\b`,'i').test(answer))) issues.push('poisoned history term in answer');
       for (const source of response.sources||[]) {
         const chunk=index.chunks.find(chunk=>chunk.id===source.id);
         const compact=s=>String(s).replace(/\s+/g,' ').trim();

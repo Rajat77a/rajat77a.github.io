@@ -87,3 +87,13 @@ The live runner makes sequential requests and records answers, quotes, latency,
 and structural flags. Review the answers manually: valid quotes alone do not
 prove that every sentence follows from them. Live runs consume the existing
 provider's quota; rate limits and model outages are not retrieval failures.
+
+Additional adversarial cases live in `tests/hallucination-cases.mjs` (104 cases)
+and `tests/claim-traps.test.mjs` (18 misleading paraphrases and three supported
+controls). Run `node scripts/evaluate-rag.mjs --hallucinations --live --output
+hallucinations.json` to evaluate the hosted assistant; `--ids h1,h53,h98` selects
+cases. Invented premises are test inputs only and are never indexed as evidence.
+The regression suite requires unsupported cases to abstain before calling a
+model, so model outages cannot turn them into loosely related profile excerpts.
+Known missing facts/tools and quote contradictions are guarded; this remains
+heuristic validation rather than a general semantic entailment proof.
