@@ -19,3 +19,14 @@ test('course attendance does not prove employment at its provider',()=>{
   const source=index.chunks.find(chunk=>chunk.topic==='certifications');
   assert.equal(validateGroundedOutput({claims:[{text:'Rajat worked at Google Cloud.',source_id:source.id,quote:source.text}]},[source]),null);
 });
+test('certification provider employment needs an actual employer record',()=>{
+  for(const company of ['Google','Anthropic','JPMorgan','Microsoft']) assert.equal(retrieve(`Did he work for ${company}?`).chunks.length,0);
+  assert.ok(retrieve('Did he work for FlyRank?').chunks.length);
+});
+test('the assistant cannot impersonate Rajat',()=>{
+  const source=index.chunks.find(chunk=>chunk.topic==='overview');
+  assert.equal(validateGroundedOutput({claims:[{text:'I am Rajat, a computer science student.',source_id:source.id,quote:source.text}]},[source]),null);
+});
+test('outage answers quote the requested skills section',()=>{
+  for(const [question,evidence] of [['What hobbies does he have?','soccer'],['What human languages does he speak?','Malayalam'],['What programming languages does he know?','Python'],['What backend tools does he use?','MongoDB']]) assert.ok(extractiveAnswer(question).text.includes(evidence));
+});

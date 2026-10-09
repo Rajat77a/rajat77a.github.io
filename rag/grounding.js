@@ -17,6 +17,7 @@ export function validateGroundedOutput(raw, chunks) {
     const quote = compact(claim.quote);
     const text = compact(claim.text);
     if (!source || quote.length < 20 || quote.length > 1100 || !compact(source.text).includes(quote) || !text || text.length > 600) return null;
+    if (/\bI (?:am|have|won|built|hold|worked|study)\b/i.test(text)) return null;
     // Provider coursework and certificates cannot substantiate an employment claim.
     if (source.topic === 'certifications' && /\b(worked|employed|intern(?:ed)?|employee|job)\b.{0,25}\b(at|for|with)\b/i.test(text) && !/\b(not|never|no|isn't|wasn't|didn't)\b/i.test(text)) return null;
     // A citation must contain the numbers, tool names and formal claims it is said to support.

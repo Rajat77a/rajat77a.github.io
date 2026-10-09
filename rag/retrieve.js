@@ -33,7 +33,7 @@ const topicFor = query => {
   if (/\b(availability|available|hire|hiring|looking|opportunities|roles?|fit)\b/.test(q) || /\bopen\b.*\binternship\b/.test(q)) return 'availability';
   if (/\b(contact|email|reach|linkedin|github|phone|based|live|lives|location)\b/.test(q)) return 'contact';
   if (/\b(won|win|competition|contest|achievement|award|koth|pwn|security|cybersecurity|ctf)\b/.test(q)) return 'achievements';
-  if (/\b(experience|internship|intern|job|employment|flyrank|freelance|clients?|cafes|short.form videos)\b/.test(q) || /\bworked (at|for)\b/.test(q) || /\b(compare|evaluate)\b.*\b(responses|model)\b/.test(q)) return 'experience';
+  if (/\b(experience|internship|intern|job|employment|flyrank|freelance|clients?|cafes|short.form videos)\b/.test(q) || /\bwork(?:ed|s)? (at|for)\b/.test(q) || /\b(compare|evaluate)\b.*\b(responses|model)\b/.test(q)) return 'experience';
   if (/\b(skills?|stack|tools?|technolog|languages?|speak|python|java|rust|prompt|prompting|dbms|database|typescript|javascript|mongodb|sqlite|n8n|canva|jwt|rest api|coding|code|generative ai|model|interested|hobbies|interests|german|french|arabic|tamil|hindi)\b/.test(q)) return 'skills';
   if (/\bcontent creation\b/.test(q)) return 'experience';
   if (/\b(projects?|built|products?|building)\b/.test(q)) return 'projects';
@@ -61,7 +61,8 @@ export function retrieve(question, history = [], limit = 6) {
   const entities = namedEntities(resolved);
   const previousUser = [...history].reverse().find(turn => turn.role === 'user');
   if (!entities.length && /\b(it|its|that|this)\b/i.test(question) && previousUser && namedEntities(previousUser.content).length > 1) return { chunks: [], query: resolved, reason: 'ambiguous' };
-  const topic = topicFor(resolved);
+  const inferredTopic = topicFor(resolved);
+  const topic = inferredTopic !== 'unknown' && entities.length && /^(what is|who (?:is|are)|tell me (?:about|more)|explain)\b/i.test(question) ? 'overview' : inferredTopic;
   if (topic === 'unknown') return { chunks: [], query: resolved, reason: 'unknown' };
   const queryTerms = expand(resolved);
   if (!topic && !entities.length) return { chunks: [], query: resolved, reason: 'unrelated' };
@@ -73,6 +74,8 @@ export function retrieve(question, history = [], limit = 6) {
     if (topic === 'certifications') return doc.topic === topic || doc.topic === 'overview';
     return doc.topic === topic;
   });
+  const employer = question.match(/\b(?:work(?:ed|s)?|employed|interned)\s+(?:at|for)\s+([\w .-]+)[?.!]?$/i)?.[1]?.trim();
+  if (employer && /^(has|have|did|does|was|is)\b/i.test(question) && !candidates.some(doc => doc.topic === 'experience' && normalize(doc.entity || '').includes(normalize(employer)))) return { chunks: [], query: resolved, reason: 'unsupported' };
   // Named tools/languages/employers in a capability question must occur in its evidence.
   const generic = new Set(groups.flat().concat(['good', 'strong', 'fit', 'now', 'current', 'currently', 'practical', 'familiar', 'comfortable', 'knowledge', 'proficient', 'professional', 'engineering', 'engineer', 'developer', 'ai', 'llm', 'learning', 'model', 'models', 'role', 'roles', 'main', 'key', 'strongest', 'any', 'also', 'yes', 'no', 'list', 'all', 'please', 'really', 'code', 'build', 'websites', 'during', 'done', 'coding', 'made', 'creation']));
   if (!entities.length && ['skills', 'experience'].includes(topic) && /^(does|do|can|has|is|did)\b/i.test(question)) {
@@ -92,6 +95,8 @@ export function retrieve(question, history = [], limit = 6) {
     if (doc.topic === topic) score += 2;
     if (entities.length && doc.kind === 'project') score += 2;
     if (entities.length && topic === 'skills' && /stack|architecture|file structure|tools.*skills/i.test(doc.section)) score += 8;
+    if (entities.length && topic === 'overview' && (doc.section === 'Overview' && doc.text.length > 100 || doc.kind === 'resume')) score += 6;
+    if (/\bresume\b/i.test(question) && doc.kind === 'resume') score += 8;
     return { doc, score };
   }).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
   const selected = [];
@@ -121,6 +126,33 @@ export function sourceFor(chunk, quote = '') {
   return { id: chunk.id, title: chunk.title, url: chunk.url, section: chunk.section, quote };
 }
 
+function relevantExcerpt(chunk, query) {
+  const lines = chunk.text.split('\n');
+  if (chunk.topic === 'skills') {
+    const section = /\b(human|speak|spoken|arabic|tamil|hindi|malayalam)\b/i.test(query) ? 'Human Lang.'
+      : /\b(hobbies|interested|interests|soccer)\b/i.test(query) ? 'Interests'
+      : /\b(backend|database|jwt|rest api|mongodb|sqlite)\b/i.test(query) ? 'Web / Backend'
+      : /\b(coding|assistants|n8n|cursor|codex)\b/i.test(query) ? 'AI Coding'
+      : /\b(generative|midjourney|runway|canva)\b/i.test(query) ? 'Generative AI'
+      : /\b(programming|data analysis|visualisation|python|java|typescript|languages)\b/i.test(query) ? 'Languages' : null;
+    if (section) {
+      const start = lines.indexOf(section);
+      if (start >= 0) return lines.slice(start,start+2).join('\n');
+    }
+  }
+  const queryTerms = expand(query);
+  let best = 0, bestScore = -1;
+  for (let start = 0; start < lines.length; start++) {
+    const tokens = words(lines.slice(start,start+5).join('\n'));
+    const score = queryTerms.reduce((sum,term) => sum + (tokens.includes(term) ? Math.log(1 + documents.length / (frequencies.get(term) || 1)) : 0),0);
+    if (score > bestScore) { best=start; bestScore=score; }
+  }
+  // Keep the excerpt contiguous and verbatim; never manufacture a supporting quote.
+  // Short passages can retain the complete context without cutting off the answer.
+  if (chunk.text.length <= 650) return chunk.text;
+  return lines.slice(best,best+5).join('\n').trim().slice(0,650);
+}
+
 export function extractiveAnswer(question, history = []) {
   const result = retrieve(question, history, 6);
   if (!result.chunks.length) return { text: result.reason === 'ambiguous' ? "Which project do you mean? Name one and I can explain it." : result.reason === 'unrelated' ? "I can help with Rajat's work and background. Try asking about a project, his experience, or his resume." : "I couldn't find that detail in Rajat's documents, so I can't confirm it.", source: 'Document answer', sources: [] };
@@ -131,7 +163,7 @@ export function extractiveAnswer(question, history = []) {
       return matching.find(chunk => chunk.section === 'Overview' && chunk.text.length >= 100)
         || matching.find(chunk => chunk.kind === 'resume') || matching[0];
     }).filter(Boolean)
-    : result.chunks.slice(0, 2);
-  const quotes = chosen.map(chunk => chunk.text.split('\n').filter(Boolean).slice(0, 5).join('\n').slice(0, 650));
+    : entities.length === 1 ? result.chunks.slice(0, 3) : result.chunks.slice(0, 2);
+  const quotes = chosen.map(chunk => relevantExcerpt(chunk,result.query));
   return { text: quotes.join('\n\n'), source: 'Source excerpts', sources: chosen.map((chunk, i) => sourceFor(chunk, quotes[i])) };
 }
