@@ -1,6 +1,7 @@
 {
   "installCommand": "ONNXRUNTIME_NODE_INSTALL=skip npm ci",
-  "buildCommand": "npm run rag:prepare",
+  "buildCommand": "node scripts/build-static.mjs",
+  "outputDirectory": "public",
   "functions": {
     "api/chat.js": {
       "maxDuration": 30,

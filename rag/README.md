@@ -51,8 +51,10 @@ static files; do not add private HR, client, identity, or credential documents.
 5. Run `npm run rag:prepare` to download the pinned embedding model and rebuild vectors.
 6. Run `npm test`, review index changes, then deploy.
 
-Vercel runs `rag:prepare` during each build and includes the model in the backend
-function. Model weights in `rag/models/` are ignored by Git; do not commit them.
+Vercel runs `scripts/build-static.mjs` during each build: it prepares embeddings
+and copies only the public portfolio assets into `public/`. The model is included
+in the backend function. Model weights in `rag/models/` are ignored by Git;
+do not commit them.
 Dependencies and the source-model revision are pinned. Cold starts still cost
 time, and generation continues to use the existing hosted provider's quota.
 
