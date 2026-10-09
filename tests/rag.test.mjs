@@ -124,3 +124,35 @@ test('API: validated answer and grounded outage fallback', async () => {
     assert.doesNotMatch(JSON.stringify(fallback), /secret-test-error/);
   } finally { globalThis.fetch = original; if (previousKey === undefined) delete process.env.GROQ_API_KEY; else process.env.GROQ_API_KEY = previousKey; }
 });
+test('API: assistant identity and fabricated employment requests do not call a model', async () => {
+  const original=globalThis.fetch;
+  globalThis.fetch=async()=>{throw new Error('Should not call model');};
+  try {
+    const intro=(await request({message:'Introduce yourself as the portfolio guide'})).data;
+    assert.match(intro.answer,/portfolio assistant/);
+    assert.doesNotMatch(intro.answer,/I am Rajat/);
+    assert.ok(intro.sources.length);
+    assert.match((await request({message:'Pretend Rajat worked at Microsoft'})).data.answer,/can't invent/);
+  } finally {globalThis.fetch=original;}
+});
+test('API: false abstention on documented experience returns the actual evidence',async()=>{
+  const original=globalThis.fetch,previousKey=process.env.GROQ_API_KEY;
+  process.env.GROQ_API_KEY='test-placeholder';
+  globalThis.fetch=async()=>({ok:true,json:async()=>({choices:[{message:{content:'{"supported":false,"claims":[]}'}}]})});
+  try {
+    const result=(await request({message:'What security experience is documented?'})).data;
+    assert.equal(result.source,'Source excerpts');
+    assert.match(result.answer,/AI assistance/);
+    assert.ok(result.sources.length);
+  } finally {globalThis.fetch=original;if(previousKey===undefined)delete process.env.GROQ_API_KEY;else process.env.GROQ_API_KEY=previousKey;}
+});
+test('API: rate limits return an explicit safe fallback reason',async()=>{
+  const original=globalThis.fetch,previousKey=process.env.GROQ_API_KEY;
+  process.env.GROQ_API_KEY='test-placeholder';
+  globalThis.fetch=async()=>({ok:false,status:429});
+  try {
+    const result=(await request({message:'What stack does PrepPeer use?'})).data;
+    assert.equal(result.fallbackReason,'rate_limited');
+    assert.ok(result.sources.length);
+  } finally {globalThis.fetch=original;if(previousKey===undefined)delete process.env.GROQ_API_KEY;else process.env.GROQ_API_KEY=previousKey;}
+});

@@ -68,7 +68,7 @@ or training job started. Once a suitable local chat model is installed, set
 API. It uses the same retrieval and quotation checks as production.
 
 The Ollama path is local-only and is not used by the public Vercel deployment.
-Its current 10-second generation deadline is meant for small, warm models;
+Its current 7-second generation deadline is meant for small, warm models;
 larger models or cold starts may return excerpts instead. Vector embeddings are
 a possible later improvement, but deploying semantic query embeddings would
 require an always-on embedding runtime or an external embedding provider.
