@@ -72,3 +72,18 @@ Its current 10-second generation deadline is meant for small, warm models;
 larger models or cold starts may return excerpts instead. Vector embeddings are
 a possible later improvement, but deploying semantic query embeddings would
 require an always-on embedding runtime or an external embedding provider.
+
+## Repeatable question evaluation
+
+`tests/questions.mjs` contains 233 questions reviewed against the source documents:
+profile, employment, skills, credentials, six projects, unsupported requests,
+follow-ups with poisoned assistant history, and every pair of project comparisons.
+These are evaluation cases, not model weight training examples.
+
+Run `npm test` for regression checks and `npm run rag:eval -- --output report.json`
+for a retrieval report. To test the actual hosted model, use
+`npm run rag:eval -- --live --output live-report.json`; `--limit N` limits requests.
+The live runner makes sequential requests and records answers, quotes, latency,
+and structural flags. Review the answers manually: valid quotes alone do not
+prove that every sentence follows from them. Live runs consume the existing
+provider's quota; rate limits and model outages are not retrieval failures.

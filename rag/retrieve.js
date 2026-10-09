@@ -1,7 +1,7 @@
 import index from './index.js';
 
 const stop = new Set('a an the is are was were be been being am i me my we our you your he him his her it its they their rajat krishnan does do did can could would should has have had about tell explain give show know what which who how why where when of on in at to for with and or from this that these those please more use used using work works'.split(' '));
-const normalize = value => String(value).toLowerCase().replace(/nextstep[.·\s-]*ai/g, 'nextstep').replace(/uni[ -]?events/g, 'unievents').replace(/full[ -]?stack/g, 'fullstack').replace(/node\.js/g, 'nodejs').replace(/next\.js/g, 'nextjs');
+const normalize = value => String(value).toLowerCase().replace(/nextstep[.·\s-]*ai/g, 'nextstep').replace(/uni[ -]?events/g, 'unievents').replace(/full[ -]?stack/g, 'fullstack').replace(/node\.js/g, 'nodejs').replace(/next\.js/g, 'nextjs').replace(/\b(databases|apis|internships|prompts|models|courses)\b/g, word => word.slice(0,-1));
 const words = value => normalize(value).match(/[a-z0-9+#]+/g) || [];
 const terms = value => [...new Set(words(value).filter(word => !stop.has(word)))];
 const groups = [
@@ -21,21 +21,23 @@ const expand = query => [...new Set(terms(query).flatMap(term => [term, ...(grou
 const aliases = [
   ['FlyRank', /\bflyrank\b/], ['PrepPeer', /\bpreppeer\b/], ['GridWatch', /\bgridwatch\b/], ['NextStep.AI', /\bnextstep\b/],
   ['University Event Management System', /\b(unievents|university event|event management)\b/],
-  ['Bitcoin Sentiment Analysis', /\b(bitcoin|hyperliquid|fear and greed)\b/], ['ZedWorks', /\bzedworks\b/]
+  ['Bitcoin Sentiment Analysis', /\b(bitcoin|hyperliquid|fear and greed)\b/], ['ZedWorks', /\b(zedworks|ignitewithoutcaffeine)\b/]
 ];
 const namedEntities = query => aliases.filter(([, pattern]) => pattern.test(normalize(query))).map(([name]) => name);
 const topicFor = query => {
   const q = normalize(query);
-  if (/\b(cgpa|gpa|salary|passport|aadhaar|home address|girlfriend|boyfriend|backlogs?|attendance|semester|placement eligibility)\b/.test(q)) return 'unknown';
-  if (/\b(certifications?|certificates?|credentials)\b/.test(q)) return 'certifications';
+  if (/\b(cgpa|gpa|salary|passport|aadhaar|home address|girlfriend|boyfriend|backlogs?|attendance|semester|placement eligibility|date of birth|how old|bank balance|leetcode|revenue|paying customers|funded|accuracy percentage|certified penetration tester|professional pentester)\b/.test(q)) return 'unknown';
+  if (/\b(certifications?|certificates?|credentials?|courses?|coursework|badge|forage|nasscom|dubai future foundation|ai ethics)\b/.test(q)) return 'certifications';
+  if (/\b(stack|database|programming languages|backend tools)\b/.test(q)) return 'skills';
   if (/\b(education|degree|college|study|studying|studies|year|school|student|graduate|graduation)\b/.test(q)) return 'education';
-  if (/\b(availability|available|hire|hiring|looking|opportunities|roles?|fit)\b/.test(q)) return 'availability';
-  if (/\b(experience|internship|intern|job|employment|worked|flyrank|freelance)\b/.test(q)) return 'experience';
-  if (/\b(contact|email|reach|linkedin|github|phone)\b/.test(q)) return 'contact';
+  if (/\b(availability|available|hire|hiring|looking|opportunities|roles?|fit)\b/.test(q) || /\bopen\b.*\binternship\b/.test(q)) return 'availability';
+  if (/\b(contact|email|reach|linkedin|github|phone|based|live|lives|location)\b/.test(q)) return 'contact';
   if (/\b(won|win|competition|contest|achievement|award|koth|pwn|security|cybersecurity|ctf)\b/.test(q)) return 'achievements';
-  if (/\b(skills?|stack|tools?|technolog|languages?|speak|python|java|rust|prompt|prompting|dbms|database)\b/.test(q)) return 'skills';
+  if (/\b(experience|internship|intern|job|employment|flyrank|freelance|clients?|cafes|short.form videos)\b/.test(q) || /\bworked (at|for)\b/.test(q) || /\b(compare|evaluate)\b.*\b(responses|model)\b/.test(q)) return 'experience';
+  if (/\b(skills?|stack|tools?|technolog|languages?|speak|python|java|rust|prompt|prompting|dbms|database|typescript|javascript|mongodb|sqlite|n8n|canva|jwt|rest api|coding|code|generative ai|model|interested|hobbies|interests|german|french|arabic|tamil|hindi)\b/.test(q)) return 'skills';
+  if (/\bcontent creation\b/.test(q)) return 'experience';
   if (/\b(projects?|built|products?|building)\b/.test(q)) return 'projects';
-  if (/\b(intro|introduction|introduce|summary|overview|background|about|work)\b/.test(q) || /\bwho\b/.test(q) || (/^what\b/.test(q) && /\bdo\b/.test(q))) return 'overview';
+  if (/\b(intro|introduction|introduce|summary|summarize|overview|background|about|work|bio|focus)\b/.test(q) || /\bwho\b/.test(q) || (/^what\b/.test(q) && /\bdo\b/.test(q))) return 'overview';
   return null;
 };
 const documents = index.chunks.map(chunk => ({ ...chunk, tokens: words(`${chunk.entity || ''} ${chunk.section} ${chunk.text}`) }));
@@ -68,10 +70,11 @@ export function retrieve(question, history = [], limit = 6) {
     if (topic === 'overview') return ['overview', 'education', 'experience', 'projects', 'achievements'].includes(doc.topic);
     if (topic === 'skills') return ['skills', 'projects'].includes(doc.topic);
     if (topic === 'experience') return doc.topic === 'experience';
+    if (topic === 'certifications') return doc.topic === topic || doc.topic === 'overview';
     return doc.topic === topic;
   });
   // Named tools/languages/employers in a capability question must occur in its evidence.
-  const generic = new Set(groups.flat().concat(['good', 'strong', 'fit', 'now', 'current', 'currently', 'practical', 'familiar', 'comfortable', 'knowledge', 'proficient', 'professional', 'engineering', 'engineer', 'developer', 'ai', 'llm', 'learning', 'model', 'models', 'role', 'roles', 'main', 'key', 'strongest', 'any', 'also', 'yes', 'no', 'list', 'all', 'please', 'really']));
+  const generic = new Set(groups.flat().concat(['good', 'strong', 'fit', 'now', 'current', 'currently', 'practical', 'familiar', 'comfortable', 'knowledge', 'proficient', 'professional', 'engineering', 'engineer', 'developer', 'ai', 'llm', 'learning', 'model', 'models', 'role', 'roles', 'main', 'key', 'strongest', 'any', 'also', 'yes', 'no', 'list', 'all', 'please', 'really', 'code', 'build', 'websites', 'during', 'done', 'coding', 'made', 'creation']));
   if (!entities.length && ['skills', 'experience'].includes(topic) && /^(does|do|can|has|is|did)\b/i.test(question)) {
     const specifics = terms(resolved).filter(term => !generic.has(term) && term !== 'flyrank');
     const missing = specifics.filter(term => !candidates.some(doc => doc.tokens.includes(term)));
@@ -88,6 +91,7 @@ export function retrieve(question, history = [], limit = 6) {
     }
     if (doc.topic === topic) score += 2;
     if (entities.length && doc.kind === 'project') score += 2;
+    if (entities.length && topic === 'skills' && /stack|architecture|file structure|tools.*skills/i.test(doc.section)) score += 8;
     return { doc, score };
   }).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
   const selected = [];
@@ -101,7 +105,7 @@ export function retrieve(question, history = [], limit = 6) {
   for (const entity of entities) {
     const matching = scored.filter(({ doc }) => normalize(doc.entity || '').includes(normalize(entity))).slice(0, 2);
     matching.forEach(({ doc }) => { if (!selected.includes(doc)) selected.push(doc); });
-    if (entities.length > 1) {
+    if (entities.length) {
       const resume = candidates.find(doc => doc.kind === 'resume' && normalize(doc.entity || '').includes(normalize(entity)));
       if (resume && !selected.includes(resume)) selected.push(resume);
     }
