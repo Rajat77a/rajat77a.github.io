@@ -1,0 +1,8 @@
+{
+  "examples": 141,
+  "maxTokens": 609,
+  "longestExample": "heldout-partial-cert-2",
+  "limit": 1024,
+  "method": "Pinned Qwen3 tokenizer via Transformers.js; Colab rechecks with Python tokenizer before training",
+  "gpuTrainingRun": false
+}

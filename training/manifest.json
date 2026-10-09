@@ -1,0 +1,18 @@
+{
+  "sourceFingerprint": "106fcb3b88bd61d0252c0ae91f9db7f2677437b9518d233b7fc1f63203d10243",
+  "train": 115,
+  "eval": 26,
+  "validation": 10,
+  "test": 16,
+  "trainFamilies": 44,
+  "evalFamilies": 13,
+  "evalSourceIDs": [
+    "resume-10",
+    "resume-12",
+    "NextStep-2-20",
+    "bitcoin-sentiment-analysis-30",
+    "ZedWorks-portfolio-33"
+  ],
+  "synthetic": true,
+  "note": "Hand-authored, source-grounded starter examples, not real visitor chats or foundation-model pretraining."
+}
