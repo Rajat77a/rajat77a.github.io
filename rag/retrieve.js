@@ -29,6 +29,7 @@ const topicFor = query => {
   if (/\b(cgpa|gpa|salary|passport|aadhaar|home address|girlfriend|boyfriend|backlogs?|attendance|semester|placement eligibility|date of birth|how old|bank balance|leetcode|revenue|paying customers|funded|accuracy percentage|certified penetration tester|professional pentester)\b/.test(q)) return 'unknown';
   if (/\b(certifications?|certificates?|credentials?|courses?|coursework|badge|forage|nasscom|dubai future foundation|ai ethics)\b/.test(q)) return 'certifications';
   if (/\b(stack|database|programming languages|backend tools)\b/.test(q)) return 'skills';
+  if (/\b(build|built|create|created|develop|developed|made|projects?|products?)\b/.test(q) && /\b(students?|learners?|parents?|campus)\b/.test(q)) return 'projects';
   if (/\b(education|degree|college|study|studying|studies|year|school|student|graduate|graduation)\b/.test(q)) return 'education';
   if (/\b(availability|available|hire|hiring|looking|opportunities|roles?|fit)\b/.test(q) || /\bopen\b.*\binternship\b/.test(q)) return 'availability';
   if (/\b(contact|email|reach|linkedin|github|phone|based|live|lives|location)\b/.test(q)) return 'contact';
@@ -46,7 +47,7 @@ const frequencies = new Map();
 documents.forEach(doc => new Set(doc.tokens).forEach(token => frequencies.set(token, (frequencies.get(token) || 0) + 1)));
 
 export function resolveQuery(question, history = []) {
-  if (namedEntities(question).length || !/\b(it|its|that|this|more|why|stack|tools)\b/i.test(question)) return question;
+  if (namedEntities(question).length || !/\b(it|its|that|this|more|why|stack|tools)\b|^\s*(which|what) technologies\b|^\s*how (does|did) (he|rajat) (build|implement)\b/i.test(question)) return question;
   for (const turn of [...history].reverse()) {
     if (turn.role !== 'user') continue;
     const entities = namedEntities(turn.content);
@@ -56,7 +57,7 @@ export function resolveQuery(question, history = []) {
   return question;
 }
 
-export function retrieve(question, history = [], limit = 6) {
+export function retrieve(question, history = [], limit = 6, { semantic } = {}) {
   const resolved = resolveQuery(question, history);
   const entities = namedEntities(resolved);
   const previousUser = [...history].reverse().find(turn => turn.role === 'user');
@@ -68,8 +69,10 @@ export function retrieve(question, history = [], limit = 6) {
   if (/\bprofessional\b.*\b(penetration|pentest)\b/i.test(question)) return { chunks: [], query: resolved, reason: 'unknown' };
   if (entities.length && /\b(funding|uptime|patent|security audit|perfect accuracy)\b/i.test(question)) return { chunks: [], query: resolved, reason: 'unknown' };
   const queryTerms = expand(resolved);
-  if (!topic && !entities.length) return { chunks: [], query: resolved, reason: 'unrelated' };
+  const semanticDiscovery = !topic && !entities.length && semantic;
+  if (!topic && !entities.length && !semantic) return { chunks: [], query: resolved, reason: 'unrelated' };
   let candidates = documents.filter(doc => {
+    if (semanticDiscovery) return (semantic[doc.id] || 0) >= 0.36 && ['projects', 'experience', 'achievements', 'education', 'skills'].includes(doc.topic);
     if (entities.length) return entities.some(entity => normalize(doc.entity || '').includes(normalize(entity))) && ['projects', 'experience'].includes(doc.topic);
     if (topic === 'overview') return ['overview', 'education', 'experience', 'projects', 'achievements'].includes(doc.topic);
     if (topic === 'skills') return ['skills', 'projects'].includes(doc.topic);
@@ -78,7 +81,8 @@ export function retrieve(question, history = [], limit = 6) {
     return doc.topic === topic;
   });
   const employer = question.match(/\b(?:work(?:ed|s)?|employed|interned|job|role|position|internship)\s+(?:at|for|with)\s+([\w.-]+)/i)?.[1];
-  if (employer && !candidates.some(doc => doc.topic === 'experience' && normalize(doc.entity || '').includes(normalize(employer)))) return { chunks: [], query: resolved, reason: 'unsupported' };
+  const serviceAudience = new Set(['cafes', 'clients', 'local', 'neighbourhood', 'neighborhood', 'nearby']);
+  if (employer && !serviceAudience.has(employer.toLowerCase()) && !candidates.some(doc => doc.topic === 'experience' && normalize(doc.entity || '').includes(normalize(employer)))) return { chunks: [], query: resolved, reason: 'unsupported' };
   const requestedTools = normalize(question).match(/\b(rust|kubernetes|postgresql|firebase|tensorflow|pytorch|aws|redis|docker|oscp|ceh|cissp)\b/g) || [];
   if (requestedTools.some(tool => !candidates.some(doc => doc.tokens.includes(tool)))) return { chunks: [], query: resolved, reason: 'unsupported' };
   const requestedVersions = [...normalize(question).matchAll(/\b(nextjs|react|python|express)\s+(\d+(?:\.\d+)*)\b/g)];
@@ -104,6 +108,7 @@ export function retrieve(question, history = [], limit = 6) {
     if (entities.length && topic === 'skills' && /stack|architecture|file structure|tools.*skills/i.test(doc.section)) score += 8;
     if (entities.length && topic === 'overview' && (doc.section === 'Overview' && doc.text.length > 100 || doc.kind === 'resume')) score += 6;
     if (/\bresume\b/i.test(question) && doc.kind === 'resume') score += 8;
+    if (semantic) score += Math.max(0, (semantic[doc.id] || 0) - 0.25) * 8;
     return { doc, score };
   }).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
   const selected = [];
@@ -160,8 +165,8 @@ function relevantExcerpt(chunk, query) {
   return lines.slice(best,best+5).join('\n').trim().slice(0,650);
 }
 
-export function extractiveAnswer(question, history = []) {
-  const result = retrieve(question, history, 6);
+export function extractiveAnswer(question, history = [], retrieval) {
+  const result = retrieval || retrieve(question, history, 6);
   if (!result.chunks.length) return { text: result.reason === 'ambiguous' ? "Which project do you mean? Name one and I can explain it." : result.reason === 'unrelated' ? "I can help with Rajat's work and background. Try asking about a project, his experience, or his resume." : "I couldn't find that detail in Rajat's documents, so I can't confirm it.", source: 'Document answer', sources: [] };
   const entities = namedEntities(result.query);
   const chosen = entities.length > 1

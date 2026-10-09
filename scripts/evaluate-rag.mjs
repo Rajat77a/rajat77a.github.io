@@ -4,6 +4,7 @@ import hallucinations from '../tests/hallucination-cases.mjs';
 import mixed from '../tests/mixed-premises.mjs';
 import { retrieve } from '../rag/retrieve.js';
 import index from '../rag/index.js';
+import { retrieveHybrid } from '../rag/hybrid.js';
 
 const live = process.argv.includes('--live');
 const args = process.argv.slice(2);
@@ -15,7 +16,7 @@ const ids=value('--ids','').split(',').filter(Boolean);
 const selected = (ids.length ? corpus.filter(item=>ids.includes(item.id)) : corpus).slice(0,limit);
 const results = [];
 for (const item of selected) {
-  const retrieval = retrieve(item.question,item.history);
+  const retrieval = process.argv.includes('--hybrid') ? await retrieveHybrid(item.question,item.history) : retrieve(item.question,item.history);
   let response;
   if (live) {
     const start = Date.now();
@@ -45,7 +46,7 @@ for (const item of selected) {
       }
     }
   }
-  results.push({...item,issues,retrieved:retrieval.chunks.map(chunk=>chunk.id),reason:retrieval.reason,...(response?{response}:{})});
+  results.push({...item,issues,retrieved:retrieval.chunks.map(chunk=>chunk.id),reason:retrieval.reason,method:retrieval.method,...(response?{response}:{})});
   if (live) console.log(`${item.id}: ${issues.length?issues.join(', '):'structural checks passed'} (${response.latencyMs}ms)`);
 }
 const fallbackReasons={};

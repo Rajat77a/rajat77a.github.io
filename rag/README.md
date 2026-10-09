@@ -7,12 +7,22 @@ for each question, and supplied as evidence before generation.
 ## Architecture
 
 Resume PDF + project READMEs + public owner statements → section-aware passages
-→ local BM25 lexical retrieval with aliases/topic filters → hosted model → claim
+→ MiniLM semantic search + BM25 with aliases/topic filters → hosted model → claim
 and quotation checks → answer with expandable source quotes.
 
-There is no vector database, embedding API, new account, or laptop dependency.
-BM25 is lexical retrieval, not semantic vector search. This is a small-corpus
-baseline; retrieval and wording should be evaluated before adding more sources.
+The backend runs a pinned, quantized all-MiniLM-L6-v2 embedding model through
+Transformers.js and ONNX Runtime. Document vectors are prepared at build time;
+visitor queries are embedded on the hosted backend. Semantic similarity boosts
+the existing lexical ranking within source/topic boundaries. Strong semantic
+matches can discover passages for previously unrecognized wording. Explicit
+privacy, unknown-tool, employer and ambiguity guards remain authoritative.
+This weighted ranking is not a separately trained cross-encoder reranker.
+
+There is no vector database, paid embedding API, new account, or laptop dependency.
+With 36 passages, vectors fit in a small JSON file. The backend keeps at most
+128 query score entries in memory. It refuses stale indexes and falls back to
+lexical retrieval if the embedding runtime is unavailable. The browser's outage
+fallback remains lexical, avoiding a model download on visitors' devices.
 
 ## Sources and precedence
 
@@ -38,7 +48,13 @@ static files; do not add private HR, client, identity, or credential documents.
 2. Run `python scripts/extract-resume.py` (requires `pypdf`).
 3. Run `node scripts/refresh-sources.mjs` (uses the existing authenticated `gh`).
 4. Run `node scripts/build-rag.mjs`.
-5. Run `node --test tests/rag.test.mjs`, review index changes, then deploy.
+5. Run `npm run rag:prepare` to download the pinned embedding model and rebuild vectors.
+6. Run `npm test`, review index changes, then deploy.
+
+Vercel runs `rag:prepare` during each build and includes the model in the backend
+function. Model weights in `rag/models/` are ignored by Git; do not commit them.
+Dependencies and the source-model revision are pinned. Cold starts still cost
+time, and generation continues to use the existing hosted provider's quota.
 
 The generated `index.js` is used by both Vercel and the browser's outage fallback.
 It must be rebuilt after changing a source. This is not live crawling.
@@ -61,17 +77,18 @@ every possible live model response.
 
 ## Optional Ollama testing
 
-The installed Ollama currently has no downloaded model. No model was downloaded
-or training job started. Once a suitable local chat model is installed, set
+Install the local test model with `ollama pull qwen3:4b`. Once installed, set
 `AI_PROVIDER=ollama` and `OLLAMA_MODEL` to its installed name, then run
 `node scripts/serve-rag.mjs`. The local preview rewrites the endpoint to its own
 API. It uses the same retrieval and quotation checks as production.
+On Windows, `powershell -ExecutionPolicy Bypass -File scripts/run-local-ai.ps1`
+starts this local test configuration at `http://127.0.0.1:4173/#ask-ai`.
 
 The Ollama path is local-only and is not used by the public Vercel deployment.
-Its current 7-second generation deadline is meant for small, warm models;
-larger models or cold starts may return excerpts instead. Vector embeddings are
-a possible later improvement, but deploying semantic query embeddings would
-require an always-on embedding runtime or an external embedding provider.
+Its default generation deadline is 60 seconds, configurable with
+`OLLAMA_TIMEOUT_MS` (7–120 seconds). Larger models or cold starts can still return
+excerpts. This model installation does not fine-tune its weights. Embeddings
+use the same MiniLM model locally and online; Ollama is optional for generation.
 
 ## Repeatable question evaluation
 
@@ -87,6 +104,8 @@ The live runner makes sequential requests and records answers, quotes, latency,
 and structural flags. Review the answers manually: valid quotes alone do not
 prove that every sentence follows from them. Live runs consume the existing
 provider's quota; rate limits and model outages are not retrieval failures.
+Add `--hybrid` to evaluate the actual semantic-plus-lexical backend retrieval.
+Run `node scripts/check-semantic.mjs` for project-name-free paraphrase checks.
 
 Additional adversarial cases live in `tests/hallucination-cases.mjs` (104 cases)
 and `tests/claim-traps.test.mjs` (18 misleading paraphrases and three supported

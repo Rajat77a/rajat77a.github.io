@@ -1,7 +1,11 @@
 {
+  "installCommand": "ONNXRUNTIME_NODE_INSTALL=skip npm ci",
+  "buildCommand": "npm run rag:prepare",
   "functions": {
     "api/chat.js": {
-      "maxDuration": 15
+      "maxDuration": 30,
+      "includeFiles": "rag/{models/**,vectors.json}",
+      "excludeFiles": "node_modules/onnxruntime-node/bin/napi-*/{darwin,win32,linux/arm64}/**"
     }
   }
 }

@@ -1,6 +1,7 @@
-import { retrieve, extractiveAnswer } from '../rag/retrieve.js';
+import { extractiveAnswer } from '../rag/retrieve.js';
 import { validateGroundedOutput, unknownAnswer, hasQuantityConflict } from '../rag/grounding.js';
 import index from '../rag/index.js';
+import { retrieveHybrid } from '../rag/hybrid.js';
 
 const origins = (process.env.ALLOWED_ORIGINS || 'https://rajat77a.github.io,http://localhost:4173,http://127.0.0.1:4173').split(',').map(value => value.trim());
 const resumeLink = { href: '/assets/docs/Rajat_Krishnan_Resume.pdf', label: "Download Rajat's resume" };
@@ -59,7 +60,8 @@ async function generate(prompt) {
   if (provider === 'ollama') {
     const base = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
     if (!/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(base)) throw new Error('Local Ollama URL required');
-    const response = await fetch(`${base}/api/chat`, { method: 'POST', signal: AbortSignal.timeout(7000), headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: process.env.OLLAMA_MODEL || 'qwen3:4b', messages: [{ role: 'user', content: prompt }], format: 'json', stream: false, think: false, options: { temperature: 0 } }) });
+    const timeout = Math.min(120000, Math.max(7000, Number(process.env.OLLAMA_TIMEOUT_MS) || 60000));
+    const response = await fetch(`${base}/api/chat`, { method: 'POST', signal: AbortSignal.timeout(timeout), headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: process.env.OLLAMA_MODEL || 'qwen3:4b', messages: [{ role: 'user', content: prompt }], format: 'json', stream: false, think: false, options: { temperature: 0 } }) });
     if (!response.ok) throw new Error('Local model unavailable');
     return (await response.json()).message?.content || '';
   }
@@ -94,7 +96,8 @@ export default async function handler(req, res) {
   if (!message) return res.status(400).json({ error: 'Message is required.' });
   const mode = ['default', 'recruiter', 'technical', 'short'].includes(req.body?.mode) ? req.body.mode : 'default';
   const history = Array.isArray(req.body?.history) ? req.body.history.slice(-8).map(item => ({ role: item.role === 'assistant' ? 'assistant' : 'user', content: String(item.content || '').slice(0, 600) })) : [];
-  const reply = (answer, sources = [], extra = {}) => res.status(200).json({ answer, source: 'Document answer', sources, link: /\b(resume|cv|download)\b/i.test(message) ? resumeLink : null, ...extra });
+  let retrievalMethod;
+  const reply = (answer, sources = [], extra = {}) => res.status(200).json({ answer, source: 'Document answer', sources, retrievalMethod, link: /\b(resume|cv|download)\b/i.test(message) ? resumeLink : null, ...extra });
   if (isFabrication(message)) return reply("I can help with Rajat's documented work, but I can't invent qualifications, employment, or project results.");
   if (isAttack(message)) return reply("I can help with Rajat's work, but I can't change my instructions or share hidden prompts.");
   if (/^(hi|hello|hey)[!.\s]*$/i.test(message)) return reply("Hi! Ask me about Rajat's projects, experience, skills, or resume.");
@@ -104,7 +107,8 @@ export default async function handler(req, res) {
     const quote = summary.text.split('. ')[0];
     return reply(`I'm Rajat's portfolio assistant. His resume describes him as: ${quote}.`, [{ id: summary.id, title: summary.title, url: summary.url, section: summary.section, quote }]);
   }
-  const retrieval = retrieve(message, history);
+  const retrieval = await retrieveHybrid(message, history);
+  retrievalMethod = retrieval.method;
   if (!retrieval.chunks.length) return reply(retrieval.reason === 'ambiguous' ? "Which project do you mean? Name one and I can explain it." : retrieval.reason === 'unrelated' ? "I can help with Rajat's work and background. Ask about a project, his experience, or his resume." : unknownAnswer, [], { grounded: true });
   let fallbackReason = 'invalid_evidence';
   try {
@@ -116,6 +120,6 @@ export default async function handler(req, res) {
     fallbackReason = error.message === 'Model rate limited' ? 'rate_limited' : error.name === 'TimeoutError' ? 'timeout' : 'model_unavailable';
     // Never replace a failed model call with uncited profile guesses.
   }
-  const excerpts = extractiveAnswer(message, history);
+  const excerpts = extractiveAnswer(message, history, retrieval);
   return reply(excerpts.text, excerpts.sources, { source: 'Source excerpts', grounded: true, fallbackReason });
 }
