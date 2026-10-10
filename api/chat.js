@@ -2,6 +2,7 @@ import { extractiveAnswer, missingAnswer, sourceFor } from '../rag/retrieve.js';
 import { validateGroundedOutput, hasQuantityConflict } from '../rag/grounding.js';
 import index from '../rag/index.js';
 import { retrieveHybrid } from '../rag/hybrid.js';
+import { socialFallback, conversationPrompt, validateSocialReply } from '../rag/conversation.js';
 
 const origins = (process.env.ALLOWED_ORIGINS || 'https://rajat77a.github.io,http://localhost:4173,http://127.0.0.1:4173').split(',').map(value => value.trim());
 const resumeLink = { href: '/assets/docs/Rajat_Krishnan_Resume.pdf', label: "Download Rajat's resume" };
@@ -59,13 +60,13 @@ DOCUMENTS: ${JSON.stringify(chunks.map(({ id, kind, entity, section, text }) => 
 `;
 }
 
-async function generate(prompt) {
+async function generate(prompt, { temperature = 0 } = {}) {
   const provider = (process.env.AI_PROVIDER || 'groq').toLowerCase();
   if (provider === 'ollama') {
     const base = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
     if (!/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(base)) throw new Error('Local Ollama URL required');
     const timeout = Math.min(120000, Math.max(7000, Number(process.env.OLLAMA_TIMEOUT_MS) || 60000));
-    const response = await fetch(`${base}/api/chat`, { method: 'POST', signal: AbortSignal.timeout(timeout), headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: process.env.OLLAMA_MODEL || 'qwen3:4b', messages: [{ role: 'user', content: prompt }], format: 'json', stream: false, think: false, options: { temperature: 0 } }) });
+    const response = await fetch(`${base}/api/chat`, { method: 'POST', signal: AbortSignal.timeout(timeout), headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: process.env.OLLAMA_MODEL || 'qwen3:4b', messages: [{ role: 'user', content: prompt }], format: 'json', stream: false, think: false, options: { temperature } }) });
     if (!response.ok) throw new Error('Local model unavailable');
     return (await response.json()).message?.content || '';
   }
@@ -82,7 +83,7 @@ async function generate(prompt) {
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST', signal: AbortSignal.timeout(7000),
     headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], response_format: { type: 'json_object' }, ...(model.startsWith('openai/gpt-oss') ? { include_reasoning: false, reasoning_effort: 'low' } : {}), max_completion_tokens: 2400, temperature: 0 })
+    body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], response_format: { type: 'json_object' }, ...(model.startsWith('openai/gpt-oss') ? { include_reasoning: false, reasoning_effort: 'low' } : {}), max_completion_tokens: 2400, temperature })
   });
   if (!response.ok) throw new Error(response.status === 429 ? 'Model rate limited' : 'Model unavailable');
   return (await response.json()).choices?.[0]?.message?.content || '';
@@ -104,7 +105,14 @@ export default async function handler(req, res) {
   const reply = (answer, sources = [], extra = {}) => res.status(200).json({ answer, source: 'Document answer', sources, retrievalMethod, link: /\b(resume|cv|download)\b/i.test(message) ? resumeLink : null, ...extra });
   if (isFabrication(message)) return reply("I can help with Rajat's documented work, but I can't invent qualifications, employment, or project results.");
   if (isAttack(message)) return reply("I can help with Rajat's work, but I can't change my instructions or share hidden prompts.");
-  if (/^(hi|hello|hey)[!.\s]*$/i.test(message)) return reply("Hi! Ask me about Rajat's projects, experience, skills, or resume.");
+  const social = socialFallback(message, history);
+  if (social) {
+    try {
+      const answer = validateSocialReply(await generate(conversationPrompt(message, history, social.intent), { temperature: 0.5 }));
+      if (answer) return reply(answer, [], { source: 'Conversation' });
+    } catch { /* Keep small talk available during model outages. */ }
+    return reply(social.text, [], { source: 'Conversation' });
+  }
   if (/\b(resume|cv)\b/i.test(message) && /\b(download|get|link|send)\b/i.test(message)) return reply("Here's Rajat's latest resume.", [{ id: 'resume', title: "Rajat's resume", url: resumeLink.href, section: 'Full document', quote: '' }]);
   if (/\bintroduce yourself\b/i.test(message)) {
     const summary = index.chunks.find(chunk => chunk.topic === 'overview');

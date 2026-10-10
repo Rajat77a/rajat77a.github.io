@@ -1,4 +1,5 @@
 import index from './index.js';
+import { socialFallback } from './conversation.js';
 
 const stop = new Set('a an the is are was were be been being am i me my we our you your he him his her it its they their rajat krishnan does do did can could would should has have had about tell explain give show know what which who how why where when of on in at to for with and or from this that these those please more use used using work works'.split(' '));
 const normalize = value => String(value).toLowerCase().replace(/nextstep[.·\s-]*ai/g, 'nextstep').replace(/uni[ -]?events/g, 'unievents').replace(/full[ -]?stack/g, 'fullstack').replace(/node\.js/g, 'nodejs').replace(/next\.js/g, 'nextjs').replace(/\b(databases|apis|internships|prompts|models|courses)\b/g, word => word.slice(0,-1));
@@ -193,6 +194,8 @@ function relevantExcerpt(chunk, query) {
 }
 
 export function extractiveAnswer(question, history = [], retrieval) {
+  const social = socialFallback(question, history);
+  if (social) return social;
   const result = retrieval || retrieve(question, history, 6);
   if (!result.chunks.length) return { text: result.reason === 'ambiguous' ? "Which project do you mean? Name one and I can explain it." : result.reason === 'unrelated' ? "I can help with Rajat's work and background. Try asking about a project, his experience, or his resume." : missingAnswer(question), source: 'Document answer', sources: [] };
   const entities = namedEntities(result.query);

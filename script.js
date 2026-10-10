@@ -1,5 +1,5 @@
 import knowledge from "./knowledge.js?v=chat-v2";
-import { extractiveAnswer } from "./rag/retrieve.js?v=rag-followups-v4";
+import { extractiveAnswer } from "./rag/retrieve.js?v=rag-conversation-v5";
 
 const revealTargets = document.querySelectorAll(
   ".section-heading, .proof-card, .cert-wall, .project-showcase, .about-section, .capabilities, .contact-section"
