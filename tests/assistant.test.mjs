@@ -52,6 +52,7 @@ test('general API, clarification, model routing, rate limits and context retenti
     const response=await call('Explain RAG',[{role:'user',content:'I am learning AI'}]);
     assert.equal(response.source,'General AI'); assert.equal(response.grounded,false); assert.deepEqual(response.sources,[]);
     assert.equal(requestBody.reasoning_effort,'medium'); assert.match(requestBody.messages[0].content,/I am learning AI/);
+    assert.match(requestBody.messages[0].content,/JSON/i);
     output={kind:'clarification',reply:'Do you want help writing code or understanding the concept?'};
     assert.equal((await call('help with this')).source,'Clarification');
     output={kind:'general',reply:'Rajat works at Google.'};
