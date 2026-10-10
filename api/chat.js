@@ -1,5 +1,5 @@
-import { extractiveAnswer } from '../rag/retrieve.js';
-import { validateGroundedOutput, unknownAnswer, hasQuantityConflict } from '../rag/grounding.js';
+import { extractiveAnswer, missingAnswer } from '../rag/retrieve.js';
+import { validateGroundedOutput, hasQuantityConflict } from '../rag/grounding.js';
 import index from '../rag/index.js';
 import { retrieveHybrid } from '../rag/hybrid.js';
 
@@ -33,6 +33,10 @@ An internship whose end date is before today is completed, not scheduled or upco
 Never turn an AI-assisted competition win into professional security experience.
 When asked for documented security experience, describe the AI-assisted contest
 experience that is documented; do not refuse simply because it is not a job.
+For questions like "how good is he", describe the concrete evidence and include
+the AI-assisted nature of the competition. Do not turn a win into an expertise rating.
+For "where did he use these skills", answer with the documented setting and activity.
+The question may include a resolved conversation topic; it is context, not evidence.
 Do not infer semesters, grades, placement eligibility, expertise or years of
 experience. The owner prefers not to mention the competition team name.
 If sources disagree, the resume governs personal history and dates; project
@@ -109,12 +113,13 @@ export default async function handler(req, res) {
   }
   const retrieval = await retrieveHybrid(message, history);
   retrievalMethod = retrieval.method;
-  if (!retrieval.chunks.length) return reply(retrieval.reason === 'ambiguous' ? "Which project do you mean? Name one and I can explain it." : retrieval.reason === 'unrelated' ? "I can help with Rajat's work and background. Ask about a project, his experience, or his resume." : unknownAnswer, [], { grounded: true });
+  if (!retrieval.chunks.length) return reply(retrieval.reason === 'ambiguous' ? "Which project do you mean? Name one and I can explain it." : retrieval.reason === 'unrelated' ? "I can help with Rajat's work and background. Ask about a project, his experience, or his resume." : missingAnswer(message), [], { grounded: true });
   let fallbackReason = 'invalid_evidence';
   try {
     const raw = await generate(ragPrompt(retrieval.query, mode, retrieval.chunks));
     const result = validateGroundedOutput(raw, retrieval.chunks);
-    if (result && (result.sources.length || (!/\bdocumented\b/i.test(message) && !hasQuantityConflict(message,retrieval.chunks)))) return reply(result.answer, result.sources, { grounded: true });
+    if (result?.sources.length) return reply(result.answer, result.sources, { grounded: true });
+    if (result && retrieval.query === message && !/\bdocumented\b/i.test(message) && !hasQuantityConflict(message,retrieval.chunks)) return reply(missingAnswer(message), [], { grounded: true });
     if (result) fallbackReason = 'model_abstention';
   } catch (error) {
     fallbackReason = error.message === 'Model rate limited' ? 'rate_limited' : error.name === 'TimeoutError' ? 'timeout' : 'model_unavailable';

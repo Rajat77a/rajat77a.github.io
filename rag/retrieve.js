@@ -26,7 +26,7 @@ const aliases = [
 const namedEntities = query => aliases.filter(([, pattern]) => pattern.test(normalize(query))).map(([name]) => name);
 const topicFor = query => {
   const q = normalize(query);
-  if (/\b(cgpa|gpa|salary|passport|aadhaar|home address|girlfriend|boyfriend|backlogs?|attendance|semester|placement eligibility|date of birth|how old|bank balance|leetcode|revenue|paying customers|funded|accuracy percentage|certified penetration tester|professional pentester)\b/.test(q)) return 'unknown';
+  if (/\b(age|birthday|cgpa|gpa|salary|passport|aadhaar|home address|girlfriend|boyfriend|backlogs?|attendance|semester|placement eligibility|date of birth|how old|bank balance|leetcode|revenue|paying customers|funded|accuracy percentage|certified penetration tester|professional pentester)\b/.test(q)) return 'unknown';
   if (/\b(certifications?|certificates?|credentials?|courses?|coursework|badge|forage|nasscom|dubai future foundation|ai ethics)\b/.test(q)) return 'certifications';
   if (/\b(stack|database|programming languages|backend tools)\b/.test(q)) return 'skills';
   if (/\b(build|built|create|created|develop|developed|made|projects?|products?)\b/.test(q) && /\b(students?|learners?|parents?|campus)\b/.test(q)) return 'projects';
@@ -46,13 +46,29 @@ const averageLength = documents.reduce((sum, doc) => sum + doc.tokens.length, 0)
 const frequencies = new Map();
 documents.forEach(doc => new Set(doc.tokens).forEach(token => frequencies.set(token, (frequencies.get(token) || 0) + 1)));
 
+const refersBack = question => /\b(it|its|that|this|these|those|them|there|more|why|stack|tools)\b|^\s*(which|what) technologies\b|^\s*how (does|did) (he|rajat) (build|implement)\b/i.test(question);
+const topicAnchors = [
+  ['cybersecurity', /\b(cybersecurity|security|koth|pwn|ctf)\b/i],
+  ['prompt engineering', /\b(prompt(?:ing)?|llm)\b/i],
+  ['backend tools', /\b(backend|databases?|jwt|rest api)\b/i],
+  ['content creation', /\b(content creation|creative|design|videos?)\b/i],
+  ['education', /\b(education|degree|studying|college|school)\b/i],
+  ['certifications', /\b(certifications?|certificates?|credentials?)\b/i],
+  ['programming languages', /\b(programming|python|javascript|typescript|java)\b/i]
+];
+
 export function resolveQuery(question, history = []) {
-  if (namedEntities(question).length || !/\b(it|its|that|this|more|why|stack|tools)\b|^\s*(which|what) technologies\b|^\s*how (does|did) (he|rajat) (build|implement)\b/i.test(question)) return question;
+  if (namedEntities(question).length || topicFor(question) === 'unknown' || !refersBack(question)) return question;
   for (const turn of [...history].reverse()) {
     if (turn.role !== 'user') continue;
     const entities = namedEntities(turn.content);
     if (entities.length === 1) return `${question} ${entities[0]}`;
     if (entities.length > 1) return question; // Do not choose one side of a comparison arbitrarily.
+    if (topicFor(turn.content) === 'unknown') return question;
+    const anchor = topicAnchors.find(([, pattern]) => pattern.test(turn.content));
+    if (anchor) return `${question} (about Rajat's ${anchor[0]})`;
+    // Follow-ups can form a chain, but a new standalone topic ends the old context.
+    if (!refersBack(turn.content)) return question;
   }
   return question;
 }
@@ -61,7 +77,7 @@ export function retrieve(question, history = [], limit = 6, { semantic } = {}) {
   const resolved = resolveQuery(question, history);
   const entities = namedEntities(resolved);
   const previousUser = [...history].reverse().find(turn => turn.role === 'user');
-  if (!entities.length && /\b(it|its|that|this)\b/i.test(question) && previousUser && namedEntities(previousUser.content).length > 1) return { chunks: [], query: resolved, reason: 'ambiguous' };
+  if (!entities.length && /\b(it|its|that|this|these|those|them)\b/i.test(question) && previousUser && namedEntities(previousUser.content).length > 1) return { chunks: [], query: resolved, reason: 'ambiguous' };
   const inferredTopic = topicFor(resolved);
   const topic = inferredTopic !== 'unknown' && entities.length && /^(what is|who (?:is|are)|tell me (?:about|more)|explain)\b/i.test(question) ? 'overview' : inferredTopic;
   if (topic === 'unknown') return { chunks: [], query: resolved, reason: 'unknown' };
@@ -69,13 +85,14 @@ export function retrieve(question, history = [], limit = 6, { semantic } = {}) {
   if (/\bprofessional\b.*\b(penetration|pentest)\b/i.test(question)) return { chunks: [], query: resolved, reason: 'unknown' };
   if (entities.length && /\b(funding|uptime|patent|security audit|perfect accuracy)\b/i.test(question)) return { chunks: [], query: resolved, reason: 'unknown' };
   const queryTerms = expand(resolved);
+  const skillApplication = topic === 'skills' && /\b(where|when|how|examples?)\b.*\b(use|used|apply|applied|skills?|tools?)\b/i.test(question);
   const semanticDiscovery = !topic && !entities.length && semantic;
   if (!topic && !entities.length && !semantic) return { chunks: [], query: resolved, reason: 'unrelated' };
   let candidates = documents.filter(doc => {
     if (semanticDiscovery) return (semantic[doc.id] || 0) >= 0.36 && ['projects', 'experience', 'achievements', 'education', 'skills'].includes(doc.topic);
     if (entities.length) return entities.some(entity => normalize(doc.entity || '').includes(normalize(entity))) && ['projects', 'experience'].includes(doc.topic);
     if (topic === 'overview') return ['overview', 'education', 'experience', 'projects', 'achievements'].includes(doc.topic);
-    if (topic === 'skills') return ['skills', 'projects'].includes(doc.topic);
+    if (topic === 'skills') return ['skills', 'projects', ...(skillApplication ? ['experience'] : [])].includes(doc.topic);
     if (topic === 'experience') return doc.topic === 'experience';
     if (topic === 'certifications') return doc.topic === topic || doc.topic === 'overview';
     return doc.topic === topic;
@@ -104,6 +121,7 @@ export function retrieve(question, history = [], limit = 6, { semantic } = {}) {
       score += idf * (tf * 2.2) / (tf + 1.2 * (.25 + .75 * doc.tokens.length / averageLength));
     }
     if (doc.topic === topic) score += 2;
+    if (skillApplication && doc.topic === 'experience') score += 5;
     if (entities.length && doc.kind === 'project') score += 2;
     if (entities.length && topic === 'skills' && /stack|architecture|file structure|tools.*skills/i.test(doc.section)) score += 8;
     if (entities.length && topic === 'overview' && (doc.section === 'Overview' && doc.text.length > 100 || doc.kind === 'resume')) score += 6;
@@ -138,6 +156,15 @@ export function sourceFor(chunk, quote = '') {
   return { id: chunk.id, title: chunk.title, url: chunk.url, section: chunk.section, quote };
 }
 
+export function missingAnswer(question) {
+  if (/\b(age|birthday|date of birth|how old)\b/i.test(question)) return "Rajat's documents don't list his age or date of birth, so I can't give you a reliable age.";
+  if (/\b(cgpa|gpa|grades?)\b/i.test(question)) return "His education is documented, but his grades or CGPA aren't listed in the sources I have.";
+  if (/\b(salary|paid|pay|earnings|income)\b/i.test(question)) return "I don't have documented pay or income figures for Rajat.";
+  if (/\b(oscp|ceh|cissp|certified penetration tester|professional pentester)\b/i.test(question)) return "I don't have a source confirming that security credential. You can ask about his documented competition experience instead.";
+  if (/\b(these|those|it|its|that|this|them|there)\b/i.test(question)) return "Which skill or project are you referring to? I need that context to answer accurately.";
+  return "The sources I have don't establish that detail. Could you narrow the question to a particular project, skill or role?";
+}
+
 function relevantExcerpt(chunk, query) {
   const lines = chunk.text.split('\n');
   if (chunk.topic === 'skills') {
@@ -167,7 +194,7 @@ function relevantExcerpt(chunk, query) {
 
 export function extractiveAnswer(question, history = [], retrieval) {
   const result = retrieval || retrieve(question, history, 6);
-  if (!result.chunks.length) return { text: result.reason === 'ambiguous' ? "Which project do you mean? Name one and I can explain it." : result.reason === 'unrelated' ? "I can help with Rajat's work and background. Try asking about a project, his experience, or his resume." : "I couldn't find that detail in Rajat's documents, so I can't confirm it.", source: 'Document answer', sources: [] };
+  if (!result.chunks.length) return { text: result.reason === 'ambiguous' ? "Which project do you mean? Name one and I can explain it." : result.reason === 'unrelated' ? "I can help with Rajat's work and background. Try asking about a project, his experience, or his resume." : missingAnswer(question), source: 'Document answer', sources: [] };
   const entities = namedEntities(result.query);
   const chosen = entities.length > 1
     ? entities.map(entity => {

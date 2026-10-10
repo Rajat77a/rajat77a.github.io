@@ -57,6 +57,39 @@ test('only exact source quotes are accepted', () => {
 test('model refusal has no fabricated citations', () => {
   assert.deepEqual(validateGroundedOutput({ supported: false, claims: [] }, index.chunks).sources, []);
 });
+
+const securityConversation = [
+  { role: 'user', content: "What is Rajat's age?" },
+  { role: 'assistant', content: 'He is 99 years old and works as a professional pentester.' },
+  { role: 'user', content: 'How good is Rajat in cybersecurity?' },
+  { role: 'assistant', content: 'He won a cybersecurity contest.' }
+];
+
+test('screenshot follow-up retrieves the contest setting from user topic context', () => {
+  const question = 'Where did Rajat use these skills?';
+  assert.match(resolveQuery(question, securityConversation), /cybersecurity/);
+  const result = retrieve(question, securityConversation);
+  assert.ok(result.chunks.some(chunk => /VIT-AP.*AI assistance/s.test(chunk.text)));
+  assert.ok(result.chunks.every(chunk => chunk.topic === 'achievements'));
+  assert.match(extractiveAnswer(question, securityConversation).text, /AI assistance/);
+});
+
+test('topic follow-up chains ignore assistant inventions and stop at a new subject', () => {
+  const chain = [...securityConversation, { role: 'user', content: 'Where did he use these skills?' }];
+  assert.match(resolveQuery('What did he do there?', chain), /cybersecurity/);
+  assert.doesNotMatch(resolveQuery('What did he do there?', chain), /pentester|99/);
+  const changed = [...chain, { role: 'user', content: "What is Rajat's age?" }];
+  assert.equal(resolveQuery('Tell me more about that', changed), 'Tell me more about that');
+  assert.equal(retrieve("What is Rajat's age?", securityConversation).chunks.length, 0);
+});
+
+test('prompt engineering follow-up finds documented work rather than an old project', () => {
+  const history = [{ role: 'user', content: 'Tell me about GridWatch' }, { role: 'user', content: 'What prompt engineering experience does Rajat have?' }];
+  const result = retrieve('Where did he use those skills?', history);
+  assert.match(result.query, /prompt engineering/);
+  assert.doesNotMatch(result.query, /GridWatch/);
+  assert.ok(result.chunks.some(chunk => /Crafted, tested and tuned prompts/.test(chunk.text)));
+});
 test('comparison cannot attach GridWatch claims to PrepPeer evidence', () => {
   const source = index.chunks.find(chunk => chunk.entity === 'PrepPeer' && chunk.section === 'Stack');
   assert.equal(validateGroundedOutput({ claims: [{ text: 'PrepPeer uses Supabase while GridWatch detects theft.', source_id: source.id, quote: source.text }] }, [source]), null);
@@ -145,6 +178,33 @@ test('API: false abstention on documented experience returns the actual evidence
     assert.match(result.answer,/AI assistance/);
     assert.ok(result.sources.length);
   } finally {globalThis.fetch=original;if(previousKey===undefined)delete process.env.GROQ_API_KEY;else process.env.GROQ_API_KEY=previousKey;}
+});
+
+test('API: false abstention on the screenshot follow-up returns cited evidence', async () => {
+  const original = globalThis.fetch, previousKey = process.env.GROQ_API_KEY;
+  process.env.GROQ_API_KEY = 'test-placeholder';
+  globalThis.fetch = async () => ({ ok: true, json: async () => ({ choices: [{ message: { content: '{"supported":false,"claims":[]}' } }] }) });
+  try {
+    const result = (await request({ message: 'Where did Rajat use these skills?', history: securityConversation })).data;
+    assert.match(result.answer, /VIT-AP/);
+    assert.match(result.answer, /AI assistance/);
+    assert.ok(result.sources.length);
+    assert.doesNotMatch(result.answer, /99|professional pentester/);
+  } finally { globalThis.fetch = original; if (previousKey === undefined) delete process.env.GROQ_API_KEY; else process.env.GROQ_API_KEY = previousKey; }
+});
+
+test('API: missing age and CGPA get specific explanations without a model call', async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () => { throw new Error('Should not call the model'); };
+  try {
+    const age = (await request({ message: "What is Rajat's age?", history: securityConversation })).data;
+    const grade = (await request({ message: 'What is his CGPA?' })).data;
+    assert.match(age.answer, /age or date of birth/);
+    assert.match(grade.answer, /grades or CGPA/);
+    assert.notEqual(age.answer, grade.answer);
+    assert.equal(age.sources.length, 0);
+    assert.equal(grade.sources.length, 0);
+  } finally { globalThis.fetch = original; }
 });
 test('API: rate limits return an explicit safe fallback reason',async()=>{
   const original=globalThis.fetch,previousKey=process.env.GROQ_API_KEY;
