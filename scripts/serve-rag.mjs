@@ -10,7 +10,7 @@ http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://localhost:4173');
     if (url.pathname === '/api/chat') {
       let body = '';
-      for await (const chunk of req) { body += chunk; if (body.length > 16000) { res.writeHead(413).end(); return; } }
+      for await (const chunk of req) { body += chunk; if (body.length > 64000) { res.writeHead(413).end(); return; } }
       req.body = body ? JSON.parse(body) : {};
       res.status = code => { res.statusCode = code; return res; };
       res.json = value => { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(value)); };

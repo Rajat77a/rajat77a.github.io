@@ -2,7 +2,7 @@ import { extractiveAnswer, missingAnswer, sourceFor } from '../rag/retrieve.js';
 import { validateGroundedOutput, hasQuantityConflict } from '../rag/grounding.js';
 import index from '../rag/index.js';
 import { retrieveHybrid } from '../rag/hybrid.js';
-import { socialFallback, conversationPrompt, validateSocialReply } from '../rag/conversation.js';
+import { socialFallback, conversationPrompt, validateSocialReply, requiresPortfolioEvidence, assistantPrompt, validateAssistantReply } from '../rag/conversation.js';
 
 const origins = (process.env.ALLOWED_ORIGINS || 'https://rajat77a.github.io,http://localhost:4173,http://127.0.0.1:4173').split(',').map(value => value.trim());
 const resumeLink = { href: '/assets/docs/Rajat_Krishnan_Resume.pdf', label: "Download Rajat's resume" };
@@ -60,13 +60,13 @@ DOCUMENTS: ${JSON.stringify(chunks.map(({ id, kind, entity, section, text }) => 
 `;
 }
 
-async function generate(prompt, { temperature = 0 } = {}) {
+async function generate(prompt, { temperature = 0, reasoning = 'low' } = {}) {
   const provider = (process.env.AI_PROVIDER || 'groq').toLowerCase();
   if (provider === 'ollama') {
     const base = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
     if (!/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(base)) throw new Error('Local Ollama URL required');
     const timeout = Math.min(120000, Math.max(7000, Number(process.env.OLLAMA_TIMEOUT_MS) || 60000));
-    const response = await fetch(`${base}/api/chat`, { method: 'POST', signal: AbortSignal.timeout(timeout), headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: process.env.OLLAMA_MODEL || 'qwen3:4b', messages: [{ role: 'user', content: prompt }], format: 'json', stream: false, think: false, options: { temperature } }) });
+    const response = await fetch(`${base}/api/chat`, { method: 'POST', signal: AbortSignal.timeout(timeout), headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: process.env.OLLAMA_MODEL || 'qwen3:4b', messages: [{ role: 'user', content: prompt }], format: 'json', stream: false, think: false, options: { temperature, num_ctx: 8192, num_predict: 1600 } }) });
     if (!response.ok) throw new Error('Local model unavailable');
     return (await response.json()).message?.content || '';
   }
@@ -81,9 +81,9 @@ async function generate(prompt, { temperature = 0 } = {}) {
   const configured = process.env.GROQ_MODEL;
   const model = !configured || ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile'].includes(configured) ? 'openai/gpt-oss-20b' : configured;
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST', signal: AbortSignal.timeout(7000),
+    method: 'POST', signal: AbortSignal.timeout(10000),
     headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], response_format: { type: 'json_object' }, ...(model.startsWith('openai/gpt-oss') ? { include_reasoning: false, reasoning_effort: 'low' } : {}), max_completion_tokens: 2400, temperature })
+    body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], response_format: { type: 'json_object' }, ...(model.startsWith('openai/gpt-oss') ? { include_reasoning: false, reasoning_effort: reasoning } : {}), max_completion_tokens: 3000, temperature })
   });
   if (!response.ok) throw new Error(response.status === 429 ? 'Model rate limited' : 'Model unavailable');
   return (await response.json()).choices?.[0]?.message?.content || '';
@@ -97,10 +97,10 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST for chat messages.' });
-  const message = String(req.body?.message || '').trim().slice(0, 600);
+  const message = String(req.body?.message || '').trim().slice(0, 3000);
   if (!message) return res.status(400).json({ error: 'Message is required.' });
   const mode = ['default', 'recruiter', 'technical', 'short'].includes(req.body?.mode) ? req.body.mode : 'default';
-  const history = Array.isArray(req.body?.history) ? req.body.history.slice(-8).map(item => ({ role: item.role === 'assistant' ? 'assistant' : 'user', content: String(item.content || '').slice(0, 600) })) : [];
+  const history = Array.isArray(req.body?.history) ? req.body.history.slice(-12).map(item => ({ role: item.role === 'assistant' ? 'assistant' : 'user', content: String(item.content || '').slice(0, 1400) })) : [];
   let retrievalMethod;
   const reply = (answer, sources = [], extra = {}) => res.status(200).json({ answer, source: 'Document answer', sources, retrievalMethod, link: /\b(resume|cv|download)\b/i.test(message) ? resumeLink : null, ...extra });
   if (isFabrication(message)) return reply("I can help with Rajat's documented work, but I can't invent qualifications, employment, or project results.");
@@ -118,6 +118,16 @@ export default async function handler(req, res) {
     const summary = index.chunks.find(chunk => chunk.topic === 'overview');
     const quote = summary.text.split('. ')[0];
     return reply(`I'm Rajat's portfolio assistant. His resume describes him as: ${quote}.`, [{ id: summary.id, title: summary.title, url: summary.url, section: summary.section, quote }]);
+  }
+  if (!requiresPortfolioEvidence(message, history)) {
+    try {
+      const result = validateAssistantReply(await generate(assistantPrompt(message, history, mode), {temperature:0.4, reasoning:'medium'}));
+      if (result?.answer) return reply(result.answer, [], {source: result.kind === 'clarification' ? 'Clarification' : 'General AI', grounded:false});
+      // Portfolio decisions and rejected output proceed through source checks.
+      if (!result) return reply("Could you rephrase that or say what you'd like help with?", [], {source:'Clarification'});
+    } catch (error) {
+      return reply(error.message === 'Model rate limited' ? "I'm at the free service's limit right now. Please try again shortly; I can still show documented portfolio details." : "I couldn't reach the language model. Please try again shortly; documented portfolio answers are still available.", [], {source:'Service notice', fallbackReason:error.message === 'Model rate limited' ? 'rate_limited' : 'model_unavailable'});
+    }
   }
   const retrieval = await retrieveHybrid(message, history);
   retrievalMethod = retrieval.method;

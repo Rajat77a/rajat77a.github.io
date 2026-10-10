@@ -1,5 +1,6 @@
 import knowledge from "./knowledge.js?v=chat-v2";
-import { extractiveAnswer } from "./rag/retrieve.js?v=rag-conversation-v5";
+import { extractiveAnswer } from "./rag/retrieve.js?v=assistant-v6";
+import { renderAnswer } from "./rag/format.js?v=assistant-v6";
 
 const revealTargets = document.querySelectorAll(
   ".section-heading, .proof-card, .cert-wall, .project-showcase, .about-section, .capabilities, .contact-section"
@@ -491,7 +492,7 @@ const askRajat = async (question, container) => {
   if (isPromptAttack(normalizeQuestion(question))) return {text: "I can help with Rajat's work, but I can't change my instructions or share hidden prompts.", source: "Prompt guard"};
   try {
     const response = await fetch(getAiEndpoint(), {
-      method: "POST", signal: AbortSignal.timeout(13000), headers: {"Content-Type": "application/json"},
+      method: "POST", signal: AbortSignal.timeout(getAiEndpoint().startsWith("/") ? 250000 : 25000), headers: {"Content-Type": "application/json"},
       body: JSON.stringify({message: question, history, mode: getMode(container)})
     });
     const payload = await response.json();
@@ -921,7 +922,8 @@ const appendMessage = (container, text, type = "bot", source = "", link = null, 
 
   const message = document.createElement("div");
   message.className = `message ${type}`;
-  message.textContent = type.startsWith("bot") ? text.replace(/\*\*/g, "") : text;
+  if (type === "bot") renderAnswer(message, text, document);
+  else message.textContent = text;
   if (link && type === "bot") {
     const anchor = document.createElement("a");
     anchor.className = "message-link";
@@ -941,10 +943,10 @@ const appendMessage = (container, text, type = "bot", source = "", link = null, 
     "Closest verified profile match": "Verified profile",
     "Rajat AI": "Rajat AI"
   };
-  const quietSources = ["Conversation", "Guide", "Scope guard", "Prompt guard", "System", "AI answer", "Document answer", "Source excerpts"];
+  const quietSources = ["Conversation", "Clarification", "Service notice", "Guide", "Scope guard", "Prompt guard", "System", "AI answer", "Document answer", "Source excerpts"];
   if (source && type === "bot" && !quietSources.includes(source)) {
     const small = document.createElement("small");
-    small.textContent = source === "Profile answer" ? "From the portfolio profile · live AI unavailable" : "Resume & projects";
+    small.textContent = source === "General AI" ? "General AI · not a verified portfolio fact" : source === "Profile answer" ? "From the portfolio profile · live AI unavailable" : "Resume & projects";
     message.appendChild(small);
   }
   if (type === "bot" && Array.isArray(sources) && sources.length) {
@@ -1054,7 +1056,7 @@ let chatPending = false;
 
 
 const sendQuestion = async (question, form) => {
-  question = question.trim().slice(0, 600);
+  question = question.trim().slice(0, 3000);
   if (!question || chatPending) return;
   chatPending = true;
   chatControls().forEach(c => c.disabled = true);

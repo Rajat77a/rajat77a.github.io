@@ -59,6 +59,10 @@ const topicAnchors = [
 ];
 
 export function resolveQuery(question, history = []) {
+  if (/^(?:please )?(?:make (?:it|that|this) (?:simpler|shorter)|explain (?:it|that|this) (?:more simply|again)|shorter|simpler|continue)[.!?]*$/i.test(question.trim())) {
+    const previous = [...history].reverse().find(turn => turn.role === 'user');
+    if (previous) return `${question} (follow-up to: ${previous.content})`;
+  }
   if (namedEntities(question).length || topicFor(question) === 'unknown' || !refersBack(question)) return question;
   for (const turn of [...history].reverse()) {
     if (turn.role !== 'user') continue;
