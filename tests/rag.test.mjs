@@ -206,6 +206,19 @@ test('API: missing age and CGPA get specific explanations without a model call',
     assert.equal(grade.sources.length, 0);
   } finally { globalThis.fetch = original; }
 });
+
+test('API: security ability answers preserve the documented AI-assisted approach', async () => {
+  const original = globalThis.fetch, previousKey = process.env.GROQ_API_KEY;
+  process.env.GROQ_API_KEY = 'test-placeholder';
+  const contest = index.chunks.find(chunk => chunk.id === 'resume-11');
+  globalThis.fetch = async () => ({ ok: true, json: async () => ({ choices: [{ message: { content: JSON.stringify({ supported: true, claims: [{ text: 'Rajat won 1st place in PWN Grounds.', source_id: contest.id, quote: contest.text.split('\n')[0] }] }) } }] }) });
+  try {
+    const result = (await request({ message: 'How good is Rajat in cybersecurity?' })).data;
+    assert.match(result.answer, /AI assistance/);
+    assert.ok(result.sources.some(source => source.quote.includes('AI assistance')));
+    assert.doesNotMatch(result.answer, /professional|expert/);
+  } finally { globalThis.fetch = original; if (previousKey === undefined) delete process.env.GROQ_API_KEY; else process.env.GROQ_API_KEY = previousKey; }
+});
 test('API: rate limits return an explicit safe fallback reason',async()=>{
   const original=globalThis.fetch,previousKey=process.env.GROQ_API_KEY;
   process.env.GROQ_API_KEY='test-placeholder';

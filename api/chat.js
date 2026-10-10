@@ -1,4 +1,4 @@
-import { extractiveAnswer, missingAnswer } from '../rag/retrieve.js';
+import { extractiveAnswer, missingAnswer, sourceFor } from '../rag/retrieve.js';
 import { validateGroundedOutput, hasQuantityConflict } from '../rag/grounding.js';
 import index from '../rag/index.js';
 import { retrieveHybrid } from '../rag/hybrid.js';
@@ -118,7 +118,15 @@ export default async function handler(req, res) {
   try {
     const raw = await generate(ragPrompt(retrieval.query, mode, retrieval.chunks));
     const result = validateGroundedOutput(raw, retrieval.chunks);
-    if (result?.sources.length) return reply(result.answer, result.sources, { grounded: true });
+    if (result?.sources.length) {
+      const securityAbility = /\b(cybersecurity|security|koth|pwn)\b/i.test(retrieval.query) && /\b(good|skills?|experience|proficien\w*|expert\w*|level)\b/i.test(message);
+      const contest = retrieval.chunks.find(chunk => chunk.topic === 'achievements' && /AI assistance/.test(chunk.text) && result.sources.some(source => source.id === chunk.id));
+      if (securityAbility && contest && !/\bAI[ -](assist\w*|driven|tools?)\b/i.test(result.answer)) {
+        const context = validateGroundedOutput({ claims: [{ text: 'He used AI assistance as part of his approach.', source_id: contest.id, quote: contest.text }] }, [contest]);
+        if (context) return reply(`${result.answer}\n\n${context.answer}`, result.sources.map(source => source.id === contest.id ? sourceFor(contest, contest.text) : source), { grounded: true });
+      }
+      return reply(result.answer, result.sources, { grounded: true });
+    }
     if (result && retrieval.query === message && !/\bdocumented\b/i.test(message) && !hasQuantityConflict(message,retrieval.chunks)) return reply(missingAnswer(message), [], { grounded: true });
     if (result) fallbackReason = 'model_abstention';
   } catch (error) {
