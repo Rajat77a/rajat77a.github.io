@@ -1,0 +1,8 @@
+{
+  "examples": 304,
+  "maxTokens": 994,
+  "longest": "train-nextstep-purpose-3",
+  "limit": 3072,
+  "method": "Pinned tokenizer; Python rechecks exact JSON serialization before GPU training.",
+  "trainingRun": false
+}

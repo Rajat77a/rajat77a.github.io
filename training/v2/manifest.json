@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "counts": {
+    "train": 213,
+    "validation": 20,
+    "test": 55,
+    "regression": 16
+  },
+  "fingerprint": "7c6f112c491139da991aea7def3b61362afa60b21a2e6cdce196c47a0243f1af",
+  "synthetic": true,
+  "metric": "Task-specific automated checks; semantic quality requires separate human review.",
+  "target": 0.9,
+  "sourceCaveat": "Fresh questions and families are withheld from this run. Some factual source passages were used in v1 evaluation; v1 exposed tests are regression-only."
+}
