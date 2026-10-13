@@ -64,7 +64,7 @@ export function validateSocialReply(raw) {
 // Explicit owner references always stay in RAG, including mixed requests.
 // Short portfolio menu questions also retain their established meaning.
 export function requiresPortfolioEvidence(message, history = []) {
-  const owner = /\b(rajat|krishnan|preppeer|gridwatch|nextstep|unievents|zedworks|flyrank|pwn grounds|koth|vit-ap|his|him|he)\b|\b(?:your|this) (?:portfolio|resume|cv|projects?|experience|skills?|background|website)\b/i;
+  const owner = /\b(rajat|krishnan|preppeer|gridwatch|nextstep|unievents|zedworks|flyrank|pwn grounds|koth|vit-ap|his|him|he)\b|\b(?:your|this) (?:portfolio|resume|cv|projects?|experience|skills?|background|website)\b|\b(?:portfolio|website|site) (?:owner|author|creator|developer)\b|\bperson (?:behind|who made) (?:this|the) (?:portfolio|website|site)\b|\bits author\b|\bthe owner['’]s (?:age|salary|bank balance|degree)\b/i;
   if (owner.test(message)) return true;
   if (/\bdocumented\b/i.test(message)) return true;
   if (/^(?:what (?:are|is)|tell me about|show me|list|summarize)?\s*(?:the )?(?:projects?|skills?|experience|education|certifications?|achievements?|resume|cv|contact|tech stack)\??$/i.test(message.trim())) return true;

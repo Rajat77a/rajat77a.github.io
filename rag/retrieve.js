@@ -27,6 +27,8 @@ const aliases = [
 const namedEntities = query => aliases.filter(([, pattern]) => pattern.test(normalize(query))).map(([name]) => name);
 const topicFor = query => {
   const q = normalize(query);
+  if (/\b(pay|pays|paid|earnings|income|professional penetration[ -]tester)\b/.test(q)) return 'unknown';
+  if (/\bcourse and institution\b/.test(q) && !/\b(certificat\w*|badge|anthropic)\b/.test(q)) return 'education';
   if (/\b(age|birthday|cgpa|gpa|salary|passport|aadhaar|home address|girlfriend|boyfriend|backlogs?|attendance|semester|placement eligibility|date of birth|how old|bank balance|leetcode|revenue|paying customers|funded|accuracy percentage|certified penetration tester|professional pentester)\b/.test(q)) return 'unknown';
   if (/\b(certifications?|certificates?|credentials?|courses?|coursework|badge|forage|nasscom|dubai future foundation|ai ethics)\b/.test(q)) return 'certifications';
   if (/\b(stack|database|programming languages|backend tools)\b/.test(q)) return 'skills';
@@ -164,7 +166,10 @@ export function sourceFor(chunk, quote = '') {
 export function missingAnswer(question) {
   if (/\b(age|birthday|date of birth|how old)\b/i.test(question)) return "Rajat's documents don't list his age or date of birth, so I can't give you a reliable age.";
   if (/\b(cgpa|gpa|grades?)\b/i.test(question)) return "His education is documented, but his grades or CGPA aren't listed in the sources I have.";
-  if (/\b(salary|paid|pay|earnings|income)\b/i.test(question)) return "I don't have documented pay or income figures for Rajat.";
+  if (/\b(company|employer)\b.*\b(pay|pays|paid)\b/i.test(question)) return "The documents don't identify a confirmed paying employer or disclose compensation, so I can't verify who pays Rajat.";
+  if (/\bbank balance\b/i.test(question)) return "Rajat's public documents don't disclose his bank balance. I can't provide or guess that private information.";
+  if (/\b(salary|paid|pay|pays|earnings|income)\b/i.test(question)) return "I don't have documented pay or income figures for Rajat.";
+  if (/\bprofessional (?:pentester|penetration[ -]tester)\b/i.test(question)) return "The documents don't establish professional penetration-testing employment or qualifications, so I can't confirm that label.";
   if (/\b(oscp|ceh|cissp|certified penetration tester|professional pentester)\b/i.test(question)) return "I don't have a source confirming that security credential. You can ask about his documented competition experience instead.";
   if (/\b(these|those|it|its|that|this|them|there)\b/i.test(question)) return "Which skill or project are you referring to? I need that context to answer accurately.";
   return "The sources I have don't establish that detail. Could you narrow the question to a particular project, skill or role?";

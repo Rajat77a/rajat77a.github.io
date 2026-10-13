@@ -1,6 +1,6 @@
 import knowledge from "./knowledge.js?v=chat-v2";
-import { extractiveAnswer } from "./rag/retrieve.js?v=assistant-v6";
-import { renderAnswer } from "./rag/format.js?v=assistant-v6";
+import { extractiveAnswer } from "./rag/retrieve.js?v=assistant-v7";
+import { renderAnswer } from "./rag/format.js?v=assistant-v7";
 
 const revealTargets = document.querySelectorAll(
   ".section-heading, .proof-card, .cert-wall, .project-showcase, .about-section, .capabilities, .contact-section"
