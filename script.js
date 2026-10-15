@@ -916,6 +916,9 @@ const appendMessage = (container, text, type = "bot", source = "", link = null, 
   if (!container) {
     return null;
   }
+  const [sourceType, ...engineParts] = source.split(' · ');
+  const engine = engineParts.join(' · ');
+  source = sourceType;
 
   const message = document.createElement("div");
   message.className = `message ${type}`;
@@ -941,9 +944,10 @@ const appendMessage = (container, text, type = "bot", source = "", link = null, 
     "Rajat AI": "Rajat AI"
   };
   const quietSources = ["Conversation", "Clarification", "Service notice", "Guide", "Scope guard", "Prompt guard", "System", "AI answer", "Document answer", "Source excerpts"];
-  if (source && type === "bot" && !quietSources.includes(source)) {
+  if (source && type === "bot" && (engine || !quietSources.includes(source))) {
     const small = document.createElement("small");
-    small.textContent = source === "General AI" ? "General AI · not a verified portfolio fact" : source === "Profile answer" ? "From the portfolio profile · live AI unavailable" : "Resume & projects";
+    const label = source === "General AI" ? "General AI · not a verified portfolio fact" : source === "Profile answer" ? "From the portfolio profile · live AI unavailable" : quietSources.includes(source) ? "" : "Resume & projects";
+    small.textContent = [engine,label].filter(Boolean).join(' · ');
     message.appendChild(small);
   }
   if (type === "bot" && Array.isArray(sources) && sources.length) {
