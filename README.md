@@ -38,5 +38,22 @@ OpenAI is still supported only as an optional paid fallback by setting
 
 ## Deploy
 
+### Assistant response modes
+
+Fast is the default: the hosted GPT-OSS 20B assistant answers new questions,
+and reviewed, source-checked snapshots handle common first-turn portfolio
+questions. The saved answers keep citations, reject source edits, and defer
+to the model for conversation context and technical/hiring styles.
+
+Trained demo explicitly selects the experimental local Qwen3 4B adapter when
+the laptop is online. It bypasses the saved-answer shortcut and labels responses
+from the trained model. If that service is unavailable, a hosted fallback is
+labelled accordingly. It remains slower than Fast mode.
+
+Source snapshots live in `rag/quick-answers-data.js`. Review their claims and
+quotes against updated source documents before refreshing them; a changed hash
+or passage disables the saved answer automatically. New aliases must be exact,
+self-contained questions, not broad topic matches.
+
 Push the contents of this repository to the GitHub Pages repository or branch
 that serves `rajat77a.github.io`.
