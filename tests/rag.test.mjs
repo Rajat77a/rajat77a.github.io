@@ -150,7 +150,7 @@ test('API: validated answer and grounded outage fallback', async () => {
     assert.equal(result.data.answer, 'PrepPeer uses Next.js 15.');
     assert.ok(result.data.sources.length);
     globalThis.fetch = async () => { throw new Error('secret-test-error'); };
-    const fallback = await request({ message: 'Tell me about GridWatch' });
+    const fallback = await request({ message: 'Tell me about GridWatch', mode:'technical' });
     assert.equal(fallback.code, 200);
     assert.equal(fallback.data.source, 'Source excerpts');
     assert.ok(fallback.data.sources.length);
@@ -173,7 +173,7 @@ test('API: false abstention on documented experience returns the actual evidence
   process.env.GROQ_API_KEY='test-placeholder';
   globalThis.fetch=async()=>({ok:true,json:async()=>({choices:[{message:{content:'{"supported":false,"claims":[]}'}}]})});
   try {
-    const result=(await request({message:'What security experience is documented?'})).data;
+    const result=(await request({message:'What security experience is documented?',mode:'technical'})).data;
     assert.equal(result.source,'Source excerpts');
     assert.match(result.answer,/AI assistance/);
     assert.ok(result.sources.length);

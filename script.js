@@ -1,5 +1,5 @@
 import knowledge from "./knowledge.js?v=trained-v2";
-import { requestAssistant } from "./rag/request-assistant.js?v=trained-v2";
+import { requestAssistant } from "./rag/request-assistant.js?v=fast-v1";
 import { extractiveAnswer } from "./rag/retrieve.js?v=assistant-v7";
 import { renderAnswer } from "./rag/format.js?v=assistant-v7";
 
@@ -453,6 +453,7 @@ const rememberSuggestions = (container, labels) => {
 };
 
 const chatModes = new WeakMap();
+let assistantEngine = 'fast';
 
 const getMode = (container) => chatModes.get(container) || "default";
 
@@ -493,7 +494,7 @@ const askRajat = async (question, container) => {
   if (isPromptAttack(normalizeQuestion(question))) return {text: "I can help with Rajat's work, but I can't change my instructions or share hidden prompts.", source: "Prompt guard"};
   try {
     const payload = await requestAssistant({endpoint:getAiEndpoint(),trainedEndpoint:knowledge.ai?.trainedEndpoint,
-      message:question,history,mode:getMode(container)});
+      message:question,history,mode:getMode(container),engine:assistantEngine});
     return {text: payload.answer, source: [payload.source || "Document answer",payload.engine].filter(Boolean).join(' · '), sources: payload.sources || [], link: resolveLink(payload.link)};
   } catch {
     const answer = extractiveAnswer(question, history);
@@ -1052,7 +1053,7 @@ const showWelcome = container => {
   container.scrollTop = 0;
 };
 chatContainers.forEach(showWelcome);
-const chatControls = () => document.querySelectorAll(".chat-form textarea, .chat-form button, [data-ask], [data-new-chat]");
+const chatControls = () => document.querySelectorAll(".chat-form textarea, .chat-form button, [data-ask], [data-new-chat], [data-ai-engine]");
 let chatPending = false;
 
 
@@ -1129,6 +1130,15 @@ document.querySelectorAll(".ai-mode-bar").forEach((bar) => {
 });
 
 const drawer = document.querySelector("[data-ai-drawer]");
+document.querySelectorAll('[data-ai-engine]').forEach(button=>{
+  button.addEventListener('click',()=>{
+    assistantEngine=button.dataset.aiEngine==='trained'?'trained':'fast';
+    document.querySelectorAll('[data-ai-engine]').forEach(item=>item.setAttribute('aria-pressed',String(item.dataset.aiEngine===assistantEngine)));
+    document.querySelectorAll('[data-engine-note]').forEach(item=>{
+      item.textContent=assistantEngine==='trained'?'Qwen3 4B · experimental · slower replies while my laptop is online':'Quick replies · sources for portfolio facts';
+    });
+  });
+});
 const launcher = document.querySelector("[data-ai-launcher]");
 const drawerInput = document.querySelector("[data-drawer-input]");
 const aiSection = document.querySelector("#ask-ai");

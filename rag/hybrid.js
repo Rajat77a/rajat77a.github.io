@@ -31,6 +31,10 @@ export async function retrieveHybrid(question, history = []) {
   const lexical = retrieve(question, history);
   // Explicit privacy, false-premise, unknown-tool and ambiguity decisions remain authoritative.
   if (!['retrieved', 'unrelated'].includes(lexical.reason)) return { ...lexical, method: 'lexical' };
+  // Small explicit matches already have the needed evidence. Avoid cold embedding
+  // inference for these; semantic discovery remains available for paraphrases.
+  const explicitEntity=lexical.chunks.some(c=>c.entity && question.toLowerCase().includes(c.entity.toLowerCase()));
+  if(lexical.reason==='retrieved' && (lexical.chunks.length<=2 || explicitEntity))return {...lexical,method:'lexical'};
   try {
     const query = resolveQuery(question, history);
     const semantic = await scoresFor(query);

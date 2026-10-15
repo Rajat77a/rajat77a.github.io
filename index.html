@@ -21,7 +21,7 @@
       href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=rag-v1" />
+    <link rel="stylesheet" href="styles.css?v=fast-v1" />
     <script>
       try {
         document.documentElement.dataset.theme = localStorage.getItem("rajat-theme") || "dark";
@@ -352,7 +352,11 @@
               <span class="ai-logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/><path d="M19 3v4M17 5h4"/></svg></span>
               <div>
                 <strong>Rajat’s assistant</strong>
-                <p>Your guide to my work</p>
+                <p data-engine-note>Quick replies · sources for portfolio facts</p>
+                <div class="assistant-engine-bar" role="group" aria-label="Assistant model">
+                  <button type="button" data-ai-engine="fast" aria-pressed="true" title="Fast hosted assistant with sourced portfolio answers">Fast</button>
+                  <button type="button" data-ai-engine="trained" aria-pressed="false" title="Try my experimental Qwen3 4B adapter; replies are slower and depend on my laptop">Trained demo</button>
+                </div>
               </div>
               <button class="new-chat" type="button" data-new-chat title="Start a new conversation"><span aria-hidden="true">↺</span><span class="new-chat-label">New chat</span></button>
             </div>
@@ -412,7 +416,11 @@
           <span class="ai-logo compact" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/><path d="M19 3v4M17 5h4"/></svg></span>
           <div>
             <strong>Rajat’s assistant</strong>
-            <p>Your guide to my work</p>
+            <p data-engine-note>Quick replies · sources for portfolio facts</p>
+            <div class="assistant-engine-bar" role="group" aria-label="Assistant model">
+              <button type="button" data-ai-engine="fast" aria-pressed="true" title="Fast hosted assistant with sourced portfolio answers">Fast</button>
+              <button type="button" data-ai-engine="trained" aria-pressed="false" title="Try my experimental Qwen3 4B adapter; replies are slower and depend on my laptop">Trained demo</button>
+            </div>
           </div>
         </div>
         <button class="new-chat" type="button" data-new-chat aria-label="Start a new conversation" title="Start a new conversation"><span aria-hidden="true">↺</span><span class="new-chat-label">New chat</span></button>
@@ -456,6 +464,6 @@
     </footer>
 
     <script type="module" src="hero3d.js"></script>
-    <script type="module" src="script.js?v=trained-v2b"></script>
+    <script type="module" src="script.js?v=fast-v1"></script>
   </body>
 </html>

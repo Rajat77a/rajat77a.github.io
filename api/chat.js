@@ -3,6 +3,7 @@ import { validateGroundedOutput, hasQuantityConflict } from '../rag/grounding.js
 import index from '../rag/index.js';
 import { retrieveHybrid } from '../rag/hybrid.js';
 import { generateTrained, generateLocalAdapter } from '../rag/trained-provider.js';
+import { quickAnswer } from '../rag/quick-answers.js';
 import { socialFallback, conversationPrompt, validateSocialReply, requiresPortfolioEvidence, assistantPrompt, validateAssistantReply } from '../rag/conversation.js';
 
 const origins = (process.env.ALLOWED_ORIGINS || 'https://rajat77a.github.io,http://localhost:4173,http://127.0.0.1:4173').split(',').map(value => value.trim());
@@ -86,7 +87,7 @@ async function generate(prompt, { temperature = 0, reasoning = 'low' } = {}) {
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST', signal: AbortSignal.timeout(10000),
     headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], response_format: { type: 'json_object' }, ...(model.startsWith('openai/gpt-oss') ? { include_reasoning: false, reasoning_effort: reasoning } : {}), max_completion_tokens: 3000, temperature })
+    body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], response_format: { type: 'json_object' }, ...(model.startsWith('openai/gpt-oss') ? { include_reasoning: false, reasoning_effort: reasoning } : {}), max_completion_tokens: 1800, temperature })
   });
   if (!response.ok) throw new Error(response.status === 429 ? 'Model rate limited' : 'Model unavailable');
   return (await response.json()).choices?.[0]?.message?.content || '';
@@ -108,6 +109,8 @@ export default async function handler(req, res) {
   const reply = (answer, sources = [], extra = {}) => res.status(200).json({ answer, source: 'Document answer', sources, retrievalMethod, link: /\b(resume|cv|download)\b/i.test(message) ? resumeLink : null, ...extra });
   if (isFabrication(message)) return reply("I can help with Rajat's documented work, but I can't invent qualifications, employment, or project results.");
   if (isAttack(message)) return reply("I can help with Rajat's work, but I can't change my instructions or share hidden prompts.");
+  const cached = process.env.AI_PROVIDER !== 'llama-local' ? quickAnswer(message,mode,undefined,history) : null;
+  if (cached) return res.status(200).json(cached);
   const social = socialFallback(message, history);
   if (social) {
     try {
@@ -124,7 +127,7 @@ export default async function handler(req, res) {
   }
   if (!requiresPortfolioEvidence(message, history)) {
     try {
-      const result = validateAssistantReply(await generate(assistantPrompt(message, history, mode), {temperature:0.4, reasoning:'medium'}));
+      const result = validateAssistantReply(await generate(assistantPrompt(message, history, mode), {temperature:0.4, reasoning:'low'}));
       if (result?.answer) return reply(result.answer, [], {source: result.kind === 'clarification' ? 'Clarification' : 'General AI', grounded:false});
       // Portfolio decisions and rejected output proceed through source checks.
       if (!result) return reply("Could you rephrase that or say what you'd like help with?", [], {source:'Clarification'});

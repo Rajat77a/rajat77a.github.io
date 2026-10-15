@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {requestAssistant} from '../rag/request-assistant.js';
 import {generateLocalAdapter} from '../rag/trained-provider.js';
-const config={trainedEndpoint:'https://test.trycloudflare.com/api/chat',endpoint:'https://host.example/api/chat',message:'hello',history:[],mode:'short'};
+const config={trainedEndpoint:'https://test.trycloudflare.com/api/chat',endpoint:'https://host.example/api/chat',message:'hello',history:[],mode:'short',engine:'trained'};
 test('ready laptop answers with trained model provenance',async()=>{
   const calls=[];
   const result=await requestAssistant(config,async(url)=>{
@@ -19,7 +19,7 @@ test('offline or busy laptop uses hosted assistant rather than dropping the conv
       if(url.endsWith('/health'))return {ok:true,json:async()=>({ready:true})};
       return {ok:problem!=='busy',json:async()=>({answer:'Try again',source:'Service notice'})};
     });
-    assert.equal(result.answer,'Hosted reply');assert.equal(result.engine,undefined);
+    assert.equal(result.answer,'Hosted reply');assert.equal(result.engine,'Hosted fallback');
   }
 });
 test('local model transport uses the actual loopback adapter server with thinking disabled',async()=>{
