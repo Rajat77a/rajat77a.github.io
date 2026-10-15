@@ -2,6 +2,7 @@ import { extractiveAnswer, missingAnswer, sourceFor } from '../rag/retrieve.js';
 import { validateGroundedOutput, hasQuantityConflict } from '../rag/grounding.js';
 import index from '../rag/index.js';
 import { retrieveHybrid } from '../rag/hybrid.js';
+import { generateTrained, generateLocalAdapter } from '../rag/trained-provider.js';
 import { socialFallback, conversationPrompt, validateSocialReply, requiresPortfolioEvidence, assistantPrompt, validateAssistantReply } from '../rag/conversation.js';
 
 const origins = (process.env.ALLOWED_ORIGINS || 'https://rajat77a.github.io,http://localhost:4173,http://127.0.0.1:4173').split(',').map(value => value.trim());
@@ -62,6 +63,8 @@ DOCUMENTS: ${JSON.stringify(chunks.map(({ id, kind, entity, section, text }) => 
 
 async function generate(prompt, { temperature = 0, reasoning = 'low' } = {}) {
   const provider = (process.env.AI_PROVIDER || 'groq').toLowerCase();
+  if (provider === 'hf-space') return generateTrained(prompt);
+  if (provider === 'llama-local') return generateLocalAdapter(prompt);
   if (provider === 'ollama') {
     const base = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
     if (!/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(base)) throw new Error('Local Ollama URL required');

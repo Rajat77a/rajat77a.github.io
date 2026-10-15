@@ -12,6 +12,7 @@ const profile = {
   },
   resumeUrl: "/assets/docs/Rajat_Krishnan_Resume.pdf",
   ai: {
+    trainedEndpoint: "https://plymouth-domain-info-caused.trycloudflare.com/api/chat",
     endpoint: "https://rajat77a-github-io.vercel.app/api/chat"
   },
   current: {

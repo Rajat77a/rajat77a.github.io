@@ -1,4 +1,5 @@
-import knowledge from "./knowledge.js?v=chat-v2";
+import knowledge from "./knowledge.js?v=trained-v2";
+import { requestAssistant } from "./rag/request-assistant.js?v=trained-v2";
 import { extractiveAnswer } from "./rag/retrieve.js?v=assistant-v7";
 import { renderAnswer } from "./rag/format.js?v=assistant-v7";
 
@@ -491,13 +492,9 @@ const askRajat = async (question, container) => {
   const history = getHistory();
   if (isPromptAttack(normalizeQuestion(question))) return {text: "I can help with Rajat's work, but I can't change my instructions or share hidden prompts.", source: "Prompt guard"};
   try {
-    const response = await fetch(getAiEndpoint(), {
-      method: "POST", signal: AbortSignal.timeout(getAiEndpoint().startsWith("/") ? 250000 : 25000), headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({message: question, history, mode: getMode(container)})
-    });
-    const payload = await response.json();
-    if (!response.ok || typeof payload.answer !== "string" || !payload.answer.trim()) throw new Error("Unavailable");
-    return {text: payload.answer, source: payload.source || "Document answer", sources: payload.sources || [], link: resolveLink(payload.link)};
+    const payload = await requestAssistant({endpoint:getAiEndpoint(),trainedEndpoint:knowledge.ai?.trainedEndpoint,
+      message:question,history,mode:getMode(container)});
+    return {text: payload.answer, source: [payload.source || "Document answer",payload.engine].filter(Boolean).join(' · '), sources: payload.sources || [], link: resolveLink(payload.link)};
   } catch {
     const answer = extractiveAnswer(question, history);
     if (/\b(resume|cv)\b/i.test(question) && /\b(download|get|link)\b/i.test(question)) return {text: "Here's Rajat's latest resume.", source: "Document answer", link: resolveLink({href: knowledge.resumeUrl, label: "Download Rajat's resume"})};
